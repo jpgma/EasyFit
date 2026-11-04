@@ -1,14 +1,5 @@
 namespace EasyFit.Features.Desafios;
 
-// Os campos são anuláveis porque o JSON recebido pode omiti-los; Rules valida antes de usar.
-internal sealed record CriarDesafioRequest(
-    string? Nome,
-    string? Descricao,
-    DateOnly? DataInicio,
-    DateOnly? DataFim,
-    int? DuracaoMinimaSegundos,
-    int? SessoesPorSemana);
-
 /// <param name="Papel">O papel de quem consulta, para a tela decidir o que oferecer.</param>
 /// <param name="Participando">Se quem consulta participa deste desafio.</param>
 internal sealed record DesafioResponse(

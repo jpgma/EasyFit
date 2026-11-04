@@ -3,7 +3,7 @@ using System.Text;
 
 namespace EasyFit.Features.Autenticacao;
 
-internal static class Passwords
+internal static class Senhas
 {
     private const string Algorithm = "pbkdf2-sha256";
     private const int Iterations = 600_000;

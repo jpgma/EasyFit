@@ -2,12 +2,12 @@ using EasyFit.Features.Autenticacao;
 
 namespace EasyFit.UnitTests.Features.Autenticacao;
 
-public class RulesTests
+public class ValidacaoContaTests
 {
     [Fact]
     public void NormalizeEmail_TrimsAndLowercases()
     {
-        Assert.Equal("ana@exemplo.com", AutenticacaoRules.NormalizeEmail("  Ana@Exemplo.COM "));
+        Assert.Equal("ana@exemplo.com", ValidacaoConta.NormalizeEmail("  Ana@Exemplo.COM "));
     }
 
     [Theory]
@@ -16,7 +16,7 @@ public class RulesTests
     [InlineData("a@b")]
     public void IsValidEmail_AcceptsPlausibleAddresses(string email)
     {
-        Assert.True(AutenticacaoRules.IsValidEmail(email));
+        Assert.True(ValidacaoConta.IsValidEmail(email));
     }
 
     [Theory]
@@ -31,13 +31,13 @@ public class RulesTests
     [InlineData("ana silva@exemplo.com")]
     public void IsValidEmail_RejectsInvalidAddresses(string? email)
     {
-        Assert.False(AutenticacaoRules.IsValidEmail(email));
+        Assert.False(ValidacaoConta.IsValidEmail(email));
     }
 
     [Fact]
     public void IsValidEmail_RejectsTooLongAddress()
     {
-        Assert.False(AutenticacaoRules.IsValidEmail(new string('a', 250) + "@b.co"));
+        Assert.False(ValidacaoConta.IsValidEmail(new string('a', 250) + "@b.co"));
     }
 
     [Theory]
@@ -47,7 +47,7 @@ public class RulesTests
     [InlineData("Ana", true)]
     public void IsValidNomeExibicao_RequiresVisibleText(string? nome, bool expected)
     {
-        Assert.Equal(expected, AutenticacaoRules.IsValidNomeExibicao(nome));
+        Assert.Equal(expected, ValidacaoConta.IsValidNomeExibicao(nome));
     }
 
     [Theory]
@@ -55,7 +55,7 @@ public class RulesTests
     [InlineData(81, false)]
     public void IsValidNomeExibicao_LimitsLength(int length, bool expected)
     {
-        Assert.Equal(expected, AutenticacaoRules.IsValidNomeExibicao(new string('a', length)));
+        Assert.Equal(expected, ValidacaoConta.IsValidNomeExibicao(new string('a', length)));
     }
 
     [Theory]
@@ -65,12 +65,12 @@ public class RulesTests
     [InlineData(129, false)]
     public void IsValidSenha_EnforcesLengthLimits(int length, bool expected)
     {
-        Assert.Equal(expected, AutenticacaoRules.IsValidSenha(new string('a', length)));
+        Assert.Equal(expected, ValidacaoConta.IsValidSenha(new string('a', length)));
     }
 
     [Fact]
     public void IsValidSenha_RejectsMissingValue()
     {
-        Assert.False(AutenticacaoRules.IsValidSenha(null));
+        Assert.False(ValidacaoConta.IsValidSenha(null));
     }
 }

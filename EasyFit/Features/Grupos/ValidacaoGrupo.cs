@@ -2,7 +2,7 @@ using EasyFit.Features.Grupos.Contracts;
 
 namespace EasyFit.Features.Grupos;
 
-internal static class GruposRules
+internal static class ValidacaoGrupo
 {
     private const int MaxNomeLength = 80;
     private const int MaxFusoHorarioLength = 64;

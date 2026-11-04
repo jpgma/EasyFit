@@ -3,7 +3,7 @@ using EasyFit.Features.Grupos.Contracts;
 
 namespace EasyFit.UnitTests.Features.Grupos;
 
-public class RulesTests
+public class ValidacaoGrupoTests
 {
     private const string P = PapelMembro.Proprietario;
     private const string A = PapelMembro.Administrador;
@@ -17,20 +17,20 @@ public class RulesTests
     [InlineData(null, false)]
     public void IsValidNome_RequiresText(string? nome, bool expected)
     {
-        Assert.Equal(expected, GruposRules.IsValidNome(nome));
+        Assert.Equal(expected, ValidacaoGrupo.IsValidNome(nome));
     }
 
     [Fact]
     public void IsValidNome_LimitsTheLength_AfterTrimming()
     {
-        Assert.True(GruposRules.IsValidNome($"  {new string('a', 80)}  "));
-        Assert.False(GruposRules.IsValidNome(new string('a', 81)));
+        Assert.True(ValidacaoGrupo.IsValidNome($"  {new string('a', 80)}  "));
+        Assert.False(ValidacaoGrupo.IsValidNome(new string('a', 81)));
     }
 
     [Fact]
     public void NormalizeNome_Trims()
     {
-        Assert.Equal("Amigos", GruposRules.NormalizeNome("  Amigos "));
+        Assert.Equal("Amigos", ValidacaoGrupo.NormalizeNome("  Amigos "));
     }
 
     [Theory]
@@ -39,13 +39,13 @@ public class RulesTests
     [InlineData(null, false)]
     public void IsPlausibleFusoHorario_DiscardsWhatIsNotWorthAQuery(string? fuso, bool expected)
     {
-        Assert.Equal(expected, GruposRules.IsPlausibleFusoHorario(fuso));
+        Assert.Equal(expected, ValidacaoGrupo.IsPlausibleFusoHorario(fuso));
     }
 
     [Fact]
     public void IsPlausibleFusoHorario_RejectsAbsurdLengths()
     {
-        Assert.False(GruposRules.IsPlausibleFusoHorario(new string('a', 65)));
+        Assert.False(ValidacaoGrupo.IsPlausibleFusoHorario(new string('a', 65)));
     }
 
     [Theory]
@@ -56,7 +56,7 @@ public class RulesTests
     [InlineData(null, false)]
     public void IsPapelAtribuivel_NeverGrantsOwnership(string? papel, bool expected)
     {
-        Assert.Equal(expected, GruposRules.IsPapelAtribuivel(papel));
+        Assert.Equal(expected, ValidacaoGrupo.IsPapelAtribuivel(papel));
     }
 
     [Theory]
@@ -71,7 +71,7 @@ public class RulesTests
     [InlineData(M, M, false)]
     public void CanAlterarPapel_IsOnlyForTheProprietario(string ator, string alvo, bool expected)
     {
-        Assert.Equal(expected, GruposRules.CanAlterarPapel(ator, alvo));
+        Assert.Equal(expected, ValidacaoGrupo.CanAlterarPapel(ator, alvo));
     }
 
     [Theory]
@@ -86,7 +86,7 @@ public class RulesTests
     [InlineData(M, M, false)]
     public void CanRemoverMembro_FollowsTheHierarchy(string ator, string alvo, bool expected)
     {
-        Assert.Equal(expected, GruposRules.CanRemoverMembro(ator, alvo));
+        Assert.Equal(expected, ValidacaoGrupo.CanRemoverMembro(ator, alvo));
     }
 
     [Theory]
@@ -95,7 +95,7 @@ public class RulesTests
     [InlineData(M, true)]
     public void CanSair_RequiresTransferringOwnershipFirst(string papel, bool expected)
     {
-        Assert.Equal(expected, GruposRules.CanSair(papel));
+        Assert.Equal(expected, ValidacaoGrupo.CanSair(papel));
     }
 
     [Theory]
@@ -104,6 +104,6 @@ public class RulesTests
     [InlineData(M, false)]
     public void CanTransferir_IsOnlyForTheProprietario(string papel, bool expected)
     {
-        Assert.Equal(expected, GruposRules.CanTransferir(papel));
+        Assert.Equal(expected, ValidacaoGrupo.CanTransferir(papel));
     }
 }

@@ -28,7 +28,7 @@ Rode `--full` ao mexer em SQL, migrações, `Program.cs`, `deploy/` ou dependên
 
 | Item | Exemplo |
 |---|---|
-| Pastas e arquivos | `Features/Reacoes/Routes.cs`, `Infrastructure/Database/Migrations/` |
+| Pastas e arquivos | `Features/Autenticacao/Registrar.cs`, `Features/Reacoes/Routes.cs`, `Infrastructure/Database/Migrations/` |
 | C# | `MapReacoesRoutes()`, `ReacaoRequest`, `GetReacoesByAtividade()`, `CalculateRejeicoesNecessarias()` |
 | TypeScript | `features/atividades/useAtividade.ts`, `InicioPage` |
 | Tabelas e colunas de domínio | `reacoes_atividade`, `duracao_segundos`, `nome_exibicao` |

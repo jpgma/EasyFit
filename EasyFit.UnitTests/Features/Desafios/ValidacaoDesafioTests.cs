@@ -3,7 +3,7 @@ using EasyFit.Features.Grupos.Contracts;
 
 namespace EasyFit.UnitTests.Features.Desafios;
 
-public class RulesTests
+public class ValidacaoDesafioTests
 {
     // 2026-11-02 é uma segunda-feira; 2026-11-29, um domingo.
     private static readonly DateOnly Segunda = new(2026, 11, 2);
@@ -17,24 +17,24 @@ public class RulesTests
     [InlineData(null, false)]
     public void IsValidNome_RequiresText(string? nome, bool expected)
     {
-        Assert.Equal(expected, DesafiosRules.IsValidNome(nome));
+        Assert.Equal(expected, ValidacaoDesafio.IsValidNome(nome));
     }
 
     [Fact]
     public void IsValidNome_LimitsTheLength_AfterTrimming()
     {
-        Assert.True(DesafiosRules.IsValidNome($"  {new string('a', 80)}  "));
-        Assert.False(DesafiosRules.IsValidNome(new string('a', 81)));
+        Assert.True(ValidacaoDesafio.IsValidNome($"  {new string('a', 80)}  "));
+        Assert.False(ValidacaoDesafio.IsValidNome(new string('a', 81)));
     }
 
     [Fact]
     public void Descricao_IsOptional_AndLimited()
     {
-        Assert.True(DesafiosRules.IsValidDescricao(null));
-        Assert.True(DesafiosRules.IsValidDescricao(new string('a', 500)));
-        Assert.False(DesafiosRules.IsValidDescricao(new string('a', 501)));
-        Assert.Null(DesafiosRules.NormalizeDescricao("   "));
-        Assert.Equal("Bora", DesafiosRules.NormalizeDescricao("  Bora  "));
+        Assert.True(ValidacaoDesafio.IsValidDescricao(null));
+        Assert.True(ValidacaoDesafio.IsValidDescricao(new string('a', 500)));
+        Assert.False(ValidacaoDesafio.IsValidDescricao(new string('a', 501)));
+        Assert.Null(ValidacaoDesafio.NormalizeDescricao("   "));
+        Assert.Equal("Bora", ValidacaoDesafio.NormalizeDescricao("  Bora  "));
     }
 
     [Theory]
@@ -48,7 +48,7 @@ public class RulesTests
     [InlineData(null, false)]
     public void IsValidDuracaoMinima_RequiresAReasonableSession(int? segundos, bool expected)
     {
-        Assert.Equal(expected, DesafiosRules.IsValidDuracaoMinima(segundos));
+        Assert.Equal(expected, ValidacaoDesafio.IsValidDuracaoMinima(segundos));
     }
 
     [Theory]
@@ -59,14 +59,14 @@ public class RulesTests
     [InlineData(null, false)]
     public void IsValidSessoesPorSemana_AllowsOneToSeven(int? sessoes, bool expected)
     {
-        Assert.Equal(expected, DesafiosRules.IsValidSessoesPorSemana(sessoes));
+        Assert.Equal(expected, ValidacaoDesafio.IsValidSessoesPorSemana(sessoes));
     }
 
     [Fact]
     public void IsValidPeriodo_AcceptsWholeWeeks_StartingTodayOrLater()
     {
-        Assert.True(DesafiosRules.IsValidPeriodo(Segunda, Domingo, hoje: Segunda));
-        Assert.True(DesafiosRules.IsValidPeriodo(Segunda, Segunda.AddDays(6), hoje: Segunda.AddDays(-1)));
+        Assert.True(ValidacaoDesafio.IsValidPeriodo(Segunda, Domingo, hoje: Segunda));
+        Assert.True(ValidacaoDesafio.IsValidPeriodo(Segunda, Segunda.AddDays(6), hoje: Segunda.AddDays(-1)));
     }
 
     [Fact]
@@ -74,34 +74,34 @@ public class RulesTests
     {
         var hoje = Segunda.AddDays(-30);
 
-        Assert.False(DesafiosRules.IsValidPeriodo(Segunda.AddDays(1), Domingo, hoje));
-        Assert.False(DesafiosRules.IsValidPeriodo(Segunda, Domingo.AddDays(-1), hoje));
+        Assert.False(ValidacaoDesafio.IsValidPeriodo(Segunda.AddDays(1), Domingo, hoje));
+        Assert.False(ValidacaoDesafio.IsValidPeriodo(Segunda, Domingo.AddDays(-1), hoje));
     }
 
     [Fact]
     public void IsValidPeriodo_RejectsAnEndBeforeTheStart()
     {
-        Assert.False(DesafiosRules.IsValidPeriodo(Segunda, Segunda.AddDays(-1), Segunda.AddDays(-30)));
+        Assert.False(ValidacaoDesafio.IsValidPeriodo(Segunda, Segunda.AddDays(-1), Segunda.AddDays(-30)));
     }
 
     [Fact]
     public void IsValidPeriodo_RejectsAStartInThePast()
     {
-        Assert.False(DesafiosRules.IsValidPeriodo(Segunda, Domingo, hoje: Segunda.AddDays(1)));
+        Assert.False(ValidacaoDesafio.IsValidPeriodo(Segunda, Domingo, hoje: Segunda.AddDays(1)));
     }
 
     [Fact]
     public void IsValidPeriodo_LimitsTheNumberOfWeeks()
     {
-        Assert.True(DesafiosRules.IsValidPeriodo(Segunda, Segunda.AddDays((52 * 7) - 1), Segunda));
-        Assert.False(DesafiosRules.IsValidPeriodo(Segunda, Segunda.AddDays((53 * 7) - 1), Segunda));
+        Assert.True(ValidacaoDesafio.IsValidPeriodo(Segunda, Segunda.AddDays((52 * 7) - 1), Segunda));
+        Assert.False(ValidacaoDesafio.IsValidPeriodo(Segunda, Segunda.AddDays((53 * 7) - 1), Segunda));
     }
 
     [Fact]
     public void CountSemanas_CountsWholeWeeks()
     {
-        Assert.Equal(1, DesafiosRules.CountSemanas(Segunda, Segunda.AddDays(6)));
-        Assert.Equal(4, DesafiosRules.CountSemanas(Segunda, Domingo));
+        Assert.Equal(1, ProgressoDesafio.CountSemanas(Segunda, Segunda.AddDays(6)));
+        Assert.Equal(4, ProgressoDesafio.CountSemanas(Segunda, Domingo));
     }
 
     [Theory]
@@ -110,7 +110,7 @@ public class RulesTests
     [InlineData(PapelMembro.Membro, false)]
     public void CanGerenciar_AllowsProprietarioAndAdministrador(string papel, bool expected)
     {
-        Assert.Equal(expected, DesafiosRules.CanGerenciar(papel));
+        Assert.Equal(expected, ValidacaoDesafio.CanGerenciar(papel));
     }
 
     [Theory]
@@ -122,7 +122,7 @@ public class RulesTests
     {
         var hoje = Segunda.AddDays(diasDesdeOInicio);
 
-        Assert.Equal(expected, DesafiosRules.GetSituacao(Segunda, Domingo, cancelado: false, hoje));
+        Assert.Equal(expected, ProgressoDesafio.GetSituacao(Segunda, Domingo, cancelado: false, hoje));
     }
 
     [Theory]
@@ -133,7 +133,7 @@ public class RulesTests
     {
         var hoje = Segunda.AddDays(diasDesdeOInicio);
 
-        Assert.Equal(SituacaoDesafio.Cancelado, DesafiosRules.GetSituacao(Segunda, Domingo, cancelado: true, hoje));
+        Assert.Equal(SituacaoDesafio.Cancelado, ProgressoDesafio.GetSituacao(Segunda, Domingo, cancelado: true, hoje));
     }
 
     [Theory]
@@ -143,7 +143,7 @@ public class RulesTests
     [InlineData(27, 4, 21)]
     public void GetSemana_ReturnsTheWeekContainingToday(int diasDesdeOInicio, int numero, int diasAteOInicioDaSemana)
     {
-        var semana = DesafiosRules.GetSemana(Segunda, Domingo, Segunda.AddDays(diasDesdeOInicio));
+        var semana = ProgressoDesafio.GetSemana(Segunda, Domingo, Segunda.AddDays(diasDesdeOInicio));
 
         var esperado = Segunda.AddDays(diasAteOInicioDaSemana);
         Assert.Equal(new SemanaResponse(numero, esperado, esperado.AddDays(6)), semana);
@@ -154,21 +154,21 @@ public class RulesTests
     [InlineData(28)]
     public void GetSemana_IsEmptyOutsideThePeriodo(int diasDesdeOInicio)
     {
-        Assert.Null(DesafiosRules.GetSemana(Segunda, Domingo, Segunda.AddDays(diasDesdeOInicio)));
+        Assert.Null(ProgressoDesafio.GetSemana(Segunda, Domingo, Segunda.AddDays(diasDesdeOInicio)));
     }
 
     [Fact]
     public void CalculateProgresso_MatchesTheExampleInTheArchitecture()
     {
         // arquitetura.md §8.5: meta de 4, com 2 verificadas e 1 pendente; a rejeitada não entra.
-        Assert.Equal(new ProgressoSemanal(2, 3, false), DesafiosRules.CalculateProgresso(2, 1, 4));
+        Assert.Equal(new ProgressoSemanal(2, 3, false), ProgressoDesafio.CalculateProgresso(2, 1, 4));
     }
 
     [Fact]
     public void CalculateProgresso_OnlyVerificadasMeetTheMeta()
     {
-        Assert.False(DesafiosRules.CalculateProgresso(3, 5, 4).MetaCumprida);
-        Assert.True(DesafiosRules.CalculateProgresso(4, 0, 4).MetaCumprida);
-        Assert.True(DesafiosRules.CalculateProgresso(6, 0, 4).MetaCumprida);
+        Assert.False(ProgressoDesafio.CalculateProgresso(3, 5, 4).MetaCumprida);
+        Assert.True(ProgressoDesafio.CalculateProgresso(4, 0, 4).MetaCumprida);
+        Assert.True(ProgressoDesafio.CalculateProgresso(6, 0, 4).MetaCumprida);
     }
 }

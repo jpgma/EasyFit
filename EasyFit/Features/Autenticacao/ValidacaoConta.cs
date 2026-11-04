@@ -1,6 +1,6 @@
 namespace EasyFit.Features.Autenticacao;
 
-internal static class AutenticacaoRules
+internal static class ValidacaoConta
 {
     public const int MinSenhaLength = 8;
 

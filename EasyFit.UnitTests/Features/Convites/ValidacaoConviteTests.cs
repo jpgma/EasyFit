@@ -4,12 +4,12 @@ using EasyFit.Features.Grupos.Contracts;
 
 namespace EasyFit.UnitTests.Features.Convites;
 
-public class RulesTests
+public class ValidacaoConviteTests
 {
     [Fact]
     public void Validade_IsSevenDays()
     {
-        Assert.Equal(TimeSpan.FromDays(7), ConvitesRules.Validade);
+        Assert.Equal(TimeSpan.FromDays(7), ValidacaoConvite.Validade);
     }
 
     [Theory]
@@ -18,7 +18,7 @@ public class RulesTests
     [InlineData(PapelMembro.Membro, false)]
     public void CanGerenciarConvites_ExcludesMembros(string papel, bool expected)
     {
-        Assert.Equal(expected, ConvitesRules.CanGerenciarConvites(papel));
+        Assert.Equal(expected, ValidacaoConvite.CanGerenciarConvites(papel));
     }
 
     [Theory]

@@ -1,5 +1,6 @@
 using EasyFit.Features.Grupos.Contracts;
 using EasyFit.Infrastructure.Authentication;
+using EasyFit.Infrastructure.Json;
 using Npgsql;
 
 namespace EasyFit.Features.Convites;
@@ -14,9 +15,34 @@ internal enum ConviteCriacaoStatus
 
 internal readonly record struct ConviteCriacaoResult(ConviteCriacaoStatus Status, ConviteCriadoResponse? Convite = null);
 
-internal static class ConvitesCommands
+internal static class CriarConvite
 {
-    public static async Task<ConviteCriacaoResult> CreateAsync(
+    public static async Task<IResult> HandleAsync(
+        Guid id,
+        HttpContext context,
+        NpgsqlDataSource dataSource,
+        CancellationToken cancellationToken)
+    {
+        var result = await ExecutarAsync(
+            dataSource,
+            id,
+            context.GetSessaoAtual().UsuarioId,
+            cancellationToken);
+
+        return result.Status switch
+        {
+            ConviteCriacaoStatus.Criado => Results.Json(
+                result.Convite!,
+                AppJsonContext.Default.ConviteCriadoResponse,
+                statusCode: StatusCodes.Status201Created),
+            ConviteCriacaoStatus.GrupoNaoEncontrado => GrupoAcesso.GrupoNaoEncontrado(),
+            ConviteCriacaoStatus.AcessoNegado => GrupoAcesso.AcessoNegado(),
+            ConviteCriacaoStatus.GrupoCheio => GrupoAcesso.GrupoCheio(),
+            _ => throw new ArgumentOutOfRangeException(nameof(result)),
+        };
+    }
+
+    private static async Task<ConviteCriacaoResult> ExecutarAsync(
         NpgsqlDataSource dataSource,
         Guid grupoId,
         Guid usuarioId,
@@ -33,7 +59,7 @@ internal static class ConvitesCommands
             return new ConviteCriacaoResult(ConviteCriacaoStatus.GrupoNaoEncontrado);
         }
 
-        if (!ConvitesRules.CanGerenciarConvites(papel))
+        if (!ValidacaoConvite.CanGerenciarConvites(papel))
         {
             return new ConviteCriacaoResult(ConviteCriacaoStatus.AcessoNegado);
         }
@@ -51,7 +77,7 @@ internal static class ConvitesCommands
         }
 
         var token = OpaqueToken.Generate();
-        var expiresAt = DateTimeOffset.UtcNow + ConvitesRules.Validade;
+        var expiresAt = DateTimeOffset.UtcNow + ValidacaoConvite.Validade;
 
         await using var insert = new NpgsqlCommand("""
             INSERT INTO convites_grupo (grupo_id, criador_id, token_hash, expires_at)
@@ -66,22 +92,5 @@ internal static class ConvitesCommands
 
         await transaction.CommitAsync(cancellationToken);
         return new ConviteCriacaoResult(ConviteCriacaoStatus.Criado, new ConviteCriadoResponse(id, token, expiresAt));
-    }
-
-    /// <returns><c>false</c> se o convite não existir neste grupo ou não estiver mais pendente.</returns>
-    public static async Task<bool> RevogarAsync(
-        NpgsqlDataSource dataSource,
-        Guid grupoId,
-        Guid conviteId,
-        CancellationToken cancellationToken)
-    {
-        await using var command = dataSource.CreateCommand("""
-            UPDATE convites_grupo
-            SET revoked_at = now()
-            WHERE id = $1 AND grupo_id = $2 AND used_at IS NULL AND revoked_at IS NULL AND expires_at > now()
-            """);
-        command.Parameters.AddWithValue(conviteId);
-        command.Parameters.AddWithValue(grupoId);
-        return await command.ExecuteNonQueryAsync(cancellationToken) == 1;
     }
 }

@@ -298,26 +298,29 @@ HTTP Response
 ```
 
 As regras de negócio puras devem ser separadas das operações de I/O.
+A fatia se organiza por operação HTTP (ver `docs/decisoes/0010-fatia-por-operacao.md`): um arquivo concentra o fluxo da rota; tipos e helpers reutilizados ficam em arquivos nomeados pelo conceito.
 
 Exemplo:
 
 ```text
-EasyFit/Features/Reacoes/
-├── Routes.cs
-├── Contracts.cs
-├── Queries.cs
-├── Commands.cs
-└── Rules.cs
+EasyFit/Features/Autenticacao/
+├── Routes.cs              # MapAutenticacaoRoutes(): ligação fina
+├── Registrar.cs           # handler, contratos, SQL e regras da operação
+├── Entrar.cs
+├── Respostas.cs           # DTOs compartilhados na fatia
+├── Sessoes.cs             # helpers reutilizados
+└── ValidacaoConta.cs      # regras puras compartilhadas
 
-EasyFit.UnitTests/Features/Reacoes/
-└── RulesTests.cs
+EasyFit.UnitTests/Features/Autenticacao/
+└── ValidacaoContaTests.cs
 ```
 
 Os testes ficam em `EasyFit.UnitTests/` e `EasyFit.IntegrationTests/`, espelhando o caminho da fatia, para que código e pacotes de teste não entrem no binário Native AOT.
 
 Não é obrigatório criar todos esses arquivos quando uma funcionalidade for pequena.
+Fatias triviais podem ficar só com `Routes.cs`.
 
-A organização deve refletir responsabilidades reais, não uma quantidade fixa de classes.
+A organização deve refletir responsabilidades reais (coesão por operação), não uma quantidade fixa de classes por camada.
 
 ---
 

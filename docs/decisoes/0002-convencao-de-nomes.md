@@ -19,7 +19,7 @@ Domínio em português, sem acentos; todo o resto em inglês, inclusive pastas e
 
 > Um participante reconheceria a palavra como conceito do aplicativo? **Sim:** português sem acentos. **Não:** inglês.
 
-Exemplos: `Features/Reacoes/Routes.cs`, `GetReacoesByAtividade()`, `reacoes_atividade.created_at`.
+Exemplos: `Features/Autenticacao/Registrar.cs`, `Features/Reacoes/Routes.cs`, `GetReacoesByAtividade()`, `reacoes_atividade.created_at`. Arquivos de operação usam o conceito do domínio em português (`Registrar.cs`); `Routes.cs` permanece em inglês por ser estrutural.
 
 Permanecem em pt-BR, com acentos: documentação, textos da interface, comentários e mensagens. Rotas, campos JSON e códigos de erro seguem a regra e por isso continuam como definidos em `arquitetura.md` (`/api/atividades/{id}/reacao`, `ATIVIDADE_NAO_ENCONTRADA`).
 

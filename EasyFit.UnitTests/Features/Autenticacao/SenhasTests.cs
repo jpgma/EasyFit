@@ -2,22 +2,22 @@ using EasyFit.Features.Autenticacao;
 
 namespace EasyFit.UnitTests.Features.Autenticacao;
 
-public class PasswordsTests
+public class SenhasTests
 {
     [Fact]
     public void Verify_AcceptsCorrectPassword_AndRejectsWrongOne()
     {
-        var hash = Passwords.Hash("senha-correta");
+        var hash = Senhas.Hash("senha-correta");
 
-        Assert.True(Passwords.Verify("senha-correta", hash));
-        Assert.False(Passwords.Verify("senha-errada", hash));
+        Assert.True(Senhas.Verify("senha-correta", hash));
+        Assert.False(Senhas.Verify("senha-errada", hash));
     }
 
     [Fact]
     public void Hash_UsesDifferentSaltEachTime_AndNeverContainsThePassword()
     {
-        var first = Passwords.Hash("senha-correta");
-        var second = Passwords.Hash("senha-correta");
+        var first = Senhas.Hash("senha-correta");
+        var second = Senhas.Hash("senha-correta");
 
         Assert.NotEqual(first, second);
         Assert.DoesNotContain("senha-correta", first);
@@ -35,6 +35,6 @@ public class PasswordsTests
     [InlineData("pbkdf2-sha256$1000$c2Fs$")]
     public void Verify_RejectsMalformedHash_WithoutThrowing(string storedHash)
     {
-        Assert.False(Passwords.Verify("senha-correta", storedHash));
+        Assert.False(Senhas.Verify("senha-correta", storedHash));
     }
 }
