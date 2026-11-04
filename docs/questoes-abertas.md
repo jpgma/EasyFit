@@ -196,7 +196,7 @@ Os erros devem ser compreensíveis pelo frontend e não revelar informações in
 
 ## Q008 — Como determinar os limites das semanas?
 
-**Status:** PROPOSTA
+**Status:** DECIDIDA — ver `decisoes/0009-desafios.md`
 
 A meta será semanal, utilizando o fuso horário do grupo.
 
@@ -238,7 +238,7 @@ Não dividir uma atividade entre semanas.
 
 ## Q010 — Como tratar desafios concorrentes?
 
-**Status:** PROPOSTA
+**Status:** DECIDIDA — ver `decisoes/0009-desafios.md`. Vários desafios podem coexistir, e a meta não muda depois da criação. A elegibilidade de cada atividade será calculada na Fase 5.
 
 Uma atividade poderá contribuir para mais de um desafio ativo.
 
@@ -255,7 +255,7 @@ Manter a atividade independente do desafio e calcular sua elegibilidade separada
 
 ## Q011 — O que acontece quando alguém entra ou sai de um grupo?
 
-**Status:** DECIDIDA — ver `decisoes/0008-grupos-e-convites.md`. O efeito sobre desafios, revisões e reações segue os princípios registrados lá e será detalhado nas Fases 4 e 6.
+**Status:** DECIDIDA — ver `decisoes/0008-grupos-e-convites.md`. A participação em desafios está em `decisoes/0009-desafios.md`. O efeito sobre revisões e reações segue os princípios registrados na decisão 0008 e será detalhado na Fase 6.
 
 Definir:
 

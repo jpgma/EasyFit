@@ -1,4 +1,12 @@
-import { ArrowLeft, CloudOff, LogOut, UserPlus, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronRight,
+  CloudOff,
+  LogOut,
+  Plus,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { Avatar } from "@/components/Avatar";
@@ -6,6 +14,13 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
 import { SplashScreen } from "@/components/SplashScreen";
 import { useSessao } from "@/features/autenticacao";
+import {
+  canGerenciarDesafios,
+  formatarData,
+  formatarDuracao,
+  situacaoLabels,
+  useDesafios,
+} from "@/features/desafios";
 import {
   canAlterarPapel,
   canConvidar,
@@ -72,6 +87,7 @@ export function GrupoPage() {
   const { data: usuario } = useSessao();
   const grupo = useGrupo(id);
   const membros = useMembros(id);
+  const desafios = useDesafios(id);
   const alterarPapel = useAlterarPapel(id);
   const remover = useRemoverMembro(id);
   const transferir = useTransferirGrupo(id);
@@ -182,6 +198,70 @@ export function GrupoPage() {
           Convidar amigos
         </Link>
       )}
+
+      <section className="mt-6">
+        <h2 className="mb-3 text-base font-bold">Desafios</h2>
+
+        {desafios.isPending && (
+          <p role="status" className="py-8 text-center text-sm text-muted">
+            Carregando…
+          </p>
+        )}
+
+        {desafios.isError && (
+          <p role="alert" className="form-error">
+            {getErrorMessage(desafios.error)}
+          </p>
+        )}
+
+        {desafios.data?.length === 0 && (
+          <p className="card p-4 text-sm text-muted">
+            Este grupo ainda não tem desafios.
+          </p>
+        )}
+
+        {desafios.data && desafios.data.length > 0 && (
+          <ul className="space-y-3">
+            {desafios.data.map((desafio) => (
+              <li key={desafio.id}>
+                <Link
+                  to={`/desafios/${desafio.id}`}
+                  className="card flex items-center gap-3 p-4 transition-colors hover:bg-surface-muted"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-bold">{desafio.nome}</p>
+                    <p className="text-sm text-muted">
+                      {desafio.sessoesPorSemana} por semana ·{" "}
+                      {formatarDuracao(desafio.duracaoMinimaSegundos)}
+                    </p>
+                    <p className="text-sm text-muted">
+                      {formatarData(desafio.dataInicio)} a{" "}
+                      {formatarData(desafio.dataFim)}
+                    </p>
+                  </div>
+                  <span className="chip">
+                    {situacaoLabels[desafio.situacao]}
+                  </span>
+                  <ChevronRight
+                    aria-hidden="true"
+                    className="h-5 w-5 shrink-0 text-muted"
+                  />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {canGerenciarDesafios(papel) && (
+          <Link
+            to={`/grupos/${id}/desafios/novo`}
+            className="btn-secondary mt-3 w-full"
+          >
+            <Plus aria-hidden="true" className="h-5 w-5" />
+            Criar desafio
+          </Link>
+        )}
+      </section>
 
       <section className="mt-6">
         <h2 className="mb-3 text-base font-bold">Membros</h2>

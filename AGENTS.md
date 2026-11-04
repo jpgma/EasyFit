@@ -46,6 +46,8 @@ Use exatamente estas grafias:
 
 Situações de verificação: `AguardandoFeedback`, `Verificada`, `EmRevisao`, `Contestada`, `Rejeitada`.
 
+Situações de um desafio: `Agendado`, `Ativo`, `Encerrado`, `Cancelado`.
+
 Ao introduzir um conceito novo, acrescente-o aqui na mesma alteração.
 
 ## Organização

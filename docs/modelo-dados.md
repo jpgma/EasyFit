@@ -63,6 +63,34 @@ Um convite só vale enquanto `used_at` e `revoked_at` estiverem vazias e `expire
 | `usado_por_id` | `uuid` | Referencia `usuarios`. Quem aceitou |
 | `revoked_at` | `timestamptz` | Preenchida ao cancelar, ou quando quem criou deixa o grupo |
 
+## `desafios`
+
+As datas são dias do calendário no fuso do grupo. Só semanas inteiras, garantidas por `CHECK`. A situação não é gravada: vem das datas e de `cancelled_at`. Ver `decisoes/0009-desafios.md`.
+
+| Coluna | Tipo | Observações |
+|---|---|---|
+| `id` | `uuid` | Chave primária |
+| `grupo_id` | `uuid` | Referencia `grupos`. Indexada com `data_inicio` |
+| `criador_id` | `uuid` | Referencia `usuarios` |
+| `nome` | `text` | Obrigatória |
+| `descricao` | `text` | Opcional |
+| `data_inicio` | `date` | Sempre uma segunda-feira |
+| `data_fim` | `date` | Sempre um domingo, posterior ao início. Incluída no período |
+| `duracao_minima_segundos` | `integer` | Positiva |
+| `sessoes_por_semana` | `integer` | Positiva |
+| `created_at` | `timestamptz` | Padrão `now()` |
+| `cancelled_at` | `timestamptz` | Preenchida ao cancelar |
+
+## `participantes_desafio`
+
+Uma linha por usuário e desafio. Participante ativo é quem tem a linha e continua no grupo: sair do grupo não apaga a linha, e voltar devolve a participação.
+
+| Coluna | Tipo | Observações |
+|---|---|---|
+| `desafio_id` | `uuid` | Parte da chave primária. Referencia `desafios` |
+| `usuario_id` | `uuid` | Parte da chave primária. Referencia `usuarios`. Indexada |
+| `joined_at` | `timestamptz` | Padrão `now()` |
+
 ## `schema_migrations`
 
 Tabela de controle do executor de migrações. Ver `decisoes/0001-migracoes-sql.md`.

@@ -651,8 +651,9 @@ Atributos:
 - Data final.
 - Duração mínima de uma sessão, em segundos.
 - Quantidade mínima de sessões por semana.
-- Fuso horário.
-- Situação.
+- Situação, calculada a partir das datas e do cancelamento.
+
+O desafio segue o fuso horário do grupo e cobre apenas semanas inteiras, de segunda a domingo. Ver `docs/decisoes/0009-desafios.md`.
 
 Exemplo:
 
@@ -966,7 +967,11 @@ POST /api/grupos/{id}/desafios
 GET  /api/desafios/{id}
 GET  /api/desafios/{id}/progresso
 GET  /api/desafios/{id}/classificacao
+POST /api/desafios/{id}/participar
+POST /api/desafios/{id}/cancelar
 ```
+
+Permissões e regras em `docs/decisoes/0009-desafios.md`.
 
 ### 10.4. Atividades
 

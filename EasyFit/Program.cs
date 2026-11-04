@@ -2,6 +2,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using EasyFit.Features.Autenticacao;
 using EasyFit.Features.Convites;
+using EasyFit.Features.Desafios;
 using EasyFit.Features.Grupos;
 using EasyFit.Features.Health;
 using EasyFit.Infrastructure.Authentication;
@@ -54,6 +55,7 @@ app.MapHealthRoutes();
 app.MapAutenticacaoRoutes();
 app.MapGruposRoutes();
 app.MapConvitesRoutes();
+app.MapDesafiosRoutes();
 
 // Rota de API inexistente responde 404 em JSON, nunca com o index.html da SPA.
 app.Map("/api/{**rest}", () =>

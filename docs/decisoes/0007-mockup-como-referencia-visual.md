@@ -37,6 +37,10 @@ Divergências conhecidas, em que o mockup não deve ser seguido:
 | E-mail de quem convidou e dos membros visível | Só nome e papel (decisão 0008) |
 | Um único grupo por pessoa | Vários grupos, escolhidos pela URL (decisão 0008) |
 | Botão de convidar para todos os membros | Só para Proprietário e Administrador (decisão 0008) |
+| Um único desafio por grupo | Vários desafios ao mesmo tempo (decisão 0009) |
+| Todos os membros participam do desafio | Participação por adesão (decisão 0009) |
+| Botão "Editar desafio" | Meta e datas não mudam: só é possível cancelar (decisão 0009) |
+| Metas individuais (`weeklyGoal` por membro) | Mesma meta para todos (`arquitetura.md` §7.4) |
 
 ## Impacto
 
