@@ -1,5 +1,7 @@
 # Normaliza tudo para LF: scripts e o build Docker quebram com CRLF.
 * text=auto eol=lf
+# O cmd.exe interpreta mal arquivos .bat com LF.
+*.bat text eol=crlf
 *.png binary
 *.jpg binary
 *.webp binary

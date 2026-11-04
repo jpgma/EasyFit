@@ -53,6 +53,8 @@ Começar com 1 OCPU e 6 GB RAM, reservando margem para PostgreSQL, aplicação e
 
 Ter uma VM funcional com Docker Compose, HTTPS e armazenamento persistente.
 
+**Situação atual (2026-11-03):** adiada. A franquia A1 caiu para 2 OCPUs e 12 GB em 2026. Em `sa-saopaulo-1`, que tem um único domínio de disponibilidade e não pode ser trocada por ser a região inicial da conta, as tentativas com 2 OCPUs e 12 GB e com 1 OCPU e 6 GB falharam por falta de capacidade. Ver a proposta em `decisoes/0005-implantacao-via-ssh.md`.
+
 ## Q002 — Como organizar os backups?
 
 **Status:** ABERTA
