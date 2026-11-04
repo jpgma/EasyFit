@@ -6,6 +6,10 @@ export function canConvidar(papel: Papel): boolean {
   return papel === "Proprietario" || papel === "Administrador";
 }
 
+export function canRevisarAtividade(papel: Papel): boolean {
+  return papel === "Proprietario" || papel === "Administrador";
+}
+
 export function canAlterarPapel(ator: Papel, alvo: Papel): boolean {
   return ator === "Proprietario" && alvo !== "Proprietario";
 }

@@ -277,7 +277,7 @@ Não permitir que a saída de um membro invalide retroativamente uma atividade.
 
 ## Q012 — Qual será a regra definitiva de consenso?
 
-**Status:** PROPOSTA
+**Status:** DECIDIDA — ver `decisoes/0012-verificacao-comunitaria.md`.
 
 Reações disponíveis:
 
@@ -311,7 +311,7 @@ Uma atividade com sinalização não resolvida não deve ser aprovada automatica
 
 ## Q013 — Como tratar grupos muito pequenos?
 
-**Status:** ABERTA
+**Status:** DECIDIDA — ver `decisoes/0012-verificacao-comunitaria.md` (0 revisores → verificada imediata; demais casos, fórmula de Q012).
 
 Investigar o comportamento com:
 
@@ -335,7 +335,7 @@ Para grupos maiores, utilizar a regra de rejeição definida em Q012.
 
 ## Q014 — Como será feita a revisão administrativa?
 
-**Status:** PROPOSTA
+**Status:** DECIDIDA — ver `decisoes/0012-verificacao-comunitaria.md`.
 
 Investigar:
 
@@ -352,7 +352,7 @@ Toda decisão deve gerar um registro imutável de auditoria.
 
 ## Q015 — Quando as reações serão encerradas?
 
-**Status:** PROPOSTA
+**Status:** DECIDIDA — ver `decisoes/0012-verificacao-comunitaria.md`.
 
 Prazo inicial: 48 horas após submissão.
 

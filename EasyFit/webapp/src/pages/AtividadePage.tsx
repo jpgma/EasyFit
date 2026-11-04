@@ -11,6 +11,7 @@ import {
   tipoComprovacaoLabels,
   useAtividade,
 } from "@/features/atividades";
+import { ReacoesAtividade } from "@/features/reacoes";
 import { ApiError, getErrorMessage } from "@/services/api";
 
 export function AtividadePage() {
@@ -120,6 +121,13 @@ export function AtividadePage() {
           </ul>
         </section>
       )}
+
+      <ReacoesAtividade
+        atividadeId={id}
+        grupoId={grupoId}
+        situacaoVerificacao={situacaoVerificacao}
+        voce={voce}
+      />
     </main>
   );
 }

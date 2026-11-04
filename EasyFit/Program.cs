@@ -6,12 +6,15 @@ using EasyFit.Features.Convites;
 using EasyFit.Features.Desafios;
 using EasyFit.Features.Grupos;
 using EasyFit.Features.Health;
+using EasyFit.Features.Reacoes;
 using EasyFit.Infrastructure.Authentication;
 using EasyFit.Infrastructure.Database;
 using EasyFit.Infrastructure.Errors;
 using EasyFit.Infrastructure.Files;
 using EasyFit.Infrastructure.Json;
+using EasyFit.Infrastructure.StaticFiles;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.StaticFiles;
 using Npgsql;
 
 var builder = WebApplication.CreateSlimBuilder(args);
@@ -42,6 +45,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 builder.Services.AddAutenticacaoRateLimiter();
 builder.Services.AddAtividadesRateLimiter();
+builder.Services.AddHostedService<EncerramentoRevisoesBackgroundService>();
 
 var app = builder.Build();
 
@@ -52,7 +56,10 @@ if (args is ["migrate"])
 
 app.UseForwardedHeaders();
 app.UseExceptionHandler(handler => handler.Run(ApiProblem.WriteInternalErrorAsync));
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = CacheControleEstatico.Aplicar,
+});
 app.UseOriginCheck();
 app.UseRateLimiter();
 
@@ -62,6 +69,7 @@ app.MapGruposRoutes();
 app.MapConvitesRoutes();
 app.MapDesafiosRoutes();
 app.MapAtividadesRoutes();
+app.MapReacoesRoutes();
 
 // Rota de API inexistente responde 404 em JSON, nunca com o index.html da SPA.
 app.Map("/api/{**rest}", () =>

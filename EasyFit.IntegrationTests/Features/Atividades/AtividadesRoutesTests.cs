@@ -127,7 +127,7 @@ public sealed class AtividadesRoutesTests : IAsyncLifetime
         progresso.EnsureSuccessStatusCode();
         var body = await progresso.Content.ReadFromJsonAsync(AppJsonContext.Default.ProgressoResponse, Token);
         var anaProgresso = Assert.Single(body!.Participantes);
-        Assert.Equal(0, anaProgresso.SessoesVerificadas);
+        Assert.Equal(1, anaProgresso.SessoesVerificadas);
         Assert.Equal(1, anaProgresso.SessoesProvisorias);
     }
 

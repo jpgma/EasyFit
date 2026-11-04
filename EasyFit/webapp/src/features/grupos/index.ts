@@ -21,5 +21,6 @@ export {
   canAlterarPapel,
   canConvidar,
   canRemover,
+  canRevisarAtividade,
   papelLabels,
 } from "./permissoes";

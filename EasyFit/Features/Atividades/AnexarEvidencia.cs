@@ -152,6 +152,17 @@ internal static class AnexarEvidencia
             evidenciaId = (Guid)(await insert.ExecuteScalarAsync(cancellationToken))!;
         }
 
+        await using (var autoVerificar = new NpgsqlCommand("""
+            UPDATE atividades a
+            SET situacao_verificacao = 'Verificada'
+            WHERE a.id = $1
+              AND NOT EXISTS (SELECT 1 FROM revisores_atividade r WHERE r.atividade_id = a.id)
+            """, connection, transaction))
+        {
+            autoVerificar.Parameters.AddWithValue(atividadeId);
+            await autoVerificar.ExecuteNonQueryAsync(cancellationToken);
+        }
+
         await transaction.CommitAsync(cancellationToken);
         return (
             AtividadeOperacaoStatus.Concluida,

@@ -22,6 +22,8 @@ internal sealed class ApiTestHost : IAsyncDisposable
     private readonly WebApplicationFactory<Program> _factory;
     private readonly List<HttpClient> _clients = [];
 
+    internal Npgsql.NpgsqlDataSource DataSource => _database.DataSource;
+
     private ApiTestHost(TestDatabase database, string cadastroAberto, string evidenciasDiretorio)
     {
         _database = database;

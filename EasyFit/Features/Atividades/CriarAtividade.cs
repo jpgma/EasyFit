@@ -79,6 +79,32 @@ internal static class CriarAtividade
         insert.Parameters.AddWithValue(request.TipoComprovacao!);
 
         var id = (Guid)(await insert.ExecuteScalarAsync(cancellationToken))!;
+
+        await using (var revisores = new NpgsqlCommand("""
+            INSERT INTO revisores_atividade (atividade_id, usuario_id)
+            SELECT $1, m.usuario_id
+            FROM membros_grupo m
+            WHERE m.grupo_id = $2 AND m.removed_at IS NULL AND m.usuario_id <> $3
+            """, connection, transaction))
+        {
+            revisores.Parameters.AddWithValue(id);
+            revisores.Parameters.AddWithValue(grupoId);
+            revisores.Parameters.AddWithValue(usuarioId);
+            await revisores.ExecuteNonQueryAsync(cancellationToken);
+        }
+
+        await using (var verificar = new NpgsqlCommand("""
+            UPDATE atividades
+            SET situacao_verificacao = 'Verificada'
+            WHERE id = $1
+              AND tipo_comprovacao = 'RegistroManual'
+              AND NOT EXISTS (SELECT 1 FROM revisores_atividade r WHERE r.atividade_id = $1)
+            """, connection, transaction))
+        {
+            verificar.Parameters.AddWithValue(id);
+            await verificar.ExecuteNonQueryAsync(cancellationToken);
+        }
+
         await transaction.CommitAsync(cancellationToken);
         return (AtividadeOperacaoStatus.Concluida, id);
     }

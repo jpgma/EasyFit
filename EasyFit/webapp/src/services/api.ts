@@ -75,6 +75,11 @@ export async function putJsonEmpty(path: string, body: unknown): Promise<void> {
   await request(path, jsonRequest("PUT", body));
 }
 
+export async function putJson<T>(path: string, body: unknown): Promise<T> {
+  const response = await request(path, jsonRequest("PUT", body));
+  return (await response.json()) as T;
+}
+
 export async function deleteEmpty(path: string): Promise<void> {
   await request(path, { method: "DELETE" });
 }

@@ -91,6 +91,72 @@ Uma linha por usuário e desafio. Participante ativo é quem tem a linha e conti
 | `usuario_id` | `uuid` | Parte da chave primária. Referencia `usuarios`. Indexada |
 | `joined_at` | `timestamptz` | Padrão `now()` |
 
+## `atividades`
+
+Ver `decisoes/0011-atividades.md` e migração `006-create-atividades.sql`.
+
+| Coluna | Tipo | Observações |
+|---|---|---|
+| `id` | `uuid` | Chave primária |
+| `grupo_id` | `uuid` | Referencia `grupos` |
+| `usuario_id` | `uuid` | Autor; referencia `usuarios` |
+| `tipo` | `text` | Tipo de exercício (§7.5) |
+| `duracao_segundos` | `integer` | Positiva |
+| `started_at` | `timestamptz` | Define a semana no fuso do grupo |
+| `descricao` | `text` | Opcional |
+| `tipo_comprovacao` | `text` | `RegistroManual`, `Fotografia`, `CapturaDeTela` |
+| `situacao_verificacao` | `text` | `AguardandoFeedback`, `Verificada`, `EmRevisao`, `Contestada`, `Rejeitada` |
+| `submitted_at` | `timestamptz` | Início da janela de reações (48 h) |
+| `created_at` | `timestamptz` | Padrão `now()` |
+
+## `evidencias_atividade`
+
+| Coluna | Tipo | Observações |
+|---|---|---|
+| `id` | `uuid` | Chave primária |
+| `atividade_id` | `uuid` | Referencia `atividades` |
+| `caminho_relativo` | `text` | Sob o volume de evidências |
+| `tipo_mime` | `text` | Validado no upload |
+| `tamanho_bytes` | `integer` | Positivo |
+| `sha256` | `text` | Hash do arquivo |
+| `ordem` | `smallint` | 1–3 por atividade |
+| `created_at` | `timestamptz` | Padrão `now()` |
+
+## `revisores_atividade`
+
+Snapshot na criação da atividade. Ver `decisoes/0012-verificacao-comunitaria.md`.
+
+| Coluna | Tipo | Observações |
+|---|---|---|
+| `atividade_id` | `uuid` | Parte da chave primária. Referencia `atividades` |
+| `usuario_id` | `uuid` | Parte da chave primária. Referencia `usuarios` |
+
+## `reacoes_atividade`
+
+| Coluna | Tipo | Observações |
+|---|---|---|
+| `id` | `uuid` | Chave primária |
+| `atividade_id` | `uuid` | Referencia `atividades` |
+| `usuario_id` | `uuid` | Referencia `usuarios` |
+| `tipo` | `text` | `Kudos`, `Suspeito`, `Rejeitar` |
+| `created_at` | `timestamptz` | Padrão `now()` |
+| `updated_at` | `timestamptz` | Atualizada a cada alteração |
+
+Restrição: uma reação por usuário e atividade.
+
+## `historico_revisao`
+
+Auditoria de decisões administrativas.
+
+| Coluna | Tipo | Observações |
+|---|---|---|
+| `id` | `uuid` | Chave primária |
+| `atividade_id` | `uuid` | Referencia `atividades` |
+| `responsavel_id` | `uuid` | Referencia `usuarios` |
+| `decisao` | `text` | `Verificada` ou `Rejeitada` |
+| `justificativa` | `text` | Obrigatória |
+| `created_at` | `timestamptz` | Padrão `now()` |
+
 ## `schema_migrations`
 
 Tabela de controle do executor de migrações. Ver `decisoes/0001-migracoes-sql.md`.

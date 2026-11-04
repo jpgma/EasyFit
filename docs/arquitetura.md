@@ -992,13 +992,16 @@ A criação usa somente JSON; o upload de evidências usa `multipart/form-data` 
 ### 10.5. Reações
 
 ```http
-PUT /api/atividades/{id}/reacao
-GET /api/atividades/{id}/reacoes
+PUT  /api/atividades/{id}/reacao
+GET  /api/atividades/{id}/reacoes
+POST /api/atividades/{id}/revisao
 ```
 
 A operação de reação deverá realizar inserção ou atualização da reação do usuário.
 
 Não permitir que o autor reaja à própria atividade.
+
+Permissões e regras em `docs/decisoes/0012-verificacao-comunitaria.md`.
 
 ---
 
