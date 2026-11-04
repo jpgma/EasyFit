@@ -442,6 +442,8 @@ Node.js será necessário apenas durante o desenvolvimento e compilação.
 
 ### 5.2. Direção visual
 
+A aparência e os fluxos das telas seguem o mockup do projeto, conforme `docs/decisoes/0007-mockup-como-referencia-visual.md`. Em regras, nomes e segurança, este documento prevalece.
+
 A interface deverá utilizar o Apple Human Interface Guidelines como referência estética e de usabilidade, sem reproduzir literalmente componentes proprietários.
 
 Características desejadas:
@@ -1171,7 +1173,7 @@ services:
       - -c
       - work_mem=4MB
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U easyfit -d easyfit"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U easyfit -d easyfit"]
       interval: 10s
       timeout: 5s
       retries: 5

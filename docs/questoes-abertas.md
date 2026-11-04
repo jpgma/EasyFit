@@ -103,7 +103,7 @@ Não instalar SDK .NET ou Node.js no servidor de produção.
 
 ## Q004 — Qual estratégia de autenticação será utilizada?
 
-**Status:** PROPOSTA
+**Status:** DECIDIDA — ver `decisoes/0006-autenticacao-por-sessao.md`
 
 O EasyFit utilizará sessões persistentes com cookies HttpOnly.
 
@@ -687,6 +687,8 @@ Investigar:
 A interface deve ser moderna, leve e mobile-first.
 
 Não utilizar dependências externas para carregar fontes ou recursos visuais.
+
+**Situação atual:** paleta, tipografia e temas claro e escuro foram definidos a partir do mockup. Ver `decisoes/0007-mockup-como-referencia-visual.md`. Falta avaliar a necessidade de um seletor manual de tema.
 
 ## Q032 — Quais páginas serão obrigatórias no MVP?
 

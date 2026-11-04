@@ -26,7 +26,9 @@ src/
 ## Interface
 
 - Mobile-first, com o Apple Human Interface Guidelines como inspiração, sem copiar componentes proprietários.
+- As telas seguem o mockup do projeto. Antes de portar uma, confira a tabela de divergências em `docs/decisoes/0007-mockup-como-referencia-visual.md`.
 - Tailwind e componentes próprios. Sem bibliotecas de UI pesadas.
+- Cores só por tokens semânticos (`bg-surface`, `text-muted`), definidos em `styles/index.css` para os dois temas. Não use `dark:` nem as paletas diretamente em páginas e componentes.
 - Nada carregado de servidores externos: fontes e ícones ficam no bundle ou são do sistema.
 - Todo texto visível em pt-BR.
 

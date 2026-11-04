@@ -14,13 +14,10 @@ export class ApiError extends Error {
   }
 }
 
-export async function getJson<T>(
-  path: string,
-  signal?: AbortSignal,
-): Promise<T> {
+async function request(path: string, init: RequestInit): Promise<Response> {
   const response = await fetch(path, {
-    signal,
-    headers: { Accept: "application/json" },
+    ...init,
+    headers: { Accept: "application/json", ...init.headers },
   });
 
   if (!response.ok) {
@@ -31,5 +28,33 @@ export async function getJson<T>(
     throw new ApiError(response.status, problem?.code, problem?.title);
   }
 
+  return response;
+}
+
+export async function getJson<T>(
+  path: string,
+  signal?: AbortSignal,
+): Promise<T> {
+  const response = await request(path, { signal });
   return (await response.json()) as T;
+}
+
+export async function postJson<T>(path: string, body: unknown): Promise<T> {
+  const response = await request(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return (await response.json()) as T;
+}
+
+export async function postEmpty(path: string): Promise<void> {
+  await request(path, { method: "POST" });
+}
+
+/** Mensagem para o usuário: a da API, ou uma genérica quando nem houve resposta. */
+export function getErrorMessage(error: unknown): string {
+  return error instanceof ApiError
+    ? error.message
+    : "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.";
 }

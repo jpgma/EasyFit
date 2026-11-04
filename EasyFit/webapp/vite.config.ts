@@ -11,7 +11,13 @@ export default defineConfig({
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
   server: {
-    proxy: { "/api": backend, "/health": backend, "/ready": backend },
+    proxy: {
+      // Mantém o Host do navegador, como o Caddy em produção. A API compara
+      // Origin com Host para recusar escritas de outra origem (CSRF).
+      "/api": { target: backend, changeOrigin: false },
+      "/health": backend,
+      "/ready": backend,
+    },
   },
   build: {
     // O backend serve a SPA a partir do próprio wwwroot.

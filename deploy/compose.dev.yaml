@@ -13,8 +13,9 @@ services:
       - "127.0.0.1:5433:5432"
     volumes:
       - dev_postgres:/var/lib/postgresql/data
+    # Por TCP: na primeira inicialização, o servidor temporário só atende pelo socket Unix.
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U easyfit -d easyfit_dev"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U easyfit -d easyfit_dev"]
       interval: 2s
       timeout: 5s
       retries: 15

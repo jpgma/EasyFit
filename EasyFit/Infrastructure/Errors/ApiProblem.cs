@@ -16,16 +16,19 @@ internal static class ApiProblem
             ContentType,
             status);
 
-    // A exceção é registrada pelo middleware; o cliente nunca recebe seus detalhes.
-    public static Task WriteInternalErrorAsync(HttpContext context)
+    /// <summary>Para middlewares, que escrevem na resposta sem passar por um endpoint.</summary>
+    public static Task WriteAsync(HttpContext context, int status, string code, string title)
     {
-        const int status = StatusCodes.Status500InternalServerError;
         context.Response.StatusCode = status;
 
         return context.Response.WriteAsJsonAsync(
-            new ProblemResponse("Erro interno do servidor.", status, "ERRO_INTERNO"),
+            new ProblemResponse(title, status, code),
             AppJsonContext.Default.ProblemResponse,
             ContentType,
             context.RequestAborted);
     }
+
+    // A exceção é registrada pelo middleware; o cliente nunca recebe seus detalhes.
+    public static Task WriteInternalErrorAsync(HttpContext context) =>
+        WriteAsync(context, StatusCodes.Status500InternalServerError, "ERRO_INTERNO", "Erro interno do servidor.");
 }

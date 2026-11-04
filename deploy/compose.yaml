@@ -8,6 +8,7 @@ services:
     restart: unless-stopped
     environment:
       ConnectionStrings__Database: ${DB_CONNECTION:?defina DB_CONNECTION no .env}
+      Autenticacao__CadastroAberto: ${CADASTRO_ABERTO:-false}
     depends_on:
       db:
         condition: service_healthy
@@ -41,8 +42,9 @@ services:
       - max_wal_size=512MB
       - -c
       - checkpoint_completion_target=0.9
+    # Por TCP: na primeira inicialização, o servidor temporário só atende pelo socket Unix.
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U easyfit -d easyfit"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U easyfit -d easyfit"]
       interval: 10s
       timeout: 5s
       retries: 5
