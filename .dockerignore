@@ -1,0 +1,10 @@
+**/bin
+**/obj
+**/node_modules
+**/TestResults
+EasyFit/wwwroot
+.git
+.env
+docs
+EasyFit.UnitTests
+EasyFit.IntegrationTests

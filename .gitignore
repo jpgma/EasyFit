@@ -1,0 +1,22 @@
+# .NET
+bin/
+obj/
+*.user
+TestResults/
+
+# Frontend
+node_modules/
+*.tsbuildinfo
+
+# Gerado pelo build do frontend
+EasyFit/wwwroot/
+
+# Segredos e configuração local
+.env
+!.env.example
+
+# Ferramentas
+.vs/
+.vscode/
+.idea/
+.claude/settings.local.json

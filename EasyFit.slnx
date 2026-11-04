@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="EasyFit/EasyFit.csproj" />
+  <Project Path="EasyFit.UnitTests/EasyFit.UnitTests.csproj" />
+  <Project Path="EasyFit.IntegrationTests/EasyFit.IntegrationTests.csproj" />
+</Solution>

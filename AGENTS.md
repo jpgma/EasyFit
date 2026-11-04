@@ -1,0 +1,113 @@
+# Regras do repositório — EasyFit
+
+Aplicação web privada para pequenos grupos manterem a rotina de exercícios por meio de desafios e validação comunitária. Arquitetura completa em `docs/arquitetura.md`; decisões pendentes em `docs/questoes-abertas.md`; decisões tomadas em `docs/decisoes/`.
+
+Regras específicas de cada stack: `EasyFit/AGENTS.md` e `EasyFit/webapp/AGENTS.md`.
+
+**Princípio:** simples o suficiente para uma única pessoa entender, implantar e manter. Entre duas alternativas que atendem aos requisitos, escolha a mais simples.
+
+## Antes de concluir qualquer trabalho
+
+Não há CI nem hooks de git: este passo é a única verificação.
+
+```bash
+scripts/verify.sh          # formatação, lint, build, testes unitários, build do frontend
+scripts/verify.sh --full   # também testes de integração e imagem arm64 (exige Docker)
+```
+
+Rode `--full` ao mexer em SQL, migrações, `Program.cs`, `deploy/` ou dependências. Não declare o trabalho concluído com falhas, e não enfraqueça uma verificação para fazê-la passar.
+
+## Idioma
+
+- **pt-BR com acentos:** documentação, textos da interface, comentários, mensagens de erro e de commit.
+- **Código:** use o teste abaixo.
+
+### Regra de nomes
+
+> Um participante reconheceria a palavra como conceito do aplicativo? **Sim:** português sem acentos. **Não:** inglês.
+
+| Item | Exemplo |
+|---|---|
+| Pastas e arquivos | `Features/Reacoes/Routes.cs`, `Infrastructure/Database/Migrations/` |
+| C# | `MapReacoesRoutes()`, `ReacaoRequest`, `GetReacoesByAtividade()`, `CalculateRejeicoesNecessarias()` |
+| TypeScript | `features/atividades/useAtividade.ts`, `InicioPage` |
+| Tabelas e colunas de domínio | `reacoes_atividade`, `duracao_segundos`, `nome_exibicao` |
+| Colunas técnicas | `id`, `created_at`, `started_at`, `expires_at`, `revoked_at`, `password_hash` |
+| Rotas e JSON | `PUT /api/atividades/{id}/reacao`, `{ "tipo": "Kudos" }` |
+| Códigos de erro | `ATIVIDADE_NAO_ENCONTRADA` |
+| Operação | serviços `app`, `db`, `proxy`; variáveis `DB_PASSWORD` |
+| Documentos | nomes em pt-BR: `docs/decisoes/0001-migracoes-sql.md` |
+
+### Glossário do domínio
+
+Use exatamente estas grafias:
+
+`Usuario`, `Sessao`, `Autenticacao`, `Grupo`, `Membro`, `Proprietario`, `Administrador`, `Convite`, `Desafio`, `Participante`, `Meta`, `Semana`, `Atividade`, `Evidencia`, `Comprovacao`, `Revisor`, `Revisao`, `Reacao`, `Kudos`, `Suspeito`, `Rejeitar`, `Rejeicao`, `Progresso`, `Classificacao`, `Sequencia`, `Feed`.
+
+Situações de verificação: `AguardandoFeedback`, `Verificada`, `EmRevisao`, `Contestada`, `Rejeitada`.
+
+Ao introduzir um conceito novo, acrescente-o aqui na mesma alteração.
+
+## Organização
+
+Monólito modular com fatias verticais. Cada funcionalidade é dona de seus endpoints, contratos, SQL, regras e testes.
+
+```text
+EasyFit/                    # aplicação: API e frontend
+├── Features/               # fatias verticais
+├── Infrastructure/         # recursos compartilhados
+├── webapp/                 # código-fonte do frontend (React)
+└── wwwroot/                # gerado a partir de webapp/, fora do git
+EasyFit.UnitTests/          # regras puras e testes de arquitetura
+EasyFit.IntegrationTests/   # HTTP e SQL contra o PostgreSQL
+deploy/  scripts/  docs/
+```
+
+Não recrie `src/`, `tests/` ou `web/`: projetos ficam na raiz e o frontend fica em `EasyFit/webapp/`. Ver `docs/decisoes/0004-estrutura-do-repositorio.md`.
+
+Fatias planejadas, criadas apenas na fase correspondente de `docs/arquitetura.md` §18: `Autenticacao`, `Usuarios`, `Grupos`, `Convites`, `Desafios`, `Atividades`, `Reacoes`, `Progresso`, `Feed`.
+
+- Não crie pastas, arquivos ou dependências antes de precisar deles.
+- Uma fatia não acessa detalhes internos de outra. Para obter dados de outra fatia, faça uma consulta SQL explícita ou use um contrato pequeno e estável (ver `EasyFit/AGENTS.md`). Um teste de arquitetura e uma regra de ESLint verificam isso.
+- Testes ficam nos projetos de teste, espelhando o caminho da fatia, e nunca dentro de `EasyFit/`.
+
+## Proibido sem uma decisão registrada
+
+- Repositórios genéricos ou serviços que apenas encapsulam chamadas ao banco.
+- Entity Framework, Dapper, ou qualquer biblioteca que dependa de reflexão.
+- Projetos separados de domínio, aplicação e infraestrutura.
+- SSR, Next.js ou Node.js em produção.
+- Fontes, ícones ou bibliotecas carregados de servidores externos.
+- Senhas, tokens ou credenciais em `localStorage`.
+- Infraestrutura distribuída: filas, cache externo, WebSockets, observabilidade dedicada.
+- Itens fora do escopo em `docs/arquitetura.md` §19.
+
+## Segurança
+
+- Todo endpoint privado verifica autenticação **e** pertencimento ao grupo no backend. Nunca confie em identificadores vindos do frontend.
+- SQL sempre parametrizado.
+- Nunca registre em log senhas, cookies, tokens, evidências ou dados sensíveis.
+- Erros não revelam detalhes internos.
+- Segredos só por configuração externa. Nada de segredo no repositório.
+
+## Dependências
+
+Toda dependência nova precisa de justificativa na descrição da alteração: o que resolve, por que não dá para fazer sem ela e se é compatível com Native AOT. No backend, ela também entra na lista de `PackageAllowlistTests`.
+
+## Decisões e documentação
+
+- Decisões em `docs/arquitetura.md` não são reabertas sem justificativa técnica concreta.
+- Decisão que muda a arquitetura ou fecha uma questão de `docs/questoes-abertas.md` gera um ADR numerado em `docs/decisoes/` (contexto, alternativas, decisão, impacto) e atualiza o status da questão.
+- Se uma alteração contradiz a documentação, atualize a documentação na mesma alteração.
+
+## Commits
+
+Conventional Commits com tipo em inglês e descrição em pt-BR:
+
+```text
+feat(reacoes): adiciona contagem de rejeições
+fix(autenticacao): corrige expiração da sessão
+chore(deploy): fixa versão do Caddy
+```
+
+Cada commit deve deixar `scripts/verify.sh` passando.

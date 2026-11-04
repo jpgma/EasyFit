@@ -1,0 +1,6 @@
+# Normaliza tudo para LF: scripts e o build Docker quebram com CRLF.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.webp binary
+*.ico binary
