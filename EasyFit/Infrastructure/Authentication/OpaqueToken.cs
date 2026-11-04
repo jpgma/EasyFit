@@ -4,8 +4,8 @@ using System.Text;
 
 namespace EasyFit.Infrastructure.Authentication;
 
-/// <summary>O token só existe no cookie; o banco guarda apenas o hash dele.</summary>
-internal static class SessaoToken
+/// <summary>Token aleatório de sessão ou convite: quem o recebe guarda o valor; o banco, apenas o hash.</summary>
+internal static class OpaqueToken
 {
     private const int TokenBytes = 32;
 

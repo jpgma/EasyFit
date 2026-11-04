@@ -943,10 +943,20 @@ POST /api/autenticacao/registrar
 GET  /api/grupos
 POST /api/grupos
 GET  /api/grupos/{id}
-POST /api/grupos/{id}/convites
-POST /api/grupos/entrar
 GET  /api/grupos/{id}/membros
+PUT  /api/grupos/{id}/membros/{usuarioId}/papel
+DELETE /api/grupos/{id}/membros/{usuarioId}
+POST /api/grupos/{id}/sair
+POST /api/grupos/{id}/transferir
+
+POST /api/grupos/{id}/convites
+GET  /api/grupos/{id}/convites
+DELETE /api/grupos/{id}/convites/{conviteId}
+POST /api/convites/consultar
+POST /api/grupos/entrar
 ```
+
+O token do convite nunca faz parte do caminho, por isso a consulta usa `POST`. Permissões e regras em `docs/decisoes/0008-grupos-e-convites.md`.
 
 ### 10.3. Desafios
 

@@ -31,7 +31,12 @@ Divergências conhecidas, em que o mockup não deve ser seguido:
 | Situações `pending`, `verified`, `under_review`, `rejected` | `AguardandoFeedback`, `Verificada`, `EmRevisao`, `Contestada`, `Rejeitada` |
 | Uma reação define a situação da atividade | Regra de consenso de `arquitetura.md` §8.3 |
 | Seis tipos de atividade | Nove tipos de `arquitetura.md` §7.5 |
-| Código de convite curto e reutilizável (`PTPRAIA-2026`) | A decidir na Fase 3 (Q028 recomenda token aleatório de uso único) |
+| Código de convite curto e reutilizável (`PTPRAIA-2026`) | Link com token aleatório de uso único (decisão 0008) |
+| Um único link de convite por grupo | Um link por pessoa, mostrado uma só vez (decisão 0008) |
+| Etapa separada para aceitar o convite depois do cadastro | Uma etapa só para quem cria a conta; aceitar é só para quem já tem conta (decisão 0008) |
+| E-mail de quem convidou e dos membros visível | Só nome e papel (decisão 0008) |
+| Um único grupo por pessoa | Vários grupos, escolhidos pela URL (decisão 0008) |
+| Botão de convidar para todos os membros | Só para Proprietário e Administrador (decisão 0008) |
 
 ## Impacto
 

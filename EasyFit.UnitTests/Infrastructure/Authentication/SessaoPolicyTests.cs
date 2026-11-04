@@ -19,19 +19,19 @@ public class SessaoPolicyTests
     [Fact]
     public void Hash_IsStable_AndDiffersFromTheToken()
     {
-        var token = SessaoToken.Generate();
+        var token = OpaqueToken.Generate();
 
-        Assert.Equal(SessaoToken.Hash(token), SessaoToken.Hash(token));
-        Assert.Equal(32, SessaoToken.Hash(token).Length);
-        Assert.NotEqual(token, Convert.ToBase64String(SessaoToken.Hash(token)));
+        Assert.Equal(OpaqueToken.Hash(token), OpaqueToken.Hash(token));
+        Assert.Equal(32, OpaqueToken.Hash(token).Length);
+        Assert.NotEqual(token, Convert.ToBase64String(OpaqueToken.Hash(token)));
     }
 
     [Fact]
     public void Generate_ProducesDifferentUrlSafeTokens()
     {
-        var first = SessaoToken.Generate();
+        var first = OpaqueToken.Generate();
 
-        Assert.NotEqual(first, SessaoToken.Generate());
+        Assert.NotEqual(first, OpaqueToken.Generate());
         Assert.Equal(43, first.Length);
         Assert.DoesNotContain(first, character => character is '+' or '/' or '=');
     }

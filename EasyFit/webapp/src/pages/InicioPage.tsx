@@ -1,19 +1,35 @@
-import { LogOut, Users } from "lucide-react";
+import {
+  ChevronRight,
+  CloudOff,
+  LogOut,
+  Plus,
+  Ticket,
+  Users,
+} from "lucide-react";
 import { useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
+import { TextField } from "@/components/TextField";
 import { useSair, useSessao } from "@/features/autenticacao";
+import { extractConviteToken } from "@/features/convites";
+import { papelLabels, useGrupos } from "@/features/grupos";
 import { getErrorMessage } from "@/services/api";
 
 export function InicioPage() {
   const { data: usuario } = useSessao();
   const sair = useSair();
+  const grupos = useGrupos();
+  const navigate = useNavigate();
   const [confirmingSair, setConfirmingSair] = useState(false);
+  const [convite, setConvite] = useState("");
 
   if (!usuario) return null;
 
+  const conviteToken = extractConviteToken(convite);
+
   return (
-    <main className="mx-auto min-h-dvh max-w-2xl animate-fade-in">
+    <main className="mx-auto min-h-dvh max-w-2xl animate-fade-in pb-8">
       <header className="flex items-center justify-between gap-3 px-5 pt-6">
         <div className="min-w-0">
           <p className="text-sm text-muted">Olá,</p>
@@ -31,15 +47,95 @@ export function InicioPage() {
         </button>
       </header>
 
-      <div className="px-5 pt-6">
-        <div className="card">
-          <EmptyState
-            icon={Users}
-            title="Você ainda não faz parte de um grupo"
-            description="Em breve você poderá criar um grupo ou entrar em um com um convite."
+      <section className="px-5 pt-6">
+        <h2 className="mb-3 text-base font-bold">Seus grupos</h2>
+
+        {grupos.isPending && (
+          <p role="status" className="py-8 text-center text-sm text-muted">
+            Carregando…
+          </p>
+        )}
+
+        {grupos.isError && (
+          <div className="card">
+            <EmptyState
+              icon={CloudOff}
+              title="Não foi possível carregar"
+              description={getErrorMessage(grupos.error)}
+            />
+          </div>
+        )}
+
+        {grupos.data?.length === 0 && (
+          <div className="card">
+            <EmptyState
+              icon={Users}
+              title="Você ainda não faz parte de um grupo"
+              description="Crie um grupo para seus amigos ou use o convite que você recebeu."
+            />
+          </div>
+        )}
+
+        {grupos.data && grupos.data.length > 0 && (
+          <ul className="space-y-3">
+            {grupos.data.map((grupo) => (
+              <li key={grupo.id}>
+                <Link
+                  to={`/grupos/${grupo.id}`}
+                  className="card flex items-center gap-3 p-4 transition-colors hover:bg-surface-muted"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-bold">{grupo.nome}</p>
+                    <p className="text-sm text-muted">
+                      {grupo.totalMembros}{" "}
+                      {grupo.totalMembros === 1 ? "membro" : "membros"} ·{" "}
+                      {papelLabels[grupo.papel]}
+                    </p>
+                  </div>
+                  <ChevronRight
+                    aria-hidden="true"
+                    className="h-5 w-5 shrink-0 text-muted"
+                  />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <Link to="/grupos/novo" className="btn-secondary mt-4 w-full">
+          <Plus aria-hidden="true" className="h-5 w-5" />
+          Criar grupo
+        </Link>
+      </section>
+
+      <section className="px-5 pt-8">
+        <h2 className="mb-3 text-base font-bold">Tenho um convite</h2>
+        <form
+          noValidate
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (conviteToken) void navigate(`/convite#${conviteToken}`);
+          }}
+          className="space-y-3"
+        >
+          <TextField
+            label="Link do convite"
+            icon={Ticket}
+            type="text"
+            autoComplete="off"
+            placeholder="Cole aqui o link que você recebeu"
+            value={convite}
+            onChange={(event) => setConvite(event.target.value)}
           />
-        </div>
-      </div>
+          <button
+            type="submit"
+            className="btn-primary w-full"
+            disabled={!conviteToken}
+          >
+            Continuar
+          </button>
+        </form>
+      </section>
 
       <ConfirmDialog
         open={confirmingSair}

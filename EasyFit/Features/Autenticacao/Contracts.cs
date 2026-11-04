@@ -1,7 +1,11 @@
 namespace EasyFit.Features.Autenticacao;
 
 // Os campos são anuláveis porque o JSON recebido pode omiti-los; Rules valida antes de usar.
-internal sealed record RegistrarRequest(string? NomeExibicao, string? Email, string? Senha);
+internal sealed record RegistrarRequest(
+    string? NomeExibicao,
+    string? Email,
+    string? Senha,
+    string? ConviteToken = null);
 
 internal sealed record EntrarRequest(string? Email, string? Senha);
 

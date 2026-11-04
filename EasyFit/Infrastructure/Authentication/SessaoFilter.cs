@@ -56,7 +56,7 @@ internal static class SessaoFilter
             WHERE token_hash = $1 AND revoked_at IS NULL AND expires_at > now()
             """))
         {
-            command.Parameters.AddWithValue(SessaoToken.Hash(token));
+            command.Parameters.AddWithValue(OpaqueToken.Hash(token));
 
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
             if (!await reader.ReadAsync(cancellationToken))

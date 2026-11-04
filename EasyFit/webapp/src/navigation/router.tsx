@@ -36,7 +36,36 @@ export const router = createBrowserRouter([
               return { Component: InicioPage };
             },
           },
+          {
+            path: "/grupos/novo",
+            lazy: async () => {
+              const { CriarGrupoPage } = await import("@/pages/CriarGrupoPage");
+              return { Component: CriarGrupoPage };
+            },
+          },
+          {
+            path: "/grupos/:id",
+            lazy: async () => {
+              const { GrupoPage } = await import("@/pages/GrupoPage");
+              return { Component: GrupoPage };
+            },
+          },
+          {
+            path: "/grupos/:id/convidar",
+            lazy: async () => {
+              const { ConvidarPage } = await import("@/pages/ConvidarPage");
+              return { Component: ConvidarPage };
+            },
+          },
         ],
+      },
+      {
+        // Fora dos dois guards: serve tanto a quem tem conta quanto a quem ainda vai criar.
+        path: "/convite",
+        lazy: async () => {
+          const { ConvitePage } = await import("@/pages/ConvitePage");
+          return { Component: ConvitePage };
+        },
       },
       { path: "*", element: <Navigate to="/" replace /> },
     ],

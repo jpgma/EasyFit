@@ -66,3 +66,7 @@ O cadastro fica fechado em produção. Para criar a primeira conta:
 4. Volte para `CADASTRO_ABERTO=false` e repita o passo 2.
 
 Em desenvolvimento, o cadastro já vem aberto. Ver `docs/decisoes/0006-autenticacao-por-sessao.md`.
+
+### Novos membros
+
+A primeira conta cria o primeiro grupo. Depois disso, ninguém precisa do cadastro aberto: o Proprietário ou um Administrador gera um link de convite na tela do grupo, e quem o recebe cria a conta por ele. Cada link vale para uma pessoa, por 7 dias. Ver `docs/decisoes/0008-grupos-e-convites.md`.

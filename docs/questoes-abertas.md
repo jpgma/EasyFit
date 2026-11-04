@@ -255,7 +255,7 @@ Manter a atividade independente do desafio e calcular sua elegibilidade separada
 
 ## Q011 — O que acontece quando alguém entra ou sai de um grupo?
 
-**Status:** ABERTA
+**Status:** DECIDIDA — ver `decisoes/0008-grupos-e-convites.md`. O efeito sobre desafios, revisões e reações segue os princípios registrados lá e será detalhado nas Fases 4 e 6.
 
 Definir:
 
@@ -616,7 +616,7 @@ Não instalar serviços adicionais.
 
 ## Q028 — Como será o convite de novos membros?
 
-**Status:** PROPOSTA
+**Status:** DECIDIDA — ver `decisoes/0008-grupos-e-convites.md`
 
 Investigar:
 

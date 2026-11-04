@@ -1,4 +1,6 @@
 using System.Threading.RateLimiting;
+using EasyFit.Features.Convites.Contracts;
+using EasyFit.Features.Grupos.Contracts;
 using EasyFit.Infrastructure.Authentication;
 using EasyFit.Infrastructure.Errors;
 using EasyFit.Infrastructure.Json;
@@ -47,12 +49,16 @@ internal static class AutenticacaoRoutes
         ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
-        if (!IsCadastroAberto(configuration))
+        // Texto em branco conta como ausência de convite; o convite recusado é decidido na transação.
+        var conviteToken = string.IsNullOrWhiteSpace(request.ConviteToken) ? null : request.ConviteToken.Trim();
+
+        // O convite é o caminho normal; o cadastro aberto existe para criar a primeira conta.
+        if (conviteToken is null && !IsCadastroAberto(configuration))
         {
             return ApiProblem.Create(
                 StatusCodes.Status403Forbidden,
                 "CADASTRO_FECHADO",
-                "O cadastro de novas contas está fechado no momento.");
+                "Para criar uma conta, você precisa de um convite.");
         }
 
         if (!AutenticacaoRules.IsValidNomeExibicao(request.NomeExibicao)
@@ -67,22 +73,28 @@ internal static class AutenticacaoRoutes
             AutenticacaoRules.NormalizeNomeExibicao(request.NomeExibicao!),
             AutenticacaoRules.NormalizeEmail(request.Email!),
             Passwords.Hash(request.Senha!),
+            conviteToken,
             cancellationToken);
 
-        if (result is not { } registered)
+        switch (result.Status)
         {
-            return ApiProblem.Create(
-                StatusCodes.Status409Conflict,
-                "EMAIL_JA_CADASTRADO",
-                "Já existe uma conta com este e-mail.");
+            case RegistroStatus.EmailJaCadastrado:
+                return ApiProblem.Create(
+                    StatusCodes.Status409Conflict,
+                    "EMAIL_JA_CADASTRADO",
+                    "Já existe uma conta com este e-mail.");
+            case RegistroStatus.ConviteInvalido:
+                return ConviteAceite.ConviteInvalido();
+            case RegistroStatus.GrupoCheio:
+                return GrupoAcesso.GrupoCheio();
         }
 
-        SessaoCookie.Write(context, registered.Token);
+        SessaoCookie.Write(context, result.Token!);
         loggerFactory.CreateLogger(LoggerCategory).LogInformation(
-            "Conta criada para o usuário {UsuarioId}.", registered.Usuario.Id);
+            "Conta criada para o usuário {UsuarioId}.", result.Usuario!.Id);
 
         return Results.Json(
-            new SessaoResponse(registered.Usuario),
+            new SessaoResponse(result.Usuario),
             AppJsonContext.Default.SessaoResponse,
             statusCode: StatusCodes.Status201Created);
     }

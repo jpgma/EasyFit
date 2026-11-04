@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, Lock, Mail } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { z } from "zod";
 import { BrandMark } from "@/components/BrandMark";
 import { TextField } from "@/components/TextField";
@@ -18,6 +18,9 @@ type FormData = z.infer<typeof schema>;
 
 export function EntrarPage() {
   const entrar = useEntrar();
+  const { state } = useLocation() as {
+    state: { conviteToken?: string } | null;
+  };
   const {
     register,
     handleSubmit,
@@ -89,7 +92,15 @@ export function EntrarPage() {
             </div>
           </div>
 
-          <Link to="/criar-conta" className="btn-secondary w-full">
+          <Link
+            to="/criar-conta"
+            state={
+              state?.conviteToken
+                ? { conviteToken: state.conviteToken }
+                : undefined
+            }
+            className="btn-secondary w-full"
+          >
             Criar conta
           </Link>
         </form>

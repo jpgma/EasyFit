@@ -14,6 +14,7 @@ export type EntrarData = {
 
 export type RegistrarData = EntrarData & {
   nomeExibicao: string;
+  conviteToken?: string;
 };
 
 type SessaoResponse = {

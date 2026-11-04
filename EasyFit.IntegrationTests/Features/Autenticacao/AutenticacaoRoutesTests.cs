@@ -284,7 +284,7 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
         var cookie = ReadSessionCookie(await RegistrarAsync(client, "Ana", "ana@exemplo.com"));
 
         Assert.Equal(1L, await CountAsync(
-            "SELECT count(*) FROM sessoes_autenticacao WHERE token_hash = $1", SessaoToken.Hash(cookie.Value)));
+            "SELECT count(*) FROM sessoes_autenticacao WHERE token_hash = $1", OpaqueToken.Hash(cookie.Value)));
         Assert.Equal(0L, await CountAsync(
             "SELECT count(*) FROM sessoes_autenticacao WHERE token_hash = $1", Encoding.UTF8.GetBytes(cookie.Value)));
         Assert.Equal(1L, await CountAsync(

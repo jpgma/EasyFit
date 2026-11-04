@@ -39,17 +39,36 @@ export async function getJson<T>(
   return (await response.json()) as T;
 }
 
-export async function postJson<T>(path: string, body: unknown): Promise<T> {
-  const response = await request(path, {
-    method: "POST",
+function jsonRequest(method: string, body: unknown): RequestInit {
+  return {
+    method,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
-  });
+  };
+}
+
+export async function postJson<T>(path: string, body?: unknown): Promise<T> {
+  const response = await request(path, jsonRequest("POST", body));
   return (await response.json()) as T;
 }
 
 export async function postEmpty(path: string): Promise<void> {
   await request(path, { method: "POST" });
+}
+
+export async function postJsonEmpty(
+  path: string,
+  body: unknown,
+): Promise<void> {
+  await request(path, jsonRequest("POST", body));
+}
+
+export async function putJsonEmpty(path: string, body: unknown): Promise<void> {
+  await request(path, jsonRequest("PUT", body));
+}
+
+export async function deleteEmpty(path: string): Promise<void> {
+  await request(path, { method: "DELETE" });
 }
 
 /** Mensagem para o usuário: a da API, ou uma genérica quando nem houve resposta. */
