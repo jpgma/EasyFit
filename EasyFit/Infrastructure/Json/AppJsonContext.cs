@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using EasyFit.Features.Atividades;
 using EasyFit.Features.Autenticacao;
 using EasyFit.Features.Convites;
 using EasyFit.Features.Desafios;
@@ -12,6 +13,10 @@ namespace EasyFit.Infrastructure.Json;
 // Todo tipo serializado pela API precisa estar registrado aqui (exigência do Native AOT).
 [JsonSourceGenerationOptions(JsonSerializerDefaults.Web)]
 [JsonSerializable(typeof(AlterarPapelRequest))]
+[JsonSerializable(typeof(AtividadeResponse))]
+[JsonSerializable(typeof(AtividadesPaginadasResponse))]
+[JsonSerializable(typeof(CriarAtividadeRequest))]
+[JsonSerializable(typeof(EvidenciaCriadaResponse))]
 [JsonSerializable(typeof(ConviteConsultaResponse))]
 [JsonSerializable(typeof(ConviteCriadoResponse))]
 [JsonSerializable(typeof(ConviteTokenRequest))]

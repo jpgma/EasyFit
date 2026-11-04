@@ -13,6 +13,8 @@ import { EmptyState } from "@/components/EmptyState";
 import { TextField } from "@/components/TextField";
 import { useSair, useSessao } from "@/features/autenticacao";
 import { extractConviteToken } from "@/features/convites";
+import { useAtividadesRecentes } from "@/features/atividades";
+import { FeedAtividade } from "@/features/feed";
 import { papelLabels, useGrupos } from "@/features/grupos";
 import { getErrorMessage } from "@/services/api";
 
@@ -20,6 +22,7 @@ export function InicioPage() {
   const { data: usuario } = useSessao();
   const sair = useSair();
   const grupos = useGrupos();
+  const recentes = useAtividadesRecentes((grupos.data?.length ?? 0) > 0);
   const navigate = useNavigate();
   const [confirmingSair, setConfirmingSair] = useState(false);
   const [convite, setConvite] = useState("");
@@ -107,6 +110,44 @@ export function InicioPage() {
           Criar grupo
         </Link>
       </section>
+
+      {grupos.data && grupos.data.length > 0 && (
+        <section className="px-5 pt-8">
+          <h2 className="mb-3 text-base font-bold">Últimas atividades</h2>
+
+          {recentes.isPending && (
+            <p role="status" className="py-6 text-center text-sm text-muted">
+              Carregando…
+            </p>
+          )}
+
+          {recentes.isError && (
+            <p role="alert" className="form-error">
+              {getErrorMessage(recentes.error)}
+            </p>
+          )}
+
+          {recentes.data &&
+            recentes.data.pages.every((p) => p.atividades.length === 0) && (
+              <p className="card p-4 text-sm text-muted">
+                Ainda não há atividades nos seus grupos.
+              </p>
+            )}
+
+          {recentes.data &&
+            recentes.data.pages.some((p) => p.atividades.length > 0) && (
+              <ul className="space-y-3">
+                {recentes.data.pages.flatMap((pagina) =>
+                  pagina.atividades.map((atividade) => (
+                    <li key={atividade.id}>
+                      <FeedAtividade atividade={atividade} mostrarGrupo />
+                    </li>
+                  )),
+                )}
+              </ul>
+            )}
+        </section>
+      )}
 
       <section className="px-5 pt-8">
         <h2 className="mb-3 text-base font-bold">Tenho um convite</h2>

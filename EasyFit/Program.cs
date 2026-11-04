@@ -1,5 +1,6 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using EasyFit.Features.Atividades;
 using EasyFit.Features.Autenticacao;
 using EasyFit.Features.Convites;
 using EasyFit.Features.Desafios;
@@ -8,6 +9,7 @@ using EasyFit.Features.Health;
 using EasyFit.Infrastructure.Authentication;
 using EasyFit.Infrastructure.Database;
 using EasyFit.Infrastructure.Errors;
+using EasyFit.Infrastructure.Files;
 using EasyFit.Infrastructure.Json;
 using Microsoft.AspNetCore.HttpOverrides;
 using Npgsql;
@@ -25,6 +27,8 @@ builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonContext.Default));
 builder.Services.AddSingleton<NpgsqlDataSource>(DataSourceFactory.Create);
+builder.Services.Configure<EvidenciasOptions>(builder.Configuration.GetSection(EvidenciasOptions.Section));
+builder.Services.AddSingleton<ArmazenamentoEvidencias>();
 
 // JSON malformado responde 400 em qualquer ambiente, em vez de virar exceção em Development.
 builder.Services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadRequest = false);
@@ -37,6 +41,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 builder.Services.AddAutenticacaoRateLimiter();
+builder.Services.AddAtividadesRateLimiter();
 
 var app = builder.Build();
 
@@ -56,6 +61,7 @@ app.MapAutenticacaoRoutes();
 app.MapGruposRoutes();
 app.MapConvitesRoutes();
 app.MapDesafiosRoutes();
+app.MapAtividadesRoutes();
 
 // Rota de API inexistente responde 404 em JSON, nunca com o index.html da SPA.
 app.Map("/api/{**rest}", () =>

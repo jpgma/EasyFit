@@ -218,7 +218,7 @@ Uma semana parcial no início ou fim do desafio deve ter comportamento explicita
 
 ## Q009 — Como tratar atividades que atravessam semanas?
 
-**Status:** ABERTA
+**Status:** DECIDIDA — ver `decisoes/0011-atividades.md`. A semana é a do horário de início (`started_at`) no fuso do grupo; a atividade não é dividida entre semanas.
 
 Exemplo:
 
@@ -440,7 +440,7 @@ Toda consulta deve passar por uma operação autenticada da API.
 
 ## Q019 — Uma atividade poderá ter várias evidências?
 
-**Status:** ABERTA
+**Status:** DECIDIDA — ver `decisoes/0011-atividades.md`. Até 3 evidências por atividade; um arquivo por requisição de upload.
 
 Investigar:
 

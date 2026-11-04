@@ -11,6 +11,9 @@ node_modules/
 # Gerado pelo build do frontend
 EasyFit/wwwroot/
 
+# Evidências em desenvolvimento local
+EasyFit/evidencias-dev/
+
 # Segredos e configuração local
 .env
 !.env.example

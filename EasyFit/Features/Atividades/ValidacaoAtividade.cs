@@ -1,0 +1,85 @@
+namespace EasyFit.Features.Atividades;
+
+internal static class TipoAtividade
+{
+    public const string Musculacao = "Musculacao";
+    public const string Corrida = "Corrida";
+    public const string Caminhada = "Caminhada";
+    public const string Ciclismo = "Ciclismo";
+    public const string Natacao = "Natacao";
+    public const string Esporte = "Esporte";
+    public const string Yoga = "Yoga";
+    public const string TreinoEmCasa = "TreinoEmCasa";
+    public const string Outro = "Outro";
+
+    private static readonly HashSet<string> Validos =
+    [
+        Musculacao,
+        Corrida,
+        Caminhada,
+        Ciclismo,
+        Natacao,
+        Esporte,
+        Yoga,
+        TreinoEmCasa,
+        Outro,
+    ];
+
+    public static bool IsValid(string? tipo) => tipo is not null && Validos.Contains(tipo);
+}
+
+internal static class TipoComprovacao
+{
+    public const string RegistroManual = "RegistroManual";
+    public const string Fotografia = "Fotografia";
+    public const string CapturaDeTela = "CapturaDeTela";
+
+    private static readonly HashSet<string> Validos =
+    [
+        RegistroManual,
+        Fotografia,
+        CapturaDeTela,
+    ];
+
+    public static bool IsValid(string? tipo) => tipo is not null && Validos.Contains(tipo);
+
+    public static bool ExigeEvidencia(string tipo) =>
+        tipo is Fotografia or CapturaDeTela;
+}
+
+internal static class SituacaoVerificacao
+{
+    public const string AguardandoFeedback = "AguardandoFeedback";
+    public const string Verificada = "Verificada";
+    public const string EmRevisao = "EmRevisao";
+    public const string Contestada = "Contestada";
+    public const string Rejeitada = "Rejeitada";
+
+    public static bool ContaComoPendente(string situacao) =>
+        situacao is AguardandoFeedback or EmRevisao or Contestada;
+}
+
+internal static class ValidacaoAtividade
+{
+    private const int MaxDescricaoLength = 500;
+    private const int MinDuracaoSegundos = 60;
+    private const int MaxDuracaoSegundos = 24 * 60 * 60;
+    public const int MaxEvidencias = 3;
+    public const int LimiteFeedPadrao = 20;
+    public const int LimiteFeedMaximo = 50;
+
+    public static bool IsValidDuracao(int? segundos) =>
+        segundos is >= MinDuracaoSegundos and <= MaxDuracaoSegundos;
+
+    public static bool IsValidDescricao(string? descricao) =>
+        (descricao?.Trim().Length ?? 0) <= MaxDescricaoLength;
+
+    public static string? NormalizeDescricao(string? descricao) =>
+        string.IsNullOrWhiteSpace(descricao) ? null : descricao.Trim();
+
+    public static bool IsValidStartedAt(DateTimeOffset? startedAt) =>
+        startedAt is { } instante && instante <= DateTimeOffset.UtcNow.AddHours(1);
+
+    public static int NormalizeLimite(int? limite) =>
+        limite is > 0 and <= LimiteFeedMaximo ? limite.Value : LimiteFeedPadrao;
+}

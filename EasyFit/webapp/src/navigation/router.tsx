@@ -72,6 +72,21 @@ export const router = createBrowserRouter([
               return { Component: DesafioPage };
             },
           },
+          {
+            path: "/grupos/:id/atividades/nova",
+            lazy: async () => {
+              const { RegistrarAtividadePage } =
+                await import("@/pages/RegistrarAtividadePage");
+              return { Component: RegistrarAtividadePage };
+            },
+          },
+          {
+            path: "/atividades/:id",
+            lazy: async () => {
+              const { AtividadePage } = await import("@/pages/AtividadePage");
+              return { Component: AtividadePage };
+            },
+          },
         ],
       },
       {

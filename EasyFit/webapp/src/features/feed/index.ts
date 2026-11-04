@@ -1,0 +1,1 @@
+export { FeedAtividade } from "./FeedAtividade";

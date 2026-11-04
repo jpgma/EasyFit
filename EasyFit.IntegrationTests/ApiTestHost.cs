@@ -22,7 +22,7 @@ internal sealed class ApiTestHost : IAsyncDisposable
     private readonly WebApplicationFactory<Program> _factory;
     private readonly List<HttpClient> _clients = [];
 
-    private ApiTestHost(TestDatabase database, string cadastroAberto)
+    private ApiTestHost(TestDatabase database, string cadastroAberto, string evidenciasDiretorio)
     {
         _database = database;
         _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
@@ -30,6 +30,7 @@ internal sealed class ApiTestHost : IAsyncDisposable
             builder.UseEnvironment("Development");
             builder.UseSetting("ConnectionStrings:Database", database.ConnectionString);
             builder.UseSetting("Autenticacao:CadastroAberto", cadastroAberto);
+            builder.UseSetting("Evidencias:Diretorio", evidenciasDiretorio);
         });
     }
 
@@ -39,7 +40,9 @@ internal sealed class ApiTestHost : IAsyncDisposable
     {
         var database = await TestDatabase.CreateAsync();
         await MigrationRunner.RunAsync(database.DataSource, MigrationCatalog.LoadEmbedded(), NullLogger.Instance, Token);
-        return new ApiTestHost(database, cadastroAberto);
+        var evidenciasDiretorio = Path.Combine(Path.GetTempPath(), "easyfit-test-evidencias", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(evidenciasDiretorio);
+        return new ApiTestHost(database, cadastroAberto, evidenciasDiretorio);
     }
 
     public HttpClient CreateAnonimo()
@@ -113,6 +116,17 @@ internal sealed class ApiTestHost : IAsyncDisposable
     {
         await using var command = _database.DataSource.CreateCommand(sql);
         return (long)(await command.ExecuteScalarAsync(Token))!;
+    }
+
+    public async Task<T> ScalarAsync<T>(string sql, params object[] parameters)
+    {
+        await using var command = _database.DataSource.CreateCommand(sql);
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            command.Parameters.AddWithValue(parameters[i]);
+        }
+
+        return (T)(await command.ExecuteScalarAsync(Token))!;
     }
 
     public static async Task AssertProblemAsync(

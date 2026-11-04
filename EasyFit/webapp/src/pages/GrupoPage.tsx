@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   ChevronRight,
   CloudOff,
+  Dumbbell,
   LogOut,
   Plus,
   UserPlus,
@@ -21,6 +22,8 @@ import {
   situacaoLabels,
   useDesafios,
 } from "@/features/desafios";
+import { useAtividadesFeed } from "@/features/atividades";
+import { FeedAtividade } from "@/features/feed";
 import {
   canAlterarPapel,
   canConvidar,
@@ -88,6 +91,7 @@ export function GrupoPage() {
   const grupo = useGrupo(id);
   const membros = useMembros(id);
   const desafios = useDesafios(id);
+  const feed = useAtividadesFeed(id);
   const alterarPapel = useAlterarPapel(id);
   const remover = useRemoverMembro(id);
   const transferir = useTransferirGrupo(id);
@@ -260,6 +264,60 @@ export function GrupoPage() {
             <Plus aria-hidden="true" className="h-5 w-5" />
             Criar desafio
           </Link>
+        )}
+      </section>
+
+      <section className="mt-6">
+        <h2 className="mb-3 text-base font-bold">Feed</h2>
+
+        <Link
+          to={`/grupos/${id}/atividades/nova`}
+          className="btn-primary mb-4 w-full"
+        >
+          <Dumbbell aria-hidden="true" className="h-5 w-5" />
+          Registrar atividade
+        </Link>
+
+        {feed.isPending && (
+          <p role="status" className="py-8 text-center text-sm text-muted">
+            Carregando…
+          </p>
+        )}
+
+        {feed.isError && (
+          <p role="alert" className="form-error">
+            {getErrorMessage(feed.error)}
+          </p>
+        )}
+
+        {feed.data &&
+          feed.data.pages.every((p) => p.atividades.length === 0) && (
+            <p className="card p-4 text-sm text-muted">
+              Ninguém registrou atividades ainda. Seja a primeira pessoa!
+            </p>
+          )}
+
+        {feed.data && feed.data.pages.some((p) => p.atividades.length > 0) && (
+          <ul className="space-y-3">
+            {feed.data.pages.flatMap((pagina) =>
+              pagina.atividades.map((atividade) => (
+                <li key={atividade.id}>
+                  <FeedAtividade atividade={atividade} />
+                </li>
+              )),
+            )}
+          </ul>
+        )}
+
+        {feed.hasNextPage && (
+          <button
+            type="button"
+            className="btn-secondary mt-3 w-full"
+            disabled={feed.isFetchingNextPage}
+            onClick={() => void feed.fetchNextPage()}
+          >
+            {feed.isFetchingNextPage ? "Carregando…" : "Carregar mais"}
+          </button>
         )}
       </section>
 

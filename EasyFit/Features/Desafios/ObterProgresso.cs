@@ -70,26 +70,72 @@ internal static class ObterProgresso
             """, connection);
         participantes.Parameters.AddWithValue(desafioId);
 
-        // As atividades só existem a partir da Fase 5: até lá, toda contagem é zero.
-        var zerado = ProgressoDesafio.CalculateProgresso(0, 0, sessoesPorSemana);
+        var semana = cancelado ? null : ProgressoDesafio.GetSemana(inicio, fim, hoje);
+        var contagens = semana is null
+            ? new Dictionary<Guid, (int Verificadas, int Pendentes)>()
+            : await LoadContagensSemanaAsync(connection, desafioId, semana.Inicio, semana.Fim, cancellationToken);
+
         var progresso = new List<ProgressoParticipanteResponse>();
         await using (var reader = await participantes.ExecuteReaderAsync(cancellationToken))
         {
             while (await reader.ReadAsync(cancellationToken))
             {
+                var participanteId = reader.GetGuid(0);
+                contagens.TryGetValue(participanteId, out var contagem);
+                var calculado = ProgressoDesafio.CalculateProgresso(
+                    contagem.Verificadas,
+                    contagem.Pendentes,
+                    sessoesPorSemana);
                 progresso.Add(new ProgressoParticipanteResponse(
-                    reader.GetGuid(0),
+                    participanteId,
                     reader.GetString(1),
-                    zerado.Verificadas,
-                    zerado.Provisorias,
-                    zerado.MetaCumprida));
+                    calculado.Verificadas,
+                    calculado.Provisorias,
+                    calculado.MetaCumprida));
             }
         }
 
         return new ProgressoResponse(
             sessoesPorSemana,
             ProgressoDesafio.CountSemanas(inicio, fim),
-            cancelado ? null : ProgressoDesafio.GetSemana(inicio, fim, hoje),
+            semana,
             progresso);
+    }
+
+    private static async Task<Dictionary<Guid, (int Verificadas, int Pendentes)>> LoadContagensSemanaAsync(
+        NpgsqlConnection connection,
+        Guid desafioId,
+        DateOnly inicioSemana,
+        DateOnly fimSemana,
+        CancellationToken cancellationToken)
+    {
+        await using var command = new NpgsqlCommand("""
+            SELECT a.usuario_id,
+                count(*) FILTER (WHERE a.situacao_verificacao = 'Verificada')::int,
+                count(*) FILTER (WHERE a.situacao_verificacao IN (
+                    'AguardandoFeedback', 'EmRevisao', 'Contestada'))::int
+            FROM atividades a
+            JOIN desafios d ON d.id = $1 AND d.grupo_id = a.grupo_id
+            JOIN grupos g ON g.id = d.grupo_id
+            JOIN participantes_desafio p ON p.desafio_id = d.id AND p.usuario_id = a.usuario_id
+            WHERE a.duracao_segundos >= d.duracao_minima_segundos
+              AND (a.started_at AT TIME ZONE g.fuso_horario)::date >= $2
+              AND (a.started_at AT TIME ZONE g.fuso_horario)::date <= $3
+              AND (a.started_at AT TIME ZONE g.fuso_horario)::date >= d.data_inicio
+              AND (a.started_at AT TIME ZONE g.fuso_horario)::date <= d.data_fim
+            GROUP BY a.usuario_id
+            """, connection);
+        command.Parameters.AddWithValue(desafioId);
+        command.Parameters.AddWithValue(inicioSemana);
+        command.Parameters.AddWithValue(fimSemana);
+
+        var contagens = new Dictionary<Guid, (int Verificadas, int Pendentes)>();
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            contagens[reader.GetGuid(0)] = (reader.GetInt32(1), reader.GetInt32(2));
+        }
+
+        return contagens;
     }
 }

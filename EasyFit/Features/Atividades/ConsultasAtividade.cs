@@ -1,0 +1,124 @@
+using Npgsql;
+
+namespace EasyFit.Features.Atividades;
+
+internal static class ConsultasAtividade
+{
+    public const string SelectResumo = """
+        SELECT a.id, a.grupo_id, g.nome, a.usuario_id, u.nome_exibicao, a.tipo,
+            a.duracao_segundos, a.started_at, a.tipo_comprovacao, a.situacao_verificacao,
+            (SELECT count(*)::int FROM evidencias_atividade e WHERE e.atividade_id = a.id),
+            a.submitted_at
+        FROM atividades a
+        JOIN grupos g ON g.id = a.grupo_id
+        JOIN usuarios u ON u.id = a.usuario_id
+        JOIN membros_grupo m ON m.grupo_id = a.grupo_id AND m.usuario_id = $1 AND m.removed_at IS NULL
+        """;
+
+    public static AtividadeResumoResponse ReadResumo(NpgsqlDataReader reader) =>
+        new(
+            reader.GetGuid(0),
+            reader.GetGuid(1),
+            reader.GetString(2),
+            reader.GetGuid(3),
+            reader.GetString(4),
+            reader.GetString(5),
+            reader.GetInt32(6),
+            reader.GetFieldValue<DateTimeOffset>(7),
+            reader.GetString(8),
+            reader.GetString(9),
+            reader.GetInt32(10),
+            reader.GetFieldValue<DateTimeOffset>(11));
+
+    public static string BuildEvidenciaUrl(Guid atividadeId, Guid evidenciaId) =>
+        $"/api/atividades/{atividadeId:D}/evidencias/{evidenciaId:D}";
+
+    public static async Task<AtividadeResponse?> GetDetalheAsync(
+        NpgsqlDataSource dataSource,
+        Guid atividadeId,
+        Guid usuarioId,
+        CancellationToken cancellationToken)
+    {
+        await using var connection = await dataSource.OpenConnectionAsync(cancellationToken);
+
+        await using var atividade = new NpgsqlCommand("""
+            SELECT a.id, a.grupo_id, g.nome, a.usuario_id, u.nome_exibicao, a.tipo,
+                a.duracao_segundos, a.started_at, a.descricao, a.tipo_comprovacao,
+                a.situacao_verificacao, a.submitted_at
+            FROM atividades a
+            JOIN grupos g ON g.id = a.grupo_id
+            JOIN usuarios u ON u.id = a.usuario_id
+            JOIN membros_grupo m ON m.grupo_id = a.grupo_id AND m.usuario_id = $2 AND m.removed_at IS NULL
+            WHERE a.id = $1
+            """, connection);
+        atividade.Parameters.AddWithValue(atividadeId);
+        atividade.Parameters.AddWithValue(usuarioId);
+
+        Guid id;
+        Guid grupoId;
+        string grupoNome;
+        Guid autorId;
+        string nomeExibicao;
+        string tipo;
+        int duracao;
+        DateTimeOffset startedAt;
+        string? descricao;
+        string tipoComprovacao;
+        string situacao;
+        DateTimeOffset submittedAt;
+
+        await using (var reader = await atividade.ExecuteReaderAsync(cancellationToken))
+        {
+            if (!await reader.ReadAsync(cancellationToken))
+            {
+                return null;
+            }
+
+            id = reader.GetGuid(0);
+            grupoId = reader.GetGuid(1);
+            grupoNome = reader.GetString(2);
+            autorId = reader.GetGuid(3);
+            nomeExibicao = reader.GetString(4);
+            tipo = reader.GetString(5);
+            duracao = reader.GetInt32(6);
+            startedAt = reader.GetFieldValue<DateTimeOffset>(7);
+            descricao = reader.IsDBNull(8) ? null : reader.GetString(8);
+            tipoComprovacao = reader.GetString(9);
+            situacao = reader.GetString(10);
+            submittedAt = reader.GetFieldValue<DateTimeOffset>(11);
+        }
+
+        var evidencias = new List<EvidenciaResponse>();
+        await using (var lista = new NpgsqlCommand(
+            "SELECT id, ordem FROM evidencias_atividade WHERE atividade_id = $1 ORDER BY ordem",
+            connection))
+        {
+            lista.Parameters.AddWithValue(atividadeId);
+            await using var reader = await lista.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                var evidenciaId = reader.GetGuid(0);
+                evidencias.Add(new EvidenciaResponse(
+                    evidenciaId,
+                    reader.GetInt16(1),
+                    BuildEvidenciaUrl(id, evidenciaId)));
+            }
+        }
+
+        return new AtividadeResponse(
+            id,
+            grupoId,
+            grupoNome,
+            autorId,
+            nomeExibicao,
+            tipo,
+            duracao,
+            startedAt,
+            descricao,
+            tipoComprovacao,
+            situacao,
+            submittedAt,
+            autorId == usuarioId,
+            evidencias);
+    }
+}

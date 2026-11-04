@@ -52,6 +52,14 @@ export async function postJson<T>(path: string, body?: unknown): Promise<T> {
   return (await response.json()) as T;
 }
 
+export async function postFormData<T>(
+  path: string,
+  body: FormData,
+): Promise<T> {
+  const response = await request(path, { method: "POST", body });
+  return (await response.json()) as T;
+}
+
 export async function postEmpty(path: string): Promise<void> {
   await request(path, { method: "POST" });
 }

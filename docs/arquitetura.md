@@ -981,9 +981,13 @@ Permissões e regras em `docs/decisoes/0009-desafios.md`.
 ```http
 GET  /api/grupos/{id}/atividades
 POST /api/grupos/{id}/atividades
+GET  /api/atividades/recentes
 GET  /api/atividades/{id}
 POST /api/atividades/{id}/evidencias
+GET  /api/atividades/{id}/evidencias/{evidenciaId}
 ```
+
+A criação usa somente JSON; o upload de evidências usa `multipart/form-data` em rota separada. Permissões e regras em `docs/decisoes/0011-atividades.md`.
 
 ### 10.5. Reações
 
