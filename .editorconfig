@@ -8,6 +8,10 @@ trim_trailing_whitespace = true
 indent_style = space
 indent_size = 2
 
+# O cmd.exe interpreta mal arquivos .bat com LF. Ver .gitattributes.
+[*.bat]
+end_of_line = crlf
+
 [*.cs]
 indent_size = 4
 csharp_style_namespace_declarations = file_scoped:warning
