@@ -36,5 +36,6 @@ Para o tamanho da VM:
 - Nada verifica o código automaticamente antes de implantar: rode `scripts/verify.sh --full` antes.
 - As 5 imagens mais recentes ficam na VM para reverter. As migrações só avançam, portanto reverter uma imagem não desfaz o esquema do banco.
 - `deploy.bat` usa o domínio como host SSH. Ativar o proxy da Cloudflare exige definir `EASYFIT_SSH_HOST` com o IP da VM, além de configurar o SSL como Full (strict).
+- `run.bat --tunnel` troca o DNS de `fit.jpgmaraujo.com.br` por um CNAME para um túnel local. Enquanto ele existir, o domínio não leva à VM: para implantar, restaure o registro A.
 - A Oracle pode recuperar instâncias Always Free ociosas: CPU, rede e memória abaixo de 20% durante 7 dias. Uma aplicação pequena pode se enquadrar. Migrar para Pay As You Go elimina o risco, mas torna possíveis cobranças acidentais. Essa decisão continua pendente.
 - Os backups continuam em aberto (Q002) e precisam estar resolvidos antes de haver dados reais.

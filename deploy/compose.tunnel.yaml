@@ -1,0 +1,23 @@
+# Publica a pilha local por um túnel da Cloudflare. Usado por run.bat --tunnel, sobre compose.yaml.
+# Vai direto ao app, sem passar pelo Caddy: ele só responde a localhost e trocaria o IP do cliente,
+# que a Cloudflare informa em X-Forwarded-For, pelo do túnel.
+
+services:
+  tunnel:
+    image: ${TUNNEL_IMAGE:?use run.bat --tunnel}
+    restart: unless-stopped
+    command:
+      - tunnel
+      - --no-autoupdate
+      - --url
+      - http://app:8080
+      - run
+      - --cred-file
+      - /etc/cloudflared/credenciais.json
+      - ${TUNNEL_NAME:?use run.bat --tunnel}
+    volumes:
+      - ${TUNNEL_DIR:?use run.bat --tunnel}/${TUNNEL_NAME}.json:/etc/cloudflared/credenciais.json:ro
+    depends_on:
+      - app
+    mem_limit: 64m
+    cpus: 0.10

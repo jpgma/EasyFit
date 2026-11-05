@@ -39,7 +39,7 @@ builder.Services.AddSingleton<ArmazenamentoEvidencias>();
 // JSON malformado responde 400 em qualquer ambiente, em vez de virar exceção em Development.
 builder.Services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadRequest = false);
 
-// Só o Caddy alcança a aplicação (ver deploy/compose.yaml), então o cabeçalho que ele define é confiável.
+// Só o Caddy ou o túnel local alcançam a aplicação (ver deploy/), então o cabeçalho que definem é confiável.
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor;

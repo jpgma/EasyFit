@@ -38,7 +38,7 @@ A Fase 2 precisa de cadastro, login e sessões persistentes. `arquitetura.md` §
 - **Dispositivos:** cada login cria uma sessão independente. Sair encerra apenas a sessão atual.
 - **Senhas:** PBKDF2-HMAC-SHA256 com 600 mil iterações e sal de 16 bytes, no formato `pbkdf2-sha256$iteracoes$sal$hash`, que permite aumentar o custo sem migração. Entre 8 e 128 caracteres.
 - **CSRF:** `SameSite=Lax`, e toda escrita em `/api` precisa de `Origin` igual ao `Host`, ou de `Sec-Fetch-Site: same-origin` quando não há `Origin`. Qualquer outro caso recebe 403 `ORIGEM_INVALIDA`. Todo proxy à frente da API precisa preservar o `Host`, como fazem o Caddy e a configuração do Vite.
-- **Tentativas:** 10 por minuto, por IP, somando `entrar` e `registrar`. O IP vem de `X-Forwarded-For`, em que se pode confiar porque só o Caddy alcança o contêiner da aplicação.
+- **Tentativas:** 10 por minuto, por IP, somando `entrar` e `registrar`. O IP vem de `X-Forwarded-For`, em que se pode confiar porque só o Caddy alcança o contêiner da aplicação. Com `run.bat --tunnel`, o túnel local também o alcança e repassa o valor definido pela Cloudflare.
 - **Cadastro:** `Autenticacao:CadastroAberto` é falso quando não definido. Para criar a primeira conta em produção: ligue, crie a conta e desligue. A Fase 3 passa a exigir convite.
 - **Recuperação de senha:** revista pela decisão 0019: o operador gera um link de uso único. Continua sem envio de e-mail.
 - **Autorização:** `RequireSessao()` em `Infrastructure/Authentication` verifica apenas a autenticação. O pertencimento ao grupo continua sendo responsabilidade de cada endpoint.
