@@ -22,6 +22,17 @@ internal sealed record ReacoesResponse(
     DateTimeOffset RevisaoEncerraEm,
     IReadOnlyList<ReacaoItemResponse> Reacoes);
 
+internal sealed record ComentarioRequest(string? Texto);
+
+internal sealed record ComentarioResponse(
+    Guid Id,
+    Guid UsuarioId,
+    string NomeExibicao,
+    string Texto,
+    DateTimeOffset CreatedAt);
+
+internal sealed record ComentariosResponse(IReadOnlyList<ComentarioResponse> Comentarios);
+
 internal sealed record RevisaoRegistradaResponse(
     string SituacaoVerificacao,
     string Decisao,

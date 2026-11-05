@@ -170,6 +170,79 @@ public sealed class ReacoesRoutesTests : IAsyncLifetime
         await ApiTestHost.AssertProblemAsync(response, HttpStatusCode.Conflict, "REACAO_ENCERRADA");
     }
 
+    [Fact]
+    public async Task Comentarios_ForaDaRevisao_Recusados()
+    {
+        var (ana, atividadeId, _) = await CriarComRevisoresAsync(2);
+
+        var response = await PostComentarioAsync(ana, atividadeId, "Foi na esteira.");
+        await ApiTestHost.AssertProblemAsync(response, HttpStatusCode.Conflict, "COMENTARIOS_ENCERRADOS");
+    }
+
+    [Fact]
+    public async Task Comentarios_EmRevisao_AutorEMembrosComentam_DepoisSoLeitura()
+    {
+        var (ana, atividadeId, revisores) = await CriarComRevisoresAsync(2);
+        (await PutReacaoAsync(revisores[0], atividadeId, TipoReacao.Suspeito)).EnsureSuccessStatusCode();
+
+        var criado = await PostComentarioAsync(ana, atividadeId, "  Foi na esteira.  ");
+        Assert.Equal(HttpStatusCode.Created, criado.StatusCode);
+        (await PostComentarioAsync(revisores[1], atividadeId, "Faz sentido.")).EnsureSuccessStatusCode();
+
+        (await PostRevisaoAsync(ana, atividadeId, Situacao.Verificada, "Conferido.")).EnsureSuccessStatusCode();
+
+        var recusado = await PostComentarioAsync(revisores[1], atividadeId, "Tarde demais.");
+        await ApiTestHost.AssertProblemAsync(recusado, HttpStatusCode.Conflict, "COMENTARIOS_ENCERRADOS");
+
+        var lista = await revisores[0].Client.GetFromJsonAsync(
+            $"/api/atividades/{atividadeId}/comentarios",
+            AppJsonContext.Default.ComentariosResponse,
+            Token);
+        Assert.Equal(["Foi na esteira.", "Faz sentido."], lista!.Comentarios.Select(c => c.Texto));
+    }
+
+    [Theory]
+    [InlineData("   ")]
+    [InlineData(null)]
+    public async Task Comentarios_TextoVazio_Recusado(string? texto)
+    {
+        var (ana, atividadeId, revisores) = await CriarComRevisoresAsync(1);
+        (await PutReacaoAsync(revisores[0], atividadeId, TipoReacao.Suspeito)).EnsureSuccessStatusCode();
+
+        var response = await PostComentarioAsync(ana, atividadeId, texto);
+        await ApiTestHost.AssertProblemAsync(response, HttpStatusCode.BadRequest, "DADOS_INVALIDOS");
+    }
+
+    [Fact]
+    public async Task Comentarios_TextoLongo_Recusado()
+    {
+        var (ana, atividadeId, revisores) = await CriarComRevisoresAsync(1);
+        (await PutReacaoAsync(revisores[0], atividadeId, TipoReacao.Suspeito)).EnsureSuccessStatusCode();
+
+        var response = await PostComentarioAsync(ana, atividadeId, new string('a', 501));
+        await ApiTestHost.AssertProblemAsync(response, HttpStatusCode.BadRequest, "DADOS_INVALIDOS");
+    }
+
+    [Fact]
+    public async Task Comentarios_ForaDoGrupo_NaoEncontrada()
+    {
+        var (ana, atividadeId, revisores) = await CriarComRevisoresAsync(1);
+        (await PutReacaoAsync(revisores[0], atividadeId, TipoReacao.Suspeito)).EnsureSuccessStatusCode();
+        var estranha = await _host.CreateUsuarioAsync("Estranha");
+
+        var get = await estranha.Client.GetAsync($"/api/atividades/{atividadeId}/comentarios", Token);
+        await ApiTestHost.AssertProblemAsync(get, HttpStatusCode.NotFound, "ATIVIDADE_NAO_ENCONTRADA");
+        var post = await PostComentarioAsync(estranha, atividadeId, "Oi");
+        await ApiTestHost.AssertProblemAsync(post, HttpStatusCode.NotFound, "ATIVIDADE_NAO_ENCONTRADA");
+    }
+
+    private static Task<HttpResponseMessage> PostComentarioAsync(TestUsuario usuario, Guid atividadeId, string? texto) =>
+        usuario.Client.PostAsJsonAsync(
+            $"/api/atividades/{atividadeId}/comentarios",
+            new ComentarioRequest(texto),
+            AppJsonContext.Default.ComentarioRequest,
+            Token);
+
     private async Task<(TestUsuario Dono, Guid AtividadeId, List<TestUsuario> Revisores)>
         CriarComRevisoresAsync(int quantidade)
     {

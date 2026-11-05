@@ -157,6 +157,18 @@ Auditoria de decisões administrativas.
 | `justificativa` | `text` | Obrigatória |
 | `created_at` | `timestamptz` | Padrão `now()` |
 
+## `comentarios_revisao`
+
+Conversa sobre uma atividade em revisão. Membros ativos escrevem apenas durante `EmRevisao`, e os comentários não podem ser editados nem removidos.
+
+| Coluna | Tipo | Observações |
+|---|---|---|
+| `id` | `uuid` | Chave primária |
+| `atividade_id` | `uuid` | Referencia `atividades` |
+| `usuario_id` | `uuid` | Referencia `usuarios` |
+| `texto` | `text` | De 1 a 500 caracteres |
+| `created_at` | `timestamptz` | Padrão `now()` |
+
 ## `schema_migrations`
 
 Tabela de controle do executor de migrações. Ver `decisoes/0001-migracoes-sql.md`.

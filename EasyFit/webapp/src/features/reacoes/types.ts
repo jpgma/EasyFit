@@ -20,6 +20,14 @@ export type ReacoesDetalhe = {
   reacoes: ReacaoItem[];
 };
 
+export type ComentarioRevisao = {
+  id: string;
+  usuarioId: string;
+  nomeExibicao: string;
+  texto: string;
+  createdAt: string;
+};
+
 export type RevisaoAtividadeData = {
   decisao: "Verificada" | "Rejeitada";
   justificativa: string;

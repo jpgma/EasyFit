@@ -999,6 +999,8 @@ A criação usa somente JSON; o upload de evidências usa `multipart/form-data` 
 PUT  /api/atividades/{id}/reacao
 GET  /api/atividades/{id}/reacoes
 POST /api/atividades/{id}/revisao
+GET  /api/atividades/{id}/comentarios
+POST /api/atividades/{id}/comentarios
 ```
 
 A operação de reação deverá realizar inserção ou atualização da reação do usuário.

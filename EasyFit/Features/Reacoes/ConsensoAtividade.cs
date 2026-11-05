@@ -108,5 +108,7 @@ internal static class ValidacaoRevisao
         && !string.IsNullOrWhiteSpace(texto)
         && texto.Trim().Length <= MaxJustificativaLength;
 
+    public static bool IsValidTexto(string? texto) => IsValidJustificativa(texto);
+
     public static string NormalizeJustificativa(string justificativa) => justificativa.Trim();
 }

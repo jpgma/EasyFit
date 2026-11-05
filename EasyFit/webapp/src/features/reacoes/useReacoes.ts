@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { shouldRetry } from "@/features/grupos";
 import { getJson, postJson, putJson } from "@/services/api";
-import type { ReacoesDetalhe, RevisaoAtividadeData, TipoReacao } from "./types";
+import type {
+  ComentarioRevisao,
+  ReacoesDetalhe,
+  RevisaoAtividadeData,
+  TipoReacao,
+} from "./types";
 
 function reacoesKey(atividadeId: string) {
   return ["atividades", atividadeId, "reacoes"] as const;
@@ -31,6 +36,37 @@ export function useRegistrarReacao(atividadeId: string) {
       void queryClient.invalidateQueries({ queryKey: ["desafios"] });
       void queryClient.invalidateQueries({ queryKey: ["atividades"] });
     },
+  });
+}
+
+function comentariosKey(atividadeId: string) {
+  return ["atividades", atividadeId, "comentarios"] as const;
+}
+
+export function useComentarios(atividadeId: string) {
+  return useQuery({
+    queryKey: comentariosKey(atividadeId),
+    queryFn: ({ signal }) =>
+      getJson<{ comentarios: ComentarioRevisao[] }>(
+        `/api/atividades/${atividadeId}/comentarios`,
+        signal,
+      ),
+    retry: shouldRetry,
+  });
+}
+
+export function useComentar(atividadeId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (texto: string) =>
+      postJson<ComentarioRevisao>(
+        `/api/atividades/${atividadeId}/comentarios`,
+        { texto },
+      ),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: comentariosKey(atividadeId),
+      }),
   });
 }
 
