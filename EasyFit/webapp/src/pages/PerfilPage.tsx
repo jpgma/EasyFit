@@ -16,6 +16,7 @@ import { useSessao } from "@/features/autenticacao";
 import { ConviteForm } from "@/features/convites";
 import { formatarDiaEMes } from "@/features/desafios";
 import { papelLabels, useGrupos } from "@/features/grupos";
+import { SinoNotificacoes } from "@/features/notificacoes";
 import { useMeuPerfil } from "@/features/usuarios";
 import { getErrorMessage } from "@/services/api";
 
@@ -49,13 +50,16 @@ export function PerfilPage() {
       <PageHeader
         title="Perfil"
         action={
-          <Link
-            to="/perfil/configuracoes"
-            aria-label="Configurações"
-            className="grid size-10 place-items-center rounded-full bg-surface shadow-card tap"
-          >
-            <Settings aria-hidden="true" className="size-5" />
-          </Link>
+          <div className="flex gap-2">
+            <SinoNotificacoes />
+            <Link
+              to="/perfil/configuracoes"
+              aria-label="Configurações"
+              className="grid size-10 place-items-center rounded-full bg-surface shadow-card tap"
+            >
+              <Settings aria-hidden="true" className="size-5" />
+            </Link>
+          </div>
         }
       />
 

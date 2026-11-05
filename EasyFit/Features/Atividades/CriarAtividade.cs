@@ -1,4 +1,5 @@
 using EasyFit.Features.Grupos.Contracts;
+using EasyFit.Features.Notificacoes.Contracts;
 using EasyFit.Infrastructure.Authentication;
 using EasyFit.Infrastructure.Json;
 using Npgsql;
@@ -104,6 +105,8 @@ internal static class CriarAtividade
             verificar.Parameters.AddWithValue(id);
             await verificar.ExecuteNonQueryAsync(cancellationToken);
         }
+
+        await NotificacoesAtividade.NotificarNovaAtividadeAsync(connection, transaction, id, cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
         return (AtividadeOperacaoStatus.Concluida, id);

@@ -1,3 +1,4 @@
+using EasyFit.Features.Notificacoes.Contracts;
 using EasyFit.Infrastructure.Authentication;
 using EasyFit.Infrastructure.Database;
 using EasyFit.Infrastructure.Json;
@@ -104,12 +105,23 @@ internal static class RegistrarReacao
             VALUES ($1, $2, $3)
             ON CONFLICT (atividade_id, usuario_id)
             DO UPDATE SET tipo = EXCLUDED.tipo, updated_at = now()
+            RETURNING created_at = updated_at
             """, connection, transaction))
         {
             upsert.Parameters.AddWithValue(atividadeId);
             upsert.Parameters.AddWithValue(usuarioId);
             upsert.Parameters.AddWithValue(tipo);
-            await upsert.ExecuteNonQueryAsync(cancellationToken);
+
+            // Trocar de reação não é uma reação nova: o autor já foi avisado desta pessoa.
+            if ((bool)(await upsert.ExecuteScalarAsync(cancellationToken))!)
+            {
+                await NotificacoesAtividade.NotificarReacaoAsync(
+                    connection,
+                    transaction,
+                    atividadeId,
+                    usuarioId,
+                    cancellationToken);
+            }
         }
 
         await VerificacaoAtividade.AplicarSituacaoCalculadaAsync(

@@ -1007,6 +1007,17 @@ GET  /api/grupos/{id}/membros/{usuarioId}/perfil
 
 Regras em `docs/decisoes/0018-perfil-e-pagina-do-membro.md`.
 
+### 10.4.2. Notificações
+
+```http
+GET  /api/notificacoes
+GET  /api/notificacoes/nao-lidas
+POST /api/notificacoes/lidas
+POST /api/notificacoes/{id}/lida
+```
+
+Regras em `docs/decisoes/0020-notificacoes-no-aplicativo.md`.
+
 ### 10.5. Reações
 
 ```http
@@ -1387,7 +1398,7 @@ Não implementar no MVP:
 - Planos de treinamento.
 - Inteligência artificial para validar imagens.
 - Pontuação baseada em intensidade.
-- Notificações push.
+- Notificações push e lembretes agendados. A lista dentro do aplicativo existe: ver `decisoes/0020-notificacoes-no-aplicativo.md`.
 - Processamento assíncrono distribuído.
 
 Essas funcionalidades poderão ser consideradas posteriormente, caso exista necessidade real.

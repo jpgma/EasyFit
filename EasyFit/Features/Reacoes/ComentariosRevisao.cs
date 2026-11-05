@@ -1,3 +1,4 @@
+using EasyFit.Features.Notificacoes.Contracts;
 using EasyFit.Infrastructure.Authentication;
 using EasyFit.Infrastructure.Database;
 using EasyFit.Infrastructure.Errors;
@@ -116,6 +117,8 @@ internal static class ComentariosRevisao
             comentarioId = reader.GetGuid(0);
             createdAt = TimestampLeitura.FromReader(reader, 1);
         }
+
+        await NotificacoesAtividade.NotificarComentarioAsync(connection, transaction, id, usuarioId, cancellationToken);
 
         string nome;
         await using (var autor = new NpgsqlCommand(

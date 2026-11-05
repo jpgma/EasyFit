@@ -56,6 +56,14 @@ export const router = createBrowserRouter([
                 },
               },
               {
+                path: "/notificacoes",
+                lazy: async () => {
+                  const { NotificacoesPage } =
+                    await import("@/pages/NotificacoesPage");
+                  return { Component: NotificacoesPage };
+                },
+              },
+              {
                 path: "/grupos/novo",
                 lazy: async () => {
                   const { CriarGrupoPage } =

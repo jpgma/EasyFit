@@ -1,4 +1,5 @@
 using EasyFit.Features.Grupos.Contracts;
+using EasyFit.Features.Notificacoes.Contracts;
 using EasyFit.Infrastructure.Authentication;
 using EasyFit.Infrastructure.Database;
 using EasyFit.Infrastructure.Json;
@@ -104,6 +105,13 @@ internal static class RevisarAtividade
             registradaEm = TimestampLeitura.FromScalar(
                 (await historico.ExecuteScalarAsync(cancellationToken))!);
         }
+
+        await NotificacoesAtividade.NotificarSituacaoAsync(
+            connection,
+            transaction,
+            atividadeId,
+            decisao,
+            cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
         return (null, new RevisaoRegistradaResponse(decisao, decisao, registradaEm));

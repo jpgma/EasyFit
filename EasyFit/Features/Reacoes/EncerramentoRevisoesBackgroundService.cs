@@ -1,3 +1,5 @@
+using EasyFit.Features.Notificacoes.Contracts;
+
 namespace EasyFit.Features.Reacoes;
 
 internal sealed class EncerramentoRevisoesBackgroundService(
@@ -19,10 +21,12 @@ internal sealed class EncerramentoRevisoesBackgroundService(
                 {
                     logger.LogInformation("Encerradas janelas de reação em {Quantidade} atividades.", alteradas);
                 }
+
+                await NotificacoesAtividade.ExcluirAntigasAsync(dataSource, stoppingToken);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                logger.LogError(ex, "Falha ao encerrar janelas de reação.");
+                logger.LogError(ex, "Falha na manutenção periódica de revisões e notificações.");
             }
 
             await Task.Delay(Intervalo, stoppingToken);

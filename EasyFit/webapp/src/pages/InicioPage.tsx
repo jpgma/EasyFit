@@ -17,6 +17,7 @@ import {
 } from "@/features/desafios";
 import { AvisoAvaliacao, FeedAtividade } from "@/features/feed";
 import { useGrupo } from "@/features/grupos";
+import { SinoNotificacoes } from "@/features/notificacoes";
 import { LinhaParticipante, useResumoGrupo } from "@/features/progresso";
 import { getErrorMessage } from "@/services/api";
 
@@ -225,12 +226,13 @@ export function InicioPage() {
     <>
       <header className="flex items-center gap-3">
         <Avatar nome={usuario.nomeExibicao} id={usuario.id} size={44} />
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-sm text-muted first-letter:uppercase">{hoje}</p>
           <h1 className="truncate text-2xl font-bold">
             {getSaudacao(agora)}, {primeiroNome}!
           </h1>
         </div>
+        <SinoNotificacoes />
       </header>
 
       <div className="mt-6">

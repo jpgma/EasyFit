@@ -1,3 +1,4 @@
+using EasyFit.Features.Notificacoes.Contracts;
 using EasyFit.Infrastructure.Database;
 using Npgsql;
 
@@ -68,6 +69,17 @@ internal static class VerificacaoAtividade
         update.Parameters.AddWithValue(atividadeId);
         update.Parameters.AddWithValue(nova);
         await update.ExecuteNonQueryAsync(cancellationToken);
+
+        // Voltar a aguardar feedback não pede nenhuma ação de ninguém.
+        if (nova != SituacaoVerificacao.AguardandoFeedback)
+        {
+            await NotificacoesAtividade.NotificarSituacaoAsync(connection, transaction, atividadeId, nova, cancellationToken);
+        }
+
+        if (nova == SituacaoVerificacao.EmRevisao)
+        {
+            await NotificacoesAtividade.NotificarDisputaAsync(connection, transaction, atividadeId, cancellationToken);
+        }
     }
 
     public static async Task<int> EncerrarJanelasExpiradasAsync(

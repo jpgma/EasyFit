@@ -171,6 +171,24 @@ Conversa sobre uma atividade em revisão. Membros ativos escrevem apenas durante
 | `texto` | `text` | De 1 a 500 caracteres |
 | `created_at` | `timestamptz` | Padrão `now()` |
 
+## `notificacoes`
+
+Avisos dentro do aplicativo. Reações e comentários não lidos de uma atividade ficam em uma linha só. Toda leitura cruza com o vínculo ativo em `membros_grupo`. Apagadas 90 dias depois da última atualização. Ver `decisoes/0020-notificacoes-no-aplicativo.md`.
+
+| Coluna | Tipo | Observações |
+|---|---|---|
+| `id` | `uuid` | Chave primária |
+| `usuario_id` | `uuid` | Quem recebe. Referencia `usuarios` |
+| `grupo_id` | `uuid` | Referencia `grupos` |
+| `atividade_id` | `uuid` | Referencia `atividades` |
+| `tipo` | `text` | `NovaAtividade`, `Reacao`, `Comentario`, `SituacaoAlterada`, `Disputa` |
+| `ator_id` | `uuid` | Opcional. Quem causou, ou a última pessoa, nas agrupadas |
+| `situacao` | `text` | Só em `SituacaoAlterada` |
+| `total` | `integer` | Eventos agrupados na linha |
+| `created_at` | `timestamptz` | Padrão `now()` |
+| `updated_at` | `timestamptz` | Padrão `now()` |
+| `read_at` | `timestamptz` | Vazia enquanto não lida |
+
 ## `schema_migrations`
 
 Tabela de controle do executor de migrações. Ver `decisoes/0001-migracoes-sql.md`.
