@@ -1,6 +1,6 @@
 # 0021 — PWA e Service Worker
 
-**Status:** DECIDIDA
+**Status:** DECIDIDA. Complementada pela seção Aviso de instalação abaixo.
 
 ## Contexto
 
@@ -43,6 +43,17 @@ A Fase 8 pede manifest, Service Worker, cache estático e instalação mobile (`
   ```
 
   Em `icone-quadrado.svg`, o `rect` não tem `rx` e o desenho fica dentro de `<g transform="translate(16 16) scale(0.72) translate(-16 -16)">`.
+
+## Aviso de instalação (acréscimo)
+
+Quem usa o EasyFit pelo navegador raramente abre Configurações, então não descobre que pode instalar o aplicativo.
+
+- Um aviso em `AvisosDoApp`, no mesmo formato do de versão nova, oferece a instalação: botão "Instalar" quando o navegador oferece `beforeinstallprompt`, e a instrução do menu Compartilhar no iOS.
+- Aparece só para quem entrou na conta, com conexão e sem o aviso de versão nova na tela. Some depois da instalação e não aparece no aplicativo instalado.
+- Não some sozinho, porque tem uma ação. Um botão "Dispensar" o esconde por 30 dias. A opção em Configurações continua disponível.
+- A dispensa fica num cookie comum, `ef_instalacao_dispensada`, e não em `localStorage`, que o ESLint bloqueia para evitar credenciais no navegador. O cookie não é credencial, e o backend o ignora.
+- **Alternativas descartadas:** liberar `localStorage` enfraqueceria a regra do ESLint; guardar a dispensa só na memória repetiria o aviso a cada visita.
+- **Compromisso aceito:** Firefox e Safari no computador não oferecem instalação por script e não mostram o aviso.
 
 ## Impacto
 

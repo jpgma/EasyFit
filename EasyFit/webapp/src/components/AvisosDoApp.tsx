@@ -1,6 +1,13 @@
-import { RefreshCw, WifiOff } from "lucide-react";
+import { Download, RefreshCw, Smartphone, WifiOff, X } from "lucide-react";
 import { useSyncExternalStore } from "react";
 import { useConectado } from "@/components/useConectado";
+import { useSessao } from "@/features/autenticacao";
+import {
+  dispensarAvisoInstalacao,
+  getModoAvisoInstalacao,
+  instalar,
+  subscribeInstalacao,
+} from "@/services/instalacao";
 import {
   aplicarAtualizacao,
   hasAtualizacao,
@@ -10,15 +17,27 @@ import {
 const classesAviso =
   "pointer-events-auto flex w-full max-w-md animate-slide-up items-center gap-3 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-medium shadow-float";
 
-/** Avisos de todo o app: falta de conexão e versão nova pronta para instalar. */
+const classesBotaoPrimario =
+  "h-11 shrink-0 rounded-lg bg-primary px-4 text-sm font-semibold text-on-primary tap hover:bg-primary-hover";
+
+/** Avisos de todo o app: falta de conexão, versão nova e convite para instalar o PWA. */
 export function AvisosDoApp() {
   const conectado = useConectado();
   const atualizacao = useSyncExternalStore(
     subscribeAtualizacao,
     hasAtualizacao,
   );
+  const modoInstalacao = useSyncExternalStore(
+    subscribeInstalacao,
+    getModoAvisoInstalacao,
+  );
+  const { data: usuario } = useSessao();
 
-  if (conectado && !atualizacao) return null;
+  // Um aviso por vez: a instalação só aparece para quem já entrou, com rede e sem versão nova.
+  const instalacao =
+    conectado && !atualizacao && usuario ? modoInstalacao : null;
+
+  if (conectado && !atualizacao && !instalacao) return null;
 
   return (
     <div
@@ -45,10 +64,41 @@ export function AvisosDoApp() {
           <p className="flex-1">Nova versão disponível</p>
           <button
             type="button"
-            className="h-11 shrink-0 rounded-lg bg-primary px-4 text-sm font-semibold text-on-primary tap hover:bg-primary-hover"
+            className={classesBotaoPrimario}
             onClick={aplicarAtualizacao}
           >
             Atualizar
+          </button>
+        </div>
+      )}
+      {instalacao && (
+        <div role="status" aria-atomic="true" className={classesAviso}>
+          <Smartphone
+            aria-hidden="true"
+            className="size-5 shrink-0 text-primary"
+          />
+          <p className="flex-1">
+            {instalacao === "botao"
+              ? "Instale o EasyFit para abrir direto da tela inicial."
+              : "Para instalar, toque em Compartilhar e depois em Adicionar à Tela de Início."}
+          </p>
+          {instalacao === "botao" && (
+            <button
+              type="button"
+              className={`${classesBotaoPrimario} inline-flex items-center gap-1.5`}
+              onClick={() => void instalar()}
+            >
+              <Download aria-hidden="true" className="size-4" />
+              Instalar
+            </button>
+          )}
+          <button
+            type="button"
+            aria-label="Dispensar aviso de instalação"
+            className="-mr-2 grid size-11 shrink-0 place-items-center rounded-lg text-muted tap hover:text-foreground"
+            onClick={dispensarAvisoInstalacao}
+          >
+            <X aria-hidden="true" className="size-5" />
           </button>
         </div>
       )}

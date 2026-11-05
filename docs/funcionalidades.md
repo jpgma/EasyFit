@@ -398,6 +398,10 @@ The system makes a notification for these events:
 - The user can install the application on the home screen of the phone.
 - On Chromium and Android, the Settings page shows "Instalar aplicativo".
 - On iOS, the Settings page tells the user to use "Compartilhar" and "Adicionar à Tela de Início".
+- In the browser, a notice at the top of all pages also tells the user to install the application. On Chromium and Android, the notice has an "Instalar" button. On iOS, it shows the same instruction as the Settings page.
+- The notice shows only when these conditions are true: the user is logged in, the connection is available, there is no "Nova versão disponível" notice, and the application is not installed.
+- The notice does not close automatically. The user can close it with the "X" button. Then it does not show again for 30 days. A cookie keeps this choice.
+- Firefox and Safari on a computer do not show the notice, because they do not let the application start an installation.
 
 ### 13.2. Offline use
 
