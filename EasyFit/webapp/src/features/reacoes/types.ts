@@ -9,6 +9,7 @@ export type ReacaoItem = {
 
 export type ReacoesDetalhe = {
   totalRevisores: number;
+  rejeicoesNecessarias: number;
   kudos: number;
   suspeito: number;
   rejeitar: number;

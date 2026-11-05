@@ -118,6 +118,81 @@ public sealed class ReacoesRoutesTests : IAsyncLifetime
         Assert.Equal(Situacao.Verificada, atualizada!.SituacaoVerificacao);
     }
 
+    [Fact]
+    public async Task PutReacao_EmRevisao_LimiteAtingidoRejeita()
+    {
+        var (ana, atividadeId, revisores) = await CriarComRevisoresAsync(3);
+
+        (await PutReacaoAsync(revisores[0], atividadeId, TipoReacao.Rejeitar)).EnsureSuccessStatusCode();
+        Assert.Equal(Situacao.EmRevisao, await SituacaoAsync(ana, atividadeId));
+
+        var resposta = await PutReacaoAsync(revisores[1], atividadeId, TipoReacao.Rejeitar);
+        resposta.EnsureSuccessStatusCode();
+        var reacoes = await resposta.Content.ReadFromJsonAsync(AppJsonContext.Default.ReacoesResponse, Token);
+        Assert.Equal(2, reacoes!.RejeicoesNecessarias);
+        Assert.Equal(Situacao.Rejeitada, await SituacaoAsync(ana, atividadeId));
+    }
+
+    [Fact]
+    public async Task PutReacao_TrocarUnicaNegativa_VoltaAAguardar()
+    {
+        var (ana, atividadeId, revisores) = await CriarComRevisoresAsync(2);
+
+        (await PutReacaoAsync(revisores[0], atividadeId, TipoReacao.Suspeito)).EnsureSuccessStatusCode();
+        Assert.Equal(Situacao.EmRevisao, await SituacaoAsync(ana, atividadeId));
+
+        (await PutReacaoAsync(revisores[0], atividadeId, TipoReacao.Kudos)).EnsureSuccessStatusCode();
+        Assert.Equal(Situacao.AguardandoFeedback, await SituacaoAsync(ana, atividadeId));
+    }
+
+    [Fact]
+    public async Task PutReacao_EmRevisaoAposPrazo_Recusada()
+    {
+        var (ana, atividadeId, revisores) = await CriarComRevisoresAsync(2);
+        (await PutReacaoAsync(revisores[0], atividadeId, TipoReacao.Suspeito)).EnsureSuccessStatusCode();
+
+        await _host.ExecuteAsync(
+            $"UPDATE atividades SET submitted_at = now() - interval '49 hours' WHERE id = '{atividadeId}'");
+
+        var response = await PutReacaoAsync(revisores[1], atividadeId, TipoReacao.Kudos);
+        await ApiTestHost.AssertProblemAsync(response, HttpStatusCode.Conflict, "JANELA_ENCERRADA");
+        Assert.Equal(Situacao.EmRevisao, await SituacaoAsync(ana, atividadeId));
+    }
+
+    [Fact]
+    public async Task PutReacao_AposDecisaoAdmin_Recusada()
+    {
+        var (ana, atividadeId, revisores) = await CriarComRevisoresAsync(2);
+        (await PutReacaoAsync(revisores[0], atividadeId, TipoReacao.Suspeito)).EnsureSuccessStatusCode();
+        (await PostRevisaoAsync(ana, atividadeId, Situacao.Verificada, "Conferido.")).EnsureSuccessStatusCode();
+
+        var response = await PutReacaoAsync(revisores[1], atividadeId, TipoReacao.Rejeitar);
+        await ApiTestHost.AssertProblemAsync(response, HttpStatusCode.Conflict, "REACAO_ENCERRADA");
+    }
+
+    private async Task<(TestUsuario Dono, Guid AtividadeId, List<TestUsuario> Revisores)>
+        CriarComRevisoresAsync(int quantidade)
+    {
+        var dono = await _host.CreateUsuarioAsync("Ana");
+        var grupoId = await _host.CreateGrupoAsync(dono);
+        var revisores = new List<TestUsuario>();
+        for (var i = 0; i < quantidade; i++)
+        {
+            revisores.Add(await _host.AddMembroAsync(grupoId, PapelMembro.Membro, $"Revisor {i}"));
+        }
+
+        var criada = await PostAtividadeAsync(dono, grupoId);
+        var atividade = await criada.Content.ReadFromJsonAsync(AppJsonContext.Default.AtividadeResponse, Token);
+        return (dono, atividade!.Id, revisores);
+    }
+
+    private static async Task<string> SituacaoAsync(TestUsuario usuario, Guid atividadeId)
+    {
+        var detalhe = await usuario.Client.GetAsync($"/api/atividades/{atividadeId}", Token);
+        var atividade = await detalhe.Content.ReadFromJsonAsync(AppJsonContext.Default.AtividadeResponse, Token);
+        return atividade!.SituacaoVerificacao;
+    }
+
     private static CriarAtividadeRequest Valid() => new(
         TipoAtividade.Corrida,
         3600,

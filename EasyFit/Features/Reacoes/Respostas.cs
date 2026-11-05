@@ -12,6 +12,7 @@ internal sealed record ReacaoItemResponse(
 
 internal sealed record ReacoesResponse(
     int TotalRevisores,
+    int RejeicoesNecessarias,
     int Kudos,
     int Suspeito,
     int Rejeitar,

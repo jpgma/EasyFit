@@ -819,7 +819,9 @@ Regras:
 - Uma ou mais reações suspeitas: EmRevisao.
 - Atingiu o limite de rejeições: Rejeitada.
 - Nenhuma reação negativa e prazo encerrado: Verificada.
-- Suspeita ou rejeição abaixo do limite: revisão manual pelo administrador do grupo.
+- Suspeita ou rejeição abaixo do limite: revisão manual pelo administrador do grupo, a qualquer momento.
+- As reações continuam abertas em EmRevisao até o fim do prazo e podem ser trocadas, sem remoção. A situação é recalculada a cada reação: atingir o limite leva a Rejeitada, e retirar a única reação negativa devolve a atividade a AguardandoFeedback (ou a Verificada, se todos os revisores já tiverem reagido).
+- Verificada e Rejeitada são finais. Depois do prazo, EmRevisao só muda por revisão manual. Ver `decisoes/0015-reacoes-em-revisao.md`.
 
 A revisão manual deve registrar responsável, data e justificativa.
 

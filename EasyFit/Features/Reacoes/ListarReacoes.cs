@@ -101,6 +101,7 @@ internal static class ListarReacoes
 
         return new ReacoesResponse(
             totalRevisores,
+            totalRevisores == 0 ? 0 : ConsensoAtividade.CalculateRejeicoesNecessarias(totalRevisores),
             contagens.Kudos,
             contagens.Suspeito,
             contagens.Rejeitar,

@@ -65,7 +65,59 @@ public class ConsensoAtividadeTests
                 SituacaoVerificacao.AguardandoFeedback));
 
     [Fact]
-    public void DeterminarSituacao_EmRevisaoPermanece() =>
+    public void DeterminarSituacao_EmRevisao_ReacoesContinuamAteOLimite() =>
+        Assert.Equal(
+            SituacaoVerificacao.Rejeitada,
+            ConsensoAtividade.DeterminarSituacao(
+                4,
+                new ContagensReacao(0, 1, 2),
+                janelaEncerrada: false,
+                SituacaoVerificacao.EmRevisao));
+
+    [Fact]
+    public void DeterminarSituacao_EmRevisao_AbaixoDoLimitePermanece() =>
+        Assert.Equal(
+            SituacaoVerificacao.EmRevisao,
+            ConsensoAtividade.DeterminarSituacao(
+                4,
+                new ContagensReacao(1, 1, 1),
+                janelaEncerrada: false,
+                SituacaoVerificacao.EmRevisao));
+
+    [Fact]
+    public void DeterminarSituacao_RetirarUnicaNegativa_VoltaAAguardar() =>
+        Assert.Equal(
+            SituacaoVerificacao.AguardandoFeedback,
+            ConsensoAtividade.DeterminarSituacao(
+                3,
+                new ContagensReacao(1, 0, 0),
+                janelaEncerrada: false,
+                SituacaoVerificacao.EmRevisao));
+
+    [Fact]
+    public void DeterminarSituacao_RetirarUnicaNegativaComTodosReagindo_Verificada() =>
+        Assert.Equal(
+            SituacaoVerificacao.Verificada,
+            ConsensoAtividade.DeterminarSituacao(
+                2,
+                new ContagensReacao(2, 0, 0),
+                janelaEncerrada: false,
+                SituacaoVerificacao.EmRevisao));
+
+    [Theory]
+    [InlineData(SituacaoVerificacao.Verificada)]
+    [InlineData(SituacaoVerificacao.Rejeitada)]
+    public void DeterminarSituacao_SituacoesFinaisNaoMudam(string situacao) =>
+        Assert.Equal(
+            situacao,
+            ConsensoAtividade.DeterminarSituacao(
+                2,
+                new ContagensReacao(0, 1, 1),
+                janelaEncerrada: false,
+                situacao));
+
+    [Fact]
+    public void DeterminarSituacao_EmRevisaoComPrazoEncerradoPermanece() =>
         Assert.Equal(
             SituacaoVerificacao.EmRevisao,
             ConsensoAtividade.DeterminarSituacao(

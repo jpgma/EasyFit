@@ -75,6 +75,8 @@ export function ReacoesAtividade({
 
   const {
     totalRevisores,
+    rejeicoesNecessarias,
+    rejeitar,
     suaReacao,
     voceERevisor,
     janelaAberta,
@@ -85,7 +87,8 @@ export function ReacoesAtividade({
     !voce &&
     voceERevisor &&
     janelaAberta &&
-    situacaoVerificacao === "AguardandoFeedback";
+    (situacaoVerificacao === "AguardandoFeedback" ||
+      situacaoVerificacao === "EmRevisao");
 
   const mostrarRevisaoAdmin =
     grupo.data !== undefined &&
@@ -132,6 +135,19 @@ export function ReacoesAtividade({
         )}
       </div>
 
+      {situacaoVerificacao === "EmRevisao" && (
+        <p className="rounded-2xl bg-warning-soft p-4 text-sm text-on-warning-soft">
+          <Emoji tipo="Rejeitar" /> {rejeitar} de {rejeicoesNecessarias}{" "}
+          {rejeicoesNecessarias === 1
+            ? "rejeição necessária"
+            : "rejeições necessárias"}
+          .{" "}
+          {janelaAberta
+            ? "Abaixo disso, um administrador decide."
+            : "O prazo acabou, e um administrador decide."}
+        </p>
+      )}
+
       {voce && totalRevisores > 0 && (
         <p className="rounded-2xl bg-surface-muted p-4 text-sm text-muted">
           Essa atividade é sua. Seus amigos vão avaliar.
@@ -147,9 +163,12 @@ export function ReacoesAtividade({
       {podeReagir && (
         <div className="space-y-2">
           {suaReacao && (
-            <p className="rounded-2xl bg-surface-muted p-4 text-sm font-medium">
-              {descricoes[suaReacao].sua}. Você pode trocar até o prazo acabar.
-            </p>
+            <div className="rounded-2xl bg-surface-muted p-4 text-sm">
+              <p className="font-medium">{descricoes[suaReacao].sua}</p>
+              <p className="mt-1 text-muted">
+                Trocar reação: escolha outra opção até o prazo acabar.
+              </p>
+            </div>
           )}
           <button
             type="button"

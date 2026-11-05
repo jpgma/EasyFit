@@ -277,7 +277,7 @@ Não permitir que a saída de um membro invalide retroativamente uma atividade.
 
 ## Q012 — Qual será a regra definitiva de consenso?
 
-**Status:** DECIDIDA — ver `decisoes/0012-verificacao-comunitaria.md`.
+**Status:** DECIDIDA — ver `decisoes/0012-verificacao-comunitaria.md`. Reações em `EmRevisao` revistas em `decisoes/0015-reacoes-em-revisao.md`.
 
 Reações disponíveis:
 
@@ -352,7 +352,7 @@ Toda decisão deve gerar um registro imutável de auditoria.
 
 ## Q015 — Quando as reações serão encerradas?
 
-**Status:** DECIDIDA — ver `decisoes/0012-verificacao-comunitaria.md`.
+**Status:** DECIDIDA — ver `decisoes/0012-verificacao-comunitaria.md`. Reações em `EmRevisao` revistas em `decisoes/0015-reacoes-em-revisao.md`.
 
 Prazo inicial: 48 horas após submissão.
 

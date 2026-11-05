@@ -1,6 +1,6 @@
 # 0012 — Verificação comunitária
 
-**Status:** DECIDIDA
+**Status:** DECIDIDA. Parcialmente substituída pela decisão 0015 (reações durante `EmRevisao`).
 
 ## Contexto
 

@@ -77,7 +77,7 @@ internal static class RegistrarReacao
             return ReacaoOperacaoStatus.AtividadeNaoEncontrada;
         }
 
-        if (situacao != SituacaoVerificacao.AguardandoFeedback)
+        if (situacao is not (SituacaoVerificacao.AguardandoFeedback or SituacaoVerificacao.EmRevisao))
         {
             return ReacaoOperacaoStatus.ReacaoEncerrada;
         }

@@ -41,7 +41,9 @@ internal static class ConsensoAtividade
 
     /// <summary>
     /// Calcula a situação após reações comunitárias ou encerramento da janela.
-    /// Não altera <see cref="SituacaoVerificacao.EmRevisao"/> (só revisão admin).
+    /// <see cref="SituacaoVerificacao.Verificada"/> e <see cref="SituacaoVerificacao.Rejeitada"/>
+    /// são finais. Com a janela encerrada, <see cref="SituacaoVerificacao.EmRevisao"/> só muda
+    /// por revisão administrativa.
     /// </summary>
     public static string DeterminarSituacao(
         int totalRevisores,
@@ -59,7 +61,7 @@ internal static class ConsensoAtividade
             return situacaoAtual;
         }
 
-        if (situacaoAtual == SituacaoVerificacao.EmRevisao)
+        if (situacaoAtual == SituacaoVerificacao.EmRevisao && janelaEncerrada)
         {
             return SituacaoVerificacao.EmRevisao;
         }
