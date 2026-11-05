@@ -51,7 +51,7 @@ internal static class RemoverMembro
             return GrupoOperacaoStatus.AcessoNegado;
         }
 
-        await MembrosGrupo.DesligarAsync(connection, transaction, grupoId, alvoId, cancellationToken);
+        await MembrosGrupo.DesligarAsync(connection, transaction, grupoId, alvoId, removido: true, cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
         return GrupoOperacaoStatus.Concluida;

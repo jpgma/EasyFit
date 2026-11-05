@@ -4,8 +4,8 @@ export {
   extractConviteToken,
   useAceitarConvite,
   useConsultarConvite,
-  useConvites,
-  useCriarConvite,
+  useConvite,
+  useGerarConvite,
   useRevogarConvite,
 } from "./useConvites";
-export type { Convite, ConviteConsulta, ConviteCriado } from "./useConvites";
+export type { Convite, ConviteConsulta } from "./useConvites";

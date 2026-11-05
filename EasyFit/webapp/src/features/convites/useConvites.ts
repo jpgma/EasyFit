@@ -2,14 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { gruposKey, shouldRetry } from "@/features/grupos";
 import { deleteEmpty, getJson, postJson } from "@/services/api";
 
-export type ConviteCriado = {
-  id: string;
-  token: string;
-  expiresAt: string;
-};
-
 export type Convite = {
-  id: string;
+  token: string;
   criadoPor: string;
   createdAt: string;
   expiresAt: string;
@@ -20,14 +14,16 @@ export type ConviteConsulta = {
   convidadoPor: string;
   totalMembros: number;
   maxMembros: number;
+  desafioNome: string | null;
+  membros: string[];
 };
 
-function convitesKey(grupoId: string) {
+function conviteKey(grupoId: string) {
   return ["convites", grupoId] as const;
 }
 
-function convitesPath(grupoId: string) {
-  return `/api/grupos/${grupoId}/convites`;
+function convitePath(grupoId: string) {
+  return `/api/grupos/${grupoId}/convite`;
 }
 
 /**
@@ -56,37 +52,35 @@ export function useConsultarConvite(token: string) {
   });
 }
 
-export function useConvites(grupoId: string, enabled: boolean) {
+export function useConvite(grupoId: string, enabled: boolean) {
   return useQuery({
-    queryKey: convitesKey(grupoId),
+    queryKey: conviteKey(grupoId),
     queryFn: async ({ signal }) => {
-      const { convites } = await getJson<{ convites: Convite[] }>(
-        convitesPath(grupoId),
+      const { convite } = await getJson<{ convite: Convite | null }>(
+        convitePath(grupoId),
         signal,
       );
-      return convites;
+      return convite;
     },
     enabled,
     retry: shouldRetry,
   });
 }
 
-export function useCriarConvite(grupoId: string) {
+export function useGerarConvite(grupoId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => postJson<ConviteCriado>(convitesPath(grupoId)),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: convitesKey(grupoId) }),
+    mutationFn: () => postJson<Convite>(convitePath(grupoId)),
+    onSuccess: (convite) =>
+      queryClient.setQueryData(conviteKey(grupoId), convite),
   });
 }
 
 export function useRevogarConvite(grupoId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (conviteId: string) =>
-      deleteEmpty(`${convitesPath(grupoId)}/${conviteId}`),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: convitesKey(grupoId) }),
+    mutationFn: () => deleteEmpty(convitePath(grupoId)),
+    onSuccess: () => queryClient.setQueryData(conviteKey(grupoId), null),
   });
 }
 

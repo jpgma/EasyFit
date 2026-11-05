@@ -42,7 +42,7 @@ internal static class SairDoGrupo
             return GrupoOperacaoStatus.ProprietarioNaoPodeSair;
         }
 
-        await MembrosGrupo.DesligarAsync(connection, transaction, grupoId, usuarioId, cancellationToken);
+        await MembrosGrupo.DesligarAsync(connection, transaction, grupoId, usuarioId, removido: false, cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
         return GrupoOperacaoStatus.Concluida;

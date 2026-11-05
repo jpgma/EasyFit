@@ -8,7 +8,6 @@ internal static class RevogarConvite
 {
     public static async Task<IResult> HandleAsync(
         Guid id,
-        Guid conviteId,
         HttpContext context,
         NpgsqlDataSource dataSource,
         CancellationToken cancellationToken)
@@ -19,27 +18,25 @@ internal static class RevogarConvite
             return denied;
         }
 
-        return await ExecutarAsync(dataSource, id, conviteId, cancellationToken)
+        return await ExecutarAsync(dataSource, id, cancellationToken)
             ? Results.NoContent()
             : ApiProblem.Create(
                 StatusCodes.Status404NotFound,
                 "CONVITE_NAO_ENCONTRADO",
-                "Este convite não está mais pendente.");
+                "Este grupo não tem um link de convite válido.");
     }
 
-    /// <returns><c>false</c> se o convite não existir neste grupo ou não estiver mais pendente.</returns>
+    /// <returns><c>false</c> se o grupo não tiver um link válido.</returns>
     private static async Task<bool> ExecutarAsync(
         NpgsqlDataSource dataSource,
         Guid grupoId,
-        Guid conviteId,
         CancellationToken cancellationToken)
     {
         await using var command = dataSource.CreateCommand("""
             UPDATE convites_grupo
             SET revoked_at = now()
-            WHERE id = $1 AND grupo_id = $2 AND used_at IS NULL AND revoked_at IS NULL AND expires_at > now()
+            WHERE grupo_id = $1 AND revoked_at IS NULL AND expires_at > now()
             """);
-        command.Parameters.AddWithValue(conviteId);
         command.Parameters.AddWithValue(grupoId);
         return await command.ExecuteNonQueryAsync(cancellationToken) == 1;
     }

@@ -34,12 +34,16 @@ internal static class MembrosGrupo
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
-    /// <summary>Encerra o vínculo e cancela os convites pendentes de quem saiu, que não responde mais pelo grupo.</summary>
+    /// <summary>
+    /// Encerra o vínculo e cancela o link criado por quem saiu, que não responde mais pelo grupo.
+    /// Numa remoção, cancela o link de qualquer criador: quem foi removido pode tê-lo guardado.
+    /// </summary>
     public static async Task DesligarAsync(
         NpgsqlConnection connection,
         NpgsqlTransaction transaction,
         Guid grupoId,
         Guid usuarioId,
+        bool removido,
         CancellationToken cancellationToken)
     {
         await using (var membro = new NpgsqlCommand(
@@ -55,10 +59,11 @@ internal static class MembrosGrupo
         await using var convites = new NpgsqlCommand("""
             UPDATE convites_grupo
             SET revoked_at = now()
-            WHERE grupo_id = $1 AND criador_id = $2 AND used_at IS NULL AND revoked_at IS NULL
+            WHERE grupo_id = $1 AND revoked_at IS NULL AND ($3 OR criador_id = $2)
             """, connection, transaction);
         convites.Parameters.AddWithValue(grupoId);
         convites.Parameters.AddWithValue(usuarioId);
+        convites.Parameters.AddWithValue(removido);
         await convites.ExecuteNonQueryAsync(cancellationToken);
     }
 

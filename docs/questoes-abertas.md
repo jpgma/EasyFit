@@ -616,7 +616,7 @@ Não instalar serviços adicionais.
 
 ## Q028 — Como será o convite de novos membros?
 
-**Status:** DECIDIDA — ver `decisoes/0008-grupos-e-convites.md`
+**Status:** DECIDIDA — ver `decisoes/0008-grupos-e-convites.md` Revista em `decisoes/0017-convite-reutilizavel.md`: um link reutilizável por grupo.
 
 Investigar:
 

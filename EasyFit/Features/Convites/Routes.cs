@@ -6,10 +6,10 @@ internal static class ConvitesRoutes
 {
     public static void MapConvitesRoutes(this IEndpointRouteBuilder routes)
     {
-        var grupo = routes.MapGroup("/api/grupos/{id:guid}/convites").RequireSessao();
+        var grupo = routes.MapGroup("/api/grupos/{id:guid}/convite").RequireSessao();
+        grupo.MapGet("/", ObterConvite.HandleAsync);
         grupo.MapPost("/", CriarConvite.HandleAsync);
-        grupo.MapGet("/", ListarConvites.HandleAsync);
-        grupo.MapDelete("/{conviteId:guid}", RevogarConvite.HandleAsync);
+        grupo.MapDelete("/", RevogarConvite.HandleAsync);
 
         routes.MapPost("/api/grupos/entrar", EntrarNoGrupo.HandleAsync).RequireSessao();
 

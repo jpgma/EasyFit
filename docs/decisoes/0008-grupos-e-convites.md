@@ -1,6 +1,6 @@
 # 0008 — Grupos, convites e permissões
 
-**Status:** DECIDIDA
+**Status:** DECIDIDA. Parcialmente substituída pela decisão 0017 (convite reutilizável).
 
 ## Contexto
 

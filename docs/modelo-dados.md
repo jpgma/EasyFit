@@ -20,7 +20,7 @@ Uma linha por sessão: cada dispositivo tem a sua. Ver `decisoes/0006-autenticac
 |---|---|---|
 | `id` | `uuid` | Chave primária |
 | `usuario_id` | `uuid` | Referencia `usuarios`, apagada junto com o usuário. Indexada |
-| `token_hash` | `bytea` | SHA-256 do token, único. O token em si nunca é gravado |
+| `token` | `text` | Único. Legível, para os administradores verem o link |
 | `created_at` | `timestamptz` | Padrão `now()` |
 | `expires_at` | `timestamptz` | Obrigatória. Renovada com o uso |
 | `revoked_at` | `timestamptz` | Preenchida ao sair |
@@ -37,7 +37,7 @@ Uma linha por sessão: cada dispositivo tem a sua. Ver `decisoes/0006-autenticac
 
 ## `membros_grupo`
 
-Uma linha por usuário e grupo. Sair do grupo preenche `removed_at`, e voltar reaproveita a linha. Ver `decisoes/0008-grupos-e-convites.md`.
+Uma linha por usuário e grupo. Sair do grupo preenche `removed_at`, e voltar reaproveita a linha, mantendo o `joined_at` original. Ver `decisoes/0008-grupos-e-convites.md`.
 
 | Coluna | Tipo | Observações |
 |---|---|---|
@@ -49,7 +49,7 @@ Uma linha por usuário e grupo. Sair do grupo preenche `removed_at`, e voltar re
 
 ## `convites_grupo`
 
-Um convite só vale enquanto `used_at` e `revoked_at` estiverem vazias e `expires_at` estiver no futuro.
+Um link reutilizável por grupo. Só vale enquanto `revoked_at` estiver vazia e `expires_at` estiver no futuro. Ver `decisoes/0017-convite-reutilizavel.md`.
 
 | Coluna | Tipo | Observações |
 |---|---|---|
@@ -59,9 +59,7 @@ Um convite só vale enquanto `used_at` e `revoked_at` estiverem vazias e `expire
 | `token_hash` | `bytea` | SHA-256 do token, único. O token em si nunca é gravado |
 | `created_at` | `timestamptz` | Padrão `now()` |
 | `expires_at` | `timestamptz` | Obrigatória. 7 dias depois da criação |
-| `used_at` | `timestamptz` | Preenchida quando o convite é aceito |
-| `usado_por_id` | `uuid` | Referencia `usuarios`. Quem aceitou |
-| `revoked_at` | `timestamptz` | Preenchida ao cancelar, ou quando quem criou deixa o grupo |
+| `revoked_at` | `timestamptz` | Preenchida ao cancelar, ao gerar outro link, quando quem criou deixa o grupo ou quando alguém é removido. No máximo uma linha do grupo fica sem ela |
 
 ## `desafios`
 

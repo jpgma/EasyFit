@@ -13,8 +13,9 @@ internal enum ConviteCriacaoStatus
     GrupoCheio,
 }
 
-internal readonly record struct ConviteCriacaoResult(ConviteCriacaoStatus Status, ConviteCriadoResponse? Convite = null);
+internal readonly record struct ConviteCriacaoResult(ConviteCriacaoStatus Status, ConviteResponse? Convite = null);
 
+/// <summary>Gera o link do grupo, substituindo o anterior.</summary>
 internal static class CriarConvite
 {
     public static async Task<IResult> HandleAsync(
@@ -33,7 +34,7 @@ internal static class CriarConvite
         {
             ConviteCriacaoStatus.Criado => Results.Json(
                 result.Convite!,
-                AppJsonContext.Default.ConviteCriadoResponse,
+                AppJsonContext.Default.ConviteResponse,
                 statusCode: StatusCodes.Status201Created),
             ConviteCriacaoStatus.GrupoNaoEncontrado => GrupoAcesso.GrupoNaoEncontrado(),
             ConviteCriacaoStatus.AcessoNegado => GrupoAcesso.AcessoNegado(),
@@ -76,21 +77,29 @@ internal static class CriarConvite
             }
         }
 
-        var token = OpaqueToken.Generate();
-        var expiresAt = DateTimeOffset.UtcNow + ValidacaoConvite.Validade;
+        await using (var anterior = new NpgsqlCommand(
+            "UPDATE convites_grupo SET revoked_at = now() WHERE grupo_id = $1 AND revoked_at IS NULL",
+            connection,
+            transaction))
+        {
+            anterior.Parameters.AddWithValue(grupoId);
+            await anterior.ExecuteNonQueryAsync(cancellationToken);
+        }
 
-        await using var insert = new NpgsqlCommand("""
-            INSERT INTO convites_grupo (grupo_id, criador_id, token_hash, expires_at)
+        await using (var insert = new NpgsqlCommand("""
+            INSERT INTO convites_grupo (grupo_id, criador_id, token, expires_at)
             VALUES ($1, $2, $3, $4)
-            RETURNING id
-            """, connection, transaction);
-        insert.Parameters.AddWithValue(grupoId);
-        insert.Parameters.AddWithValue(usuarioId);
-        insert.Parameters.AddWithValue(OpaqueToken.Hash(token));
-        insert.Parameters.AddWithValue(expiresAt);
-        var id = (Guid)(await insert.ExecuteScalarAsync(cancellationToken))!;
+            """, connection, transaction))
+        {
+            insert.Parameters.AddWithValue(grupoId);
+            insert.Parameters.AddWithValue(usuarioId);
+            insert.Parameters.AddWithValue(OpaqueToken.Generate());
+            insert.Parameters.AddWithValue(DateTimeOffset.UtcNow + ValidacaoConvite.Validade);
+            await insert.ExecuteNonQueryAsync(cancellationToken);
+        }
 
+        var convite = await ObterConvite.GetAtivoAsync(connection, transaction, grupoId, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-        return new ConviteCriacaoResult(ConviteCriacaoStatus.Criado, new ConviteCriadoResponse(id, token, expiresAt));
+        return new ConviteCriacaoResult(ConviteCriacaoStatus.Criado, convite);
     }
 }

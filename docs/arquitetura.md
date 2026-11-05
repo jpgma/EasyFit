@@ -885,7 +885,7 @@ historico_revisao
 
 - E-mail único por usuário.
 - Um vínculo por usuário e grupo.
-- Um convite por token.
+- Um convite por token, e um link ativo por grupo.
 - Um desafio por período em cada grupo, sem sobreposição de datas (exceto os cancelados).
 - Uma reação por usuário e atividade.
 - Um revisor por usuário e atividade.
@@ -954,14 +954,14 @@ DELETE /api/grupos/{id}/membros/{usuarioId}
 POST /api/grupos/{id}/sair
 POST /api/grupos/{id}/transferir
 
-POST /api/grupos/{id}/convites
-GET  /api/grupos/{id}/convites
-DELETE /api/grupos/{id}/convites/{conviteId}
+GET  /api/grupos/{id}/convite
+POST /api/grupos/{id}/convite
+DELETE /api/grupos/{id}/convite
 POST /api/convites/consultar
 POST /api/grupos/entrar
 ```
 
-O token do convite nunca faz parte do caminho, por isso a consulta usa `POST`. Permissões e regras em `docs/decisoes/0008-grupos-e-convites.md`.
+O token do convite nunca faz parte do caminho, por isso a consulta usa `POST`. Permissões e regras em `docs/decisoes/0008-grupos-e-convites.md` e `docs/decisoes/0017-convite-reutilizavel.md`.
 
 ### 10.3. Desafios
 

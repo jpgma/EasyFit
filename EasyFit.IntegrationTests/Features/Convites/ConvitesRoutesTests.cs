@@ -30,28 +30,71 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
         var grupoId = await _host.CreateGrupoAsync(ana);
         var ator = await _host.AddMembroAsync(grupoId, papel);
 
-        var response = await ator.Client.PostAsync($"/api/grupos/{grupoId}/convites", null, Token);
+        var response = await ator.Client.PostAsync($"/api/grupos/{grupoId}/convite", null, Token);
 
         Assert.Equal(expected, response.StatusCode);
     }
 
     [Fact]
-    public async Task Create_StoresOnlyTheHash_AndExpiresInSevenDays()
+    public async Task Create_ExpiresInSevenDays_AndTheLinkStaysVisibleToAdmins()
     {
-        var ana = await _host.CreateUsuarioAsync();
+        var ana = await _host.CreateUsuarioAsync("Ana");
         var grupoId = await _host.CreateGrupoAsync(ana);
+        var admin = await _host.AddMembroAsync(grupoId, PapelMembro.Administrador);
 
-        var response = await ana.Client.PostAsync($"/api/grupos/{grupoId}/convites", null, Token);
+        Assert.Null((await GetConviteAsync(ana, grupoId)).Convite);
 
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        var convite = await response.Content.ReadFromJsonAsync(AppJsonContext.Default.ConviteCriadoResponse, Token);
-        Assert.False(string.IsNullOrEmpty(convite!.Token));
+        var convite = await CreateConviteAsync(ana, grupoId);
+
+        Assert.False(string.IsNullOrEmpty(convite.Token));
+        Assert.Equal("Ana", convite.CriadoPor);
         Assert.InRange(
             convite.ExpiresAt,
             DateTimeOffset.UtcNow.AddDays(7).AddMinutes(-1),
             DateTimeOffset.UtcNow.AddDays(7).AddMinutes(1));
-        Assert.Equal(0L, await _host.CountAsync(
-            $"SELECT count(*) FROM convites_grupo WHERE encode(token_hash, 'escape') = '{convite.Token}'"));
+        Assert.Equal(convite.Token, (await GetConviteAsync(admin, grupoId)).Convite?.Token);
+    }
+
+    [Fact]
+    public async Task Create_ReplacesThePreviousLink()
+    {
+        var ana = await _host.CreateUsuarioAsync();
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var antigo = await CreateConviteAsync(ana, grupoId);
+
+        var novo = await CreateConviteAsync(ana, grupoId);
+
+        Assert.NotEqual(antigo.Token, novo.Token);
+        Assert.Equal(novo.Token, (await GetConviteAsync(ana, grupoId)).Convite?.Token);
+        Assert.Equal(HttpStatusCode.NotFound, (await ConsultarAsync(_host.CreateAnonimo(), antigo.Token)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await ConsultarAsync(_host.CreateAnonimo(), novo.Token)).StatusCode);
+    }
+
+    [Fact]
+    public async Task Create_ReplacesAnExpiredLink()
+    {
+        var ana = await _host.CreateUsuarioAsync();
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        await CreateConviteAsync(ana, grupoId);
+        await _host.ExecuteAsync("UPDATE convites_grupo SET expires_at = now() - interval '1 second'");
+
+        Assert.Null((await GetConviteAsync(ana, grupoId)).Convite);
+
+        var novo = await CreateConviteAsync(ana, grupoId);
+        Assert.Equal(novo.Token, (await GetConviteAsync(ana, grupoId)).Convite?.Token);
+    }
+
+    [Fact]
+    public async Task ConcurrentCreates_LeaveOneActiveLink()
+    {
+        var ana = await _host.CreateUsuarioAsync();
+        var grupoId = await _host.CreateGrupoAsync(ana);
+
+        var respostas = await Task.WhenAll(Enumerable.Range(0, 5).Select(_ =>
+            ana.Client.PostAsync($"/api/grupos/{grupoId}/convite", null, Token)));
+
+        Assert.All(respostas, r => Assert.Equal(HttpStatusCode.Created, r.StatusCode));
+        Assert.Equal(1L, await _host.CountAsync("SELECT count(*) FROM convites_grupo WHERE revoked_at IS NULL"));
     }
 
     [Fact]
@@ -61,9 +104,27 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
         var grupoId = await _host.CreateGrupoAsync(ana);
         await FillGrupoAsync(grupoId, GrupoEntrada.MaxMembros - 1);
 
-        var response = await ana.Client.PostAsync($"/api/grupos/{grupoId}/convites", null, Token);
+        var response = await ana.Client.PostAsync($"/api/grupos/{grupoId}/convite", null, Token);
 
         await ApiTestHost.AssertProblemAsync(response, HttpStatusCode.Conflict, "GRUPO_CHEIO");
+    }
+
+    [Fact]
+    public async Task Get_And_Delete_AreDeniedToMembros()
+    {
+        var ana = await _host.CreateUsuarioAsync();
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        await CreateConviteAsync(ana, grupoId);
+        var membro = await _host.AddMembroAsync(grupoId);
+
+        await ApiTestHost.AssertProblemAsync(
+            await membro.Client.GetAsync($"/api/grupos/{grupoId}/convite", Token),
+            HttpStatusCode.Forbidden,
+            "ACESSO_NEGADO");
+        await ApiTestHost.AssertProblemAsync(
+            await membro.Client.DeleteAsync($"/api/grupos/{grupoId}/convite", Token),
+            HttpStatusCode.Forbidden,
+            "ACESSO_NEGADO");
     }
 
     [Fact]
@@ -71,19 +132,19 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
     {
         var ana = await _host.CreateUsuarioAsync();
         var grupoId = await _host.CreateGrupoAsync(ana);
-        var convite = await CreateConviteAsync(ana, grupoId);
+        await CreateConviteAsync(ana, grupoId);
         var estranho = await _host.CreateUsuarioAsync();
 
         await ApiTestHost.AssertProblemAsync(
-            await estranho.Client.PostAsync($"/api/grupos/{grupoId}/convites", null, Token),
+            await estranho.Client.PostAsync($"/api/grupos/{grupoId}/convite", null, Token),
             HttpStatusCode.NotFound,
             "GRUPO_NAO_ENCONTRADO");
         await ApiTestHost.AssertProblemAsync(
-            await estranho.Client.GetAsync($"/api/grupos/{grupoId}/convites", Token),
+            await estranho.Client.GetAsync($"/api/grupos/{grupoId}/convite", Token),
             HttpStatusCode.NotFound,
             "GRUPO_NAO_ENCONTRADO");
         await ApiTestHost.AssertProblemAsync(
-            await estranho.Client.DeleteAsync($"/api/grupos/{grupoId}/convites/{convite.Id}", Token),
+            await estranho.Client.DeleteAsync($"/api/grupos/{grupoId}/convite", Token),
             HttpStatusCode.NotFound,
             "GRUPO_NAO_ENCONTRADO");
     }
@@ -95,15 +156,15 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
         var id = Guid.NewGuid();
 
         await ApiTestHost.AssertProblemAsync(
-            await anonimo.PostAsync($"/api/grupos/{id}/convites", null, Token),
+            await anonimo.PostAsync($"/api/grupos/{id}/convite", null, Token),
             HttpStatusCode.Unauthorized,
             "NAO_AUTENTICADO");
         await ApiTestHost.AssertProblemAsync(
-            await anonimo.GetAsync($"/api/grupos/{id}/convites", Token),
+            await anonimo.GetAsync($"/api/grupos/{id}/convite", Token),
             HttpStatusCode.Unauthorized,
             "NAO_AUTENTICADO");
         await ApiTestHost.AssertProblemAsync(
-            await anonimo.DeleteAsync($"/api/grupos/{id}/convites/{id}", Token),
+            await anonimo.DeleteAsync($"/api/grupos/{id}/convite", Token),
             HttpStatusCode.Unauthorized,
             "NAO_AUTENTICADO");
         await ApiTestHost.AssertProblemAsync(
@@ -113,79 +174,82 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task List_ShowsPendingInvitesWithoutTokens_AndIsDeniedToMembros()
-    {
-        var ana = await _host.CreateUsuarioAsync("Ana");
-        var grupoId = await _host.CreateGrupoAsync(ana);
-        var pendente = await CreateConviteAsync(ana, grupoId);
-        var revogado = await CreateConviteAsync(ana, grupoId);
-        await ana.Client.DeleteAsync($"/api/grupos/{grupoId}/convites/{revogado.Id}", Token);
-        var membro = await _host.AddMembroAsync(grupoId);
-
-        var response = await ana.Client.GetAsync($"/api/grupos/{grupoId}/convites", Token);
-        var raw = await response.Content.ReadAsStringAsync(Token);
-        Assert.DoesNotContain(pendente.Token, raw, StringComparison.Ordinal);
-
-        var body = await ana.Client.GetFromJsonAsync(
-            $"/api/grupos/{grupoId}/convites", AppJsonContext.Default.ConvitesResponse, Token);
-        var convite = Assert.Single(body!.Convites);
-        Assert.Equal(pendente.Id, convite.Id);
-        Assert.Equal("Ana", convite.CriadoPor);
-
-        await ApiTestHost.AssertProblemAsync(
-            await membro.Client.GetAsync($"/api/grupos/{grupoId}/convites", Token),
-            HttpStatusCode.Forbidden,
-            "ACESSO_NEGADO");
-    }
-
-    [Fact]
-    public async Task Revogar_OnlyWorksWithinTheInvitesOwnGroup()
+    public async Task Revogar_WithoutAnActiveLink_IsNotFound()
     {
         var ana = await _host.CreateUsuarioAsync();
-        var grupoDaAna = await _host.CreateGrupoAsync(ana);
-        var convite = await CreateConviteAsync(ana, grupoDaAna);
-        var bia = await _host.CreateUsuarioAsync();
-        var grupoDaBia = await _host.CreateGrupoAsync(bia);
+        var grupoId = await _host.CreateGrupoAsync(ana);
 
-        var response = await bia.Client.DeleteAsync($"/api/grupos/{grupoDaBia}/convites/{convite.Id}", Token);
+        var response = await ana.Client.DeleteAsync($"/api/grupos/{grupoId}/convite", Token);
 
         await ApiTestHost.AssertProblemAsync(response, HttpStatusCode.NotFound, "CONVITE_NAO_ENCONTRADO");
-        Assert.Equal(HttpStatusCode.OK, (await ConsultarAsync(_host.CreateAnonimo(), convite.Token)).StatusCode);
     }
 
     [Fact]
-    public async Task Consultar_ShowsThePreviewToAnonymousVisitors()
+    public async Task Consultar_ShowsThePreviewToAnonymousVisitors_WithoutEmails()
     {
         var ana = await _host.CreateUsuarioAsync("Ana");
         var grupoId = await _host.CreateGrupoAsync(ana, "Amigos");
+        await _host.AddMembroAsync(grupoId, nome: "Bia");
         var convite = await CreateConviteAsync(ana, grupoId);
 
         var response = await ConsultarAsync(_host.CreateAnonimo(), convite.Token);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var raw = await response.Content.ReadAsStringAsync(Token);
+        Assert.DoesNotContain("@", raw, StringComparison.Ordinal);
         var body = await response.Content.ReadFromJsonAsync(AppJsonContext.Default.ConviteConsultaResponse, Token);
-        Assert.Equal(new ConviteConsultaResponse("Amigos", "Ana", 1, GrupoEntrada.MaxMembros), body);
+        Assert.Equal("Amigos", body!.GrupoNome);
+        Assert.Equal("Ana", body.ConvidadoPor);
+        Assert.Equal(2, body.TotalMembros);
+        Assert.Equal(GrupoEntrada.MaxMembros, body.MaxMembros);
+        Assert.Null(body.DesafioNome);
+        Assert.Equal(["Ana", "Bia"], body.Membros);
     }
 
     [Fact]
-    public async Task ExpiredUsedRevokedAndUnknownInvites_AllGetTheSameAnswer()
+    public async Task Consultar_ShowsTheCurrentDesafio_NeverACanceledOrFinishedOne()
     {
         var ana = await _host.CreateUsuarioAsync();
         var grupoId = await _host.CreateGrupoAsync(ana);
+        var convite = await CreateConviteAsync(ana, grupoId);
+        const string HojeNoGrupo = "(now() AT TIME ZONE 'America/Sao_Paulo')::date";
+        await _host.ExecuteAsync($"""
+            INSERT INTO desafios (
+                grupo_id, criador_id, nome, data_inicio, data_fim,
+                duracao_minima_segundos, sessoes_por_semana, cancelled_at)
+            VALUES
+                ('{grupoId}', '{ana.Id}', 'Encerrado',
+                 date_trunc('week', {HojeNoGrupo})::date - 14, date_trunc('week', {HojeNoGrupo})::date - 8, 3600, 4, NULL),
+                ('{grupoId}', '{ana.Id}', 'Cancelado',
+                 date_trunc('week', {HojeNoGrupo})::date, date_trunc('week', {HojeNoGrupo})::date + 6, 3600, 4, now()),
+                ('{grupoId}', '{ana.Id}', 'Atual',
+                 date_trunc('week', {HojeNoGrupo})::date, date_trunc('week', {HojeNoGrupo})::date + 6, 3600, 4, NULL),
+                ('{grupoId}', '{ana.Id}', 'Próximo',
+                 date_trunc('week', {HojeNoGrupo})::date + 7, date_trunc('week', {HojeNoGrupo})::date + 13, 3600, 4, NULL)
+            """);
 
-        var expirado = await CreateConviteAsync(ana, grupoId);
+        var response = await ConsultarAsync(_host.CreateAnonimo(), convite.Token);
+
+        var body = await response.Content.ReadFromJsonAsync(AppJsonContext.Default.ConviteConsultaResponse, Token);
+        Assert.Equal("Atual", body!.DesafioNome);
+    }
+
+    [Fact]
+    public async Task ExpiredRevokedAndUnknownInvites_AllGetTheSameAnswer()
+    {
+        var ana = await _host.CreateUsuarioAsync();
+        var grupoExpirado = await _host.CreateGrupoAsync(ana);
+        var grupoRevogado = await _host.CreateGrupoAsync(ana);
+
+        var expirado = await CreateConviteAsync(ana, grupoExpirado);
         await _host.ExecuteAsync(
-            $"UPDATE convites_grupo SET expires_at = now() - interval '1 second' WHERE id = '{expirado.Id}'");
+            $"UPDATE convites_grupo SET expires_at = now() - interval '1 second' WHERE grupo_id = '{grupoExpirado}'");
 
-        var usado = await CreateConviteAsync(ana, grupoId);
-        var primeira = await _host.CreateUsuarioAsync();
-        Assert.Equal(HttpStatusCode.OK, (await EntrarAsync(primeira.Client, usado.Token)).StatusCode);
-
-        var revogado = await CreateConviteAsync(ana, grupoId);
-        await ana.Client.DeleteAsync($"/api/grupos/{grupoId}/convites/{revogado.Id}", Token);
+        var revogado = await CreateConviteAsync(ana, grupoRevogado);
+        await ana.Client.DeleteAsync($"/api/grupos/{grupoRevogado}/convite", Token);
 
         var visitante = await _host.CreateUsuarioAsync();
-        foreach (var token in new[] { expirado.Token, usado.Token, revogado.Token, "desconhecido", new string('x', 500) })
+        foreach (var token in new[] { expirado.Token, revogado.Token, "desconhecido", new string('x', 500) })
         {
             await ApiTestHost.AssertProblemAsync(
                 await ConsultarAsync(visitante.Client, token), HttpStatusCode.NotFound, "CONVITE_INVALIDO");
@@ -197,12 +261,13 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Entrar_AddsAMembro_AndConsumesTheInvite()
+    public async Task Entrar_AddsAMembro_AndTheLinkKeepsWorking()
     {
         var ana = await _host.CreateUsuarioAsync();
         var grupoId = await _host.CreateGrupoAsync(ana);
         var convite = await CreateConviteAsync(ana, grupoId);
         var bia = await _host.CreateUsuarioAsync();
+        var caio = await _host.CreateUsuarioAsync();
 
         var response = await EntrarAsync(bia.Client, convite.Token);
 
@@ -213,12 +278,12 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
         var grupo = await bia.Client.GetFromJsonAsync(
             $"/api/grupos/{grupoId}", AppJsonContext.Default.GrupoResponse, Token);
         Assert.Equal(PapelMembro.Membro, grupo!.Papel);
-        Assert.Equal(1L, await _host.CountAsync(
-            $"SELECT count(*) FROM convites_grupo WHERE id = '{convite.Id}' AND used_at IS NOT NULL AND usado_por_id = '{bia.Id}'"));
+
+        Assert.Equal(HttpStatusCode.OK, (await EntrarAsync(caio.Client, convite.Token)).StatusCode);
     }
 
     [Fact]
-    public async Task Entrar_ByACurrentMember_DoesNotBurnTheInvite()
+    public async Task Entrar_ByACurrentMember_IsRefused()
     {
         var ana = await _host.CreateUsuarioAsync();
         var grupoId = await _host.CreateGrupoAsync(ana);
@@ -227,11 +292,10 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
         var response = await EntrarAsync(ana.Client, convite.Token);
 
         await ApiTestHost.AssertProblemAsync(response, HttpStatusCode.Conflict, "JA_E_MEMBRO");
-        Assert.Equal(HttpStatusCode.OK, (await ConsultarAsync(_host.CreateAnonimo(), convite.Token)).StatusCode);
     }
 
     [Fact]
-    public async Task Entrar_InAFullGroup_DoesNotBurnTheInvite()
+    public async Task Entrar_InAFullGroup_IsRefused()
     {
         var ana = await _host.CreateUsuarioAsync();
         var grupoId = await _host.CreateGrupoAsync(ana);
@@ -246,11 +310,12 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task ConcurrentAccepts_OfOneInvite_LetOnlyOnePersonIn()
+    public async Task ConcurrentAccepts_ForTheLastSlot_LetOnlyOnePersonIn()
     {
         var ana = await _host.CreateUsuarioAsync();
         var grupoId = await _host.CreateGrupoAsync(ana);
         var convite = await CreateConviteAsync(ana, grupoId);
+        await FillGrupoAsync(grupoId, GrupoEntrada.MaxMembros - 2);
         var bia = await _host.CreateUsuarioAsync();
         var caio = await _host.CreateUsuarioAsync();
 
@@ -260,49 +325,25 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
 
         Assert.Single(responses, response => response.StatusCode == HttpStatusCode.OK);
         var refused = Assert.Single(responses, response => response.StatusCode != HttpStatusCode.OK);
-        await ApiTestHost.AssertProblemAsync(refused, HttpStatusCode.NotFound, "CONVITE_INVALIDO");
-        Assert.Equal(2L, await _host.CountAsync("SELECT count(*) FROM membros_grupo WHERE removed_at IS NULL"));
-    }
-
-    [Fact]
-    public async Task ConcurrentAccepts_ForTheLastSlot_LetOnlyOnePersonIn_AndKeepTheOtherInvite()
-    {
-        var ana = await _host.CreateUsuarioAsync();
-        var grupoId = await _host.CreateGrupoAsync(ana);
-        var primeiro = await CreateConviteAsync(ana, grupoId);
-        var segundo = await CreateConviteAsync(ana, grupoId);
-        await FillGrupoAsync(grupoId, GrupoEntrada.MaxMembros - 2);
-        var bia = await _host.CreateUsuarioAsync();
-        var caio = await _host.CreateUsuarioAsync();
-
-        var responses = await Task.WhenAll(
-            EntrarAsync(bia.Client, primeiro.Token),
-            EntrarAsync(caio.Client, segundo.Token));
-
-        Assert.Single(responses, response => response.StatusCode == HttpStatusCode.OK);
-        var refused = Assert.Single(responses, response => response.StatusCode != HttpStatusCode.OK);
         await ApiTestHost.AssertProblemAsync(refused, HttpStatusCode.Conflict, "GRUPO_CHEIO");
         Assert.Equal(
             GrupoEntrada.MaxMembros,
             await _host.CountAsync("SELECT count(*) FROM membros_grupo WHERE removed_at IS NULL"));
-        Assert.Equal(1L, await _host.CountAsync("SELECT count(*) FROM convites_grupo WHERE used_at IS NULL"));
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task LeavingOrBeingRemoved_RevokesThatPersonsPendingInvites(bool removed)
+    [Fact]
+    public async Task Leaving_RevokesTheLink_OnlyIfThatPersonCreatedIt()
     {
         var ana = await _host.CreateUsuarioAsync();
-        var grupoId = await _host.CreateGrupoAsync(ana);
-        var admin = await _host.AddMembroAsync(grupoId, PapelMembro.Administrador);
-        var doAdmin = await CreateConviteAsync(admin, grupoId);
-        var daAna = await CreateConviteAsync(ana, grupoId);
+        var grupoDoAdmin = await _host.CreateGrupoAsync(ana);
+        var grupoDaAna = await _host.CreateGrupoAsync(ana);
+        var admin = await _host.AddMembroAsync(grupoDoAdmin, PapelMembro.Administrador);
+        var outraAdmin = await _host.AddMembroAsync(grupoDaAna, PapelMembro.Administrador);
+        var doAdmin = await CreateConviteAsync(admin, grupoDoAdmin);
+        var daAna = await CreateConviteAsync(ana, grupoDaAna);
 
-        var response = removed
-            ? await ana.Client.DeleteAsync($"/api/grupos/{grupoId}/membros/{admin.Id}", Token)
-            : await admin.Client.PostAsync($"/api/grupos/{grupoId}/sair", null, Token);
-        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        await admin.Client.PostAsync($"/api/grupos/{grupoDoAdmin}/sair", null, Token);
+        await outraAdmin.Client.PostAsync($"/api/grupos/{grupoDaAna}/sair", null, Token);
 
         var anonimo = _host.CreateAnonimo();
         Assert.Equal(HttpStatusCode.NotFound, (await ConsultarAsync(anonimo, doAdmin.Token)).StatusCode);
@@ -310,11 +351,31 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task RemovedMember_ComesBackOnlyWithANewInvite_AsMembro()
+    public async Task Removing_RevokesTheLink_WhoeverCreatedIt_SoTheRemovedMemberCannotReturn()
+    {
+        var ana = await _host.CreateUsuarioAsync();
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var bia = await _host.AddMembroAsync(grupoId);
+        var convite = await CreateConviteAsync(ana, grupoId);
+
+        var response = await ana.Client.DeleteAsync($"/api/grupos/{grupoId}/membros/{bia.Id}", Token);
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+        await ApiTestHost.AssertProblemAsync(
+            await EntrarAsync(bia.Client, convite.Token),
+            HttpStatusCode.NotFound,
+            "CONVITE_INVALIDO");
+        Assert.Null((await GetConviteAsync(ana, grupoId)).Convite);
+    }
+
+    [Fact]
+    public async Task RemovedMember_ComesBackOnlyWithANewInvite_AsMembro_KeepingTheFirstEntry()
     {
         var ana = await _host.CreateUsuarioAsync();
         var grupoId = await _host.CreateGrupoAsync(ana);
         var admin = await _host.AddMembroAsync(grupoId, PapelMembro.Administrador);
+        await _host.ExecuteAsync(
+            $"UPDATE membros_grupo SET joined_at = now() - interval '60 days' WHERE usuario_id = '{admin.Id}'");
         await ana.Client.DeleteAsync($"/api/grupos/{grupoId}/membros/{admin.Id}", Token);
         var convite = await CreateConviteAsync(ana, grupoId);
 
@@ -325,6 +386,10 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
             $"/api/grupos/{grupoId}", AppJsonContext.Default.GrupoResponse, Token);
         Assert.Equal(PapelMembro.Membro, grupo!.Papel);
         Assert.Equal(2, grupo.TotalMembros);
+        Assert.Equal(1L, await _host.CountAsync($"""
+            SELECT count(*) FROM membros_grupo
+            WHERE usuario_id = '{admin.Id}' AND joined_at < now() - interval '59 days'
+            """));
     }
 
     [Fact]
@@ -360,7 +425,6 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
             JOIN usuarios u ON u.id = m.usuario_id
             WHERE u.email = 'nova@exemplo.com' AND m.grupo_id = '{grupoId}' AND m.papel = 'Membro'
             """));
-        Assert.Equal(1L, await _host.CountAsync($"SELECT count(*) FROM convites_grupo WHERE id = '{convite.Id}' AND used_at IS NOT NULL"));
     }
 
     [Theory]
@@ -384,7 +448,7 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Registrar_InAFullGroup_LeavesNoAccountBehind_AndKeepsTheInvite()
+    public async Task Registrar_InAFullGroup_LeavesNoAccountBehind()
     {
         var ana = await _host.CreateUsuarioAsync();
         var grupoId = await _host.CreateGrupoAsync(ana);
@@ -395,11 +459,10 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
 
         await ApiTestHost.AssertProblemAsync(response, HttpStatusCode.Conflict, "GRUPO_CHEIO");
         Assert.Equal(0L, await _host.CountAsync("SELECT count(*) FROM usuarios WHERE email = 'nova@exemplo.com'"));
-        Assert.Equal(1L, await _host.CountAsync($"SELECT count(*) FROM convites_grupo WHERE id = '{convite.Id}' AND used_at IS NULL"));
     }
 
     [Fact]
-    public async Task Registrar_WithARepeatedEmail_DoesNotBurnTheInvite()
+    public async Task Registrar_WithARepeatedEmail_IsRefused()
     {
         var ana = await _host.CreateUsuarioAsync();
         var grupoId = await _host.CreateGrupoAsync(ana);
@@ -409,7 +472,6 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
         var response = await RegistrarAsync(_host.CreateAnonimo(), "ana@exemplo.com", convite.Token);
 
         await ApiTestHost.AssertProblemAsync(response, HttpStatusCode.Conflict, "EMAIL_JA_CADASTRADO");
-        Assert.Equal(1L, await _host.CountAsync($"SELECT count(*) FROM convites_grupo WHERE id = '{convite.Id}' AND used_at IS NULL"));
     }
 
     private async Task FillGrupoAsync(Guid grupoId, int quantidade)
@@ -420,12 +482,18 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
         }
     }
 
-    private static async Task<ConviteCriadoResponse> CreateConviteAsync(TestUsuario criador, Guid grupoId)
+    private static async Task<ConviteResponse> CreateConviteAsync(TestUsuario criador, Guid grupoId)
     {
-        var response = await criador.Client.PostAsync($"/api/grupos/{grupoId}/convites", null, Token);
+        var response = await criador.Client.PostAsync($"/api/grupos/{grupoId}/convite", null, Token);
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync(AppJsonContext.Default.ConviteCriadoResponse, Token))!;
+        return (await response.Content.ReadFromJsonAsync(AppJsonContext.Default.ConviteResponse, Token))!;
     }
+
+    private static async Task<ConviteAtualResponse> GetConviteAsync(TestUsuario leitor, Guid grupoId) =>
+        (await leitor.Client.GetFromJsonAsync(
+            $"/api/grupos/{grupoId}/convite",
+            AppJsonContext.Default.ConviteAtualResponse,
+            Token))!;
 
     private static Task<HttpResponseMessage> ConsultarAsync(HttpClient client, string token) =>
         client.PostAsJsonAsync(Consultar, new ConviteTokenRequest(token), AppJsonContext.Default.ConviteTokenRequest, Token);

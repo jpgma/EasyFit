@@ -1,5 +1,6 @@
-import { CloudOff, Ticket, Users } from "lucide-react";
+import { CloudOff, Target, Ticket, Users } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router";
+import { Avatar } from "@/components/Avatar";
 import { Logo } from "@/components/BrandMark";
 import { EmptyState } from "@/components/EmptyState";
 import { SplashScreen } from "@/components/SplashScreen";
@@ -67,7 +68,7 @@ export function ConvitePage() {
       consulta.error.status === 404 ? (
       <ConviteIndisponivel
         title="Este convite não é válido"
-        description="Ele pode ter expirado ou sido cancelado. Peça um novo link para quem te chamou."
+        description="Ele pode ter expirado ou sido substituído. Peça o link atual para quem te chamou."
       />
     ) : (
       <ConviteIndisponivel
@@ -78,7 +79,14 @@ export function ConvitePage() {
     );
   }
 
-  const { grupoNome, convidadoPor, totalMembros, maxMembros } = consulta.data;
+  const {
+    grupoNome,
+    convidadoPor,
+    totalMembros,
+    maxMembros,
+    desafioNome,
+    membros,
+  } = consulta.data;
   const vagas = maxMembros - totalMembros;
   const logado = Boolean(sessao.data);
 
@@ -99,6 +107,24 @@ export function ConvitePage() {
             <Users aria-hidden="true" className="size-4 shrink-0" />
             {totalMembros} de {maxMembros} membros
           </p>
+          {desafioNome && (
+            <p className="mt-1 flex items-center gap-2 text-sm text-muted">
+              <Target aria-hidden="true" className="size-4 shrink-0" />
+              <span className="min-w-0 break-words">Meta: {desafioNome}</span>
+            </p>
+          )}
+          <ul className="mt-4 flex flex-wrap gap-x-3 gap-y-2">
+            {membros.map((nome, indice) => (
+              <li
+                key={`${nome}-${indice}`}
+                className="flex items-center gap-1.5 text-xs font-medium"
+              >
+                {/* A prévia é pública e não expõe identificadores: a cor vem do nome. */}
+                <Avatar nome={nome} id={nome} size={24} />
+                {nome.trim().split(/\s+/)[0]}
+              </li>
+            ))}
+          </ul>
           <p className="mt-5 rounded-2xl bg-surface-muted p-4 text-sm text-muted">
             Ao entrar, você concorda em registrar suas atividades e avaliar as
             dos colegas com sinceridade.
