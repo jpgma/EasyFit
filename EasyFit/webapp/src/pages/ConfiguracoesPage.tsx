@@ -1,6 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { KeyRound, LogOut, Shield, User } from "lucide-react";
-import { useState } from "react";
+import {
+  Download,
+  KeyRound,
+  LogOut,
+  Shield,
+  Smartphone,
+  User,
+} from "lucide-react";
+import { useState, useSyncExternalStore } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -14,6 +21,11 @@ import {
   useSessao,
 } from "@/features/autenticacao";
 import { getErrorMessage } from "@/services/api";
+import {
+  getModoInstalacao,
+  instalar,
+  subscribeInstalacao,
+} from "@/services/instalacao";
 
 const nomeSchema = z.object({
   nomeExibicao: z
@@ -161,6 +173,41 @@ function SenhaForm() {
   );
 }
 
+function Instalacao() {
+  const modo = useSyncExternalStore(subscribeInstalacao, getModoInstalacao);
+
+  if (modo === null) return null;
+
+  return (
+    <>
+      <SectionTitle>Aplicativo</SectionTitle>
+      <div className="card space-y-3 p-5">
+        <div className="flex gap-3 text-sm text-muted">
+          <Smartphone
+            aria-hidden="true"
+            className="size-5 shrink-0 text-primary"
+          />
+          <p>
+            {modo === "botao"
+              ? "Instale o EasyFit para abrir direto da tela inicial, como um app."
+              : "No iPhone ou iPad, toque em Compartilhar e depois em Adicionar à Tela de Início."}
+          </p>
+        </div>
+        {modo === "botao" && (
+          <button
+            type="button"
+            className="btn-secondary w-full"
+            onClick={() => void instalar()}
+          >
+            <Download aria-hidden="true" className="size-4" />
+            Instalar aplicativo
+          </button>
+        )}
+      </div>
+    </>
+  );
+}
+
 export function ConfiguracoesPage() {
   const { data: usuario } = useSessao();
   const sair = useSair();
@@ -176,6 +223,8 @@ export function ConfiguracoesPage() {
 
       <SectionTitle>Senha</SectionTitle>
       <SenhaForm />
+
+      <Instalacao />
 
       <SectionTitle>Privacidade</SectionTitle>
       <div className="card flex gap-3 p-4 text-sm text-muted">

@@ -1,4 +1,4 @@
-import { CloudOff } from "lucide-react";
+import { WifiOff } from "lucide-react";
 import { Navigate, Outlet, useLocation } from "react-router";
 import { EmptyState } from "@/components/EmptyState";
 import { SplashScreen } from "@/components/SplashScreen";
@@ -11,27 +11,30 @@ type GateProps = {
 
 // Só decide o que mostrar: quem protege os dados continua sendo o backend.
 function SessaoGate({ allow, redirectTo }: GateProps) {
-  const { data: usuario, isPending, refetch } = useSessao();
+  const { data: usuario, isPending, fetchStatus, refetch } = useSessao();
   const location = useLocation();
 
   // Com o dado já em cache, uma falha ao revalidar não tira a pessoa da tela atual.
   if (usuario === undefined) {
-    if (isPending) return <SplashScreen />;
+    // Sem rede, a consulta fica pausada até a conexão voltar: em vez de carregar para sempre, avisa.
+    if (isPending && fetchStatus !== "paused") return <SplashScreen />;
 
     return (
       <main className="flex min-h-dvh flex-col items-center justify-center">
         <EmptyState
-          icon={CloudOff}
-          title="Sem conexão"
-          description="Não foi possível falar com o servidor. Verifique sua conexão e tente novamente."
+          icon={WifiOff}
+          title="Você está sem conexão"
+          description="Confira sua internet. Assim que voltar, a gente atualiza tudo."
+          action={
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => void refetch()}
+            >
+              Tentar de novo
+            </button>
+          }
         />
-        <button
-          type="button"
-          className="btn-secondary"
-          onClick={() => void refetch()}
-        >
-          Tentar novamente
-        </button>
       </main>
     );
   }

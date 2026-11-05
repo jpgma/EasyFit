@@ -10,13 +10,10 @@ internal static class CacheControleEstatico
     public static void Aplicar(StaticFileResponseContext contexto)
     {
         var nome = contexto.File.Name;
-        if (nome.Equals("index.html", StringComparison.OrdinalIgnoreCase))
-        {
-            contexto.Context.Response.Headers.CacheControl = "no-cache, must-revalidate";
-            return;
-        }
-
-        if (nome.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
+        // O sw.js e o manifest têm nome fixo: o navegador precisa sempre conferir se mudaram.
+        if (nome.EndsWith(".html", StringComparison.OrdinalIgnoreCase)
+            || nome.Equals("sw.js", StringComparison.OrdinalIgnoreCase)
+            || nome.Equals("manifest.webmanifest", StringComparison.OrdinalIgnoreCase))
         {
             contexto.Context.Response.Headers.CacheControl = "no-cache, must-revalidate";
             return;
