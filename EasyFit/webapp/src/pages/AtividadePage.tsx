@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 import { SplashScreen } from "@/components/SplashScreen";
 import {
+  EvidenciasAtividade,
   formatarDataRelativa,
   formatarDuracao,
   tipoAtividadeLabels,
@@ -65,23 +66,7 @@ export function AtividadePage() {
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_1fr]">
         <div className="card overflow-hidden">
-          {evidencias.length === 0 ? (
-            <div className="grid aspect-[4/3] place-items-center bg-surface-muted text-sm text-muted">
-              Sem comprovante anexado
-            </div>
-          ) : (
-            <div className="flex snap-x snap-mandatory overflow-x-auto">
-              {evidencias.map((evidencia) => (
-                <img
-                  key={evidencia.id}
-                  src={evidencia.url}
-                  alt={`Comprovante ${evidencia.ordem} de ${evidencias.length}`}
-                  className="aspect-[4/3] w-full shrink-0 snap-center object-cover"
-                  loading="lazy"
-                />
-              ))}
-            </div>
-          )}
+          <EvidenciasAtividade evidencias={evidencias} />
 
           <div className="p-5">
             <div className="flex items-center gap-3">

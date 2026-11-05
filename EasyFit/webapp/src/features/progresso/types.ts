@@ -31,7 +31,13 @@ export type HistoricoSemanal = {
 
 export type ResumoGrupo = {
   grupoId: string;
-  desafio: { id: string; nome: string; situacao: string } | null;
+  desafio: {
+    id: string;
+    nome: string;
+    situacao: string;
+    sessoesPorSemana: number;
+    duracaoMinimaSegundos: number;
+  } | null;
   sessoesPorSemana: number | null;
   meuProgresso: {
     sessoesVerificadas: number;

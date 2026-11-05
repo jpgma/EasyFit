@@ -983,13 +983,14 @@ Permissões e regras em `docs/decisoes/0009-desafios.md` e `docs/decisoes/0016-u
 ```http
 GET  /api/grupos/{id}/atividades
 POST /api/grupos/{id}/atividades
+GET  /api/grupos/{id}/atividades/para-avaliar
 GET  /api/atividades/recentes
 GET  /api/atividades/{id}
 POST /api/atividades/{id}/evidencias
 GET  /api/atividades/{id}/evidencias/{evidenciaId}
 ```
 
-A criação usa somente JSON; o upload de evidências usa `multipart/form-data` em rota separada. Permissões e regras em `docs/decisoes/0011-atividades.md`.
+A lista do grupo aceita `?filtro=Minhas|Pendentes|Verificadas|EmRevisao`, aplicado no servidor para não quebrar a paginação por cursor. `para-avaliar` devolve o que ainda espera a reação de quem consulta, dentro da janela de 48 horas. A criação usa somente JSON; o upload de evidências usa `multipart/form-data` em rota separada. Permissões e regras em `docs/decisoes/0011-atividades.md`.
 
 ### 10.5. Reações
 

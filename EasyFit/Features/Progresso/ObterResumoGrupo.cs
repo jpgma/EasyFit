@@ -71,13 +71,18 @@ internal static class ObterResumoGrupo
 
         return Results.Ok(new ResumoGrupoResponse(
             grupoId,
-            new DesafioDestaqueResponse(destacado.Id, destacado.Nome, destacado.Situacao),
+            new DesafioDestaqueResponse(
+                destacado.Id,
+                destacado.Nome,
+                destacado.Situacao,
+                desafio.SessoesPorSemana,
+                destacado.DuracaoMinimaSegundos),
             desafio.SessoesPorSemana,
             meuProgresso,
             top));
     }
 
-    private sealed record DesafioDestaque(Guid Id, string Nome, string Situacao);
+    private sealed record DesafioDestaque(Guid Id, string Nome, string Situacao, int DuracaoMinimaSegundos);
 
     private static async Task<DesafioDestaque?> LoadDesafioDestaqueAsync(
         NpgsqlConnection connection,
@@ -86,7 +91,7 @@ internal static class ObterResumoGrupo
     {
         await using var command = new NpgsqlCommand("""
             SELECT d.id, d.nome, d.data_inicio, d.data_fim, d.cancelled_at IS NOT NULL,
-                (now() AT TIME ZONE g.fuso_horario)::date
+                (now() AT TIME ZONE g.fuso_horario)::date, d.duracao_minima_segundos
             FROM desafios d
             JOIN grupos g ON g.id = d.grupo_id
             WHERE d.grupo_id = $1
@@ -110,7 +115,7 @@ internal static class ObterResumoGrupo
             var fim = reader.GetFieldValue<DateOnly>(3);
             var hoje = reader.GetFieldValue<DateOnly>(5);
             var situacao = GetSituacao(inicio, fim, cancelado: false, hoje);
-            return new DesafioDestaque(reader.GetGuid(0), reader.GetString(1), situacao);
+            return new DesafioDestaque(reader.GetGuid(0), reader.GetString(1), situacao, reader.GetInt32(6));
         }
 
         return null;

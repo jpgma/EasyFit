@@ -100,11 +100,42 @@ internal static class ObterProgresso
             }
         }
 
+        var seusDias = semana is null
+            ? []
+            : await LoadDiasComAtividadeAsync(connection, desafioId, semana.Inicio, semana.Fim, usuarioId, cancellationToken);
+
         return new ProgressoResponse(
             sessoesPorSemana,
             ProgressoDesafio.CountSemanas(inicio, fim),
             semana,
-            progresso);
+            progresso,
+            seusDias);
+    }
+
+    private static async Task<List<DateOnly>> LoadDiasComAtividadeAsync(
+        NpgsqlConnection connection,
+        Guid desafioId,
+        DateOnly inicioSemana,
+        DateOnly fimSemana,
+        Guid usuarioId,
+        CancellationToken cancellationToken)
+    {
+        await using var command = new NpgsqlCommand(
+            ContagensAtividadeDesafio.BuildDiasComAtividade(),
+            connection);
+        command.Parameters.AddWithValue(desafioId);
+        command.Parameters.AddWithValue(inicioSemana);
+        command.Parameters.AddWithValue(fimSemana);
+        command.Parameters.AddWithValue(usuarioId);
+
+        var dias = new List<DateOnly>();
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            dias.Add(reader.GetFieldValue<DateOnly>(0));
+        }
+
+        return dias;
     }
 
     private static async Task<Dictionary<Guid, (int Verificadas, int Pendentes)>> LoadContagensSemanaAsync(

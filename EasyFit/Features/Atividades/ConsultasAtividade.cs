@@ -8,7 +8,10 @@ internal static class ConsultasAtividade
         SELECT a.id, a.grupo_id, g.nome, a.usuario_id, u.nome_exibicao, a.tipo,
             a.duracao_segundos, a.started_at, a.tipo_comprovacao, a.situacao_verificacao,
             (SELECT count(*)::int FROM evidencias_atividade e WHERE e.atividade_id = a.id),
-            a.submitted_at
+            a.submitted_at, a.descricao,
+            (SELECT count(*)::int FROM reacoes_atividade r WHERE r.atividade_id = a.id AND r.tipo = 'Kudos'),
+            (SELECT count(*)::int FROM reacoes_atividade r WHERE r.atividade_id = a.id AND r.tipo = 'Suspeito'),
+            (SELECT count(*)::int FROM reacoes_atividade r WHERE r.atividade_id = a.id AND r.tipo = 'Rejeitar')
         FROM atividades a
         JOIN grupos g ON g.id = a.grupo_id
         JOIN usuarios u ON u.id = a.usuario_id
@@ -28,7 +31,11 @@ internal static class ConsultasAtividade
             reader.GetString(8),
             reader.GetString(9),
             reader.GetInt32(10),
-            reader.GetFieldValue<DateTimeOffset>(11));
+            reader.GetFieldValue<DateTimeOffset>(11),
+            reader.IsDBNull(12) ? null : reader.GetString(12),
+            reader.GetInt32(13),
+            reader.GetInt32(14),
+            reader.GetInt32(15));
 
     public static string BuildEvidenciaUrl(Guid atividadeId, Guid evidenciaId) =>
         $"/api/atividades/{atividadeId:D}/evidencias/{evidenciaId:D}";

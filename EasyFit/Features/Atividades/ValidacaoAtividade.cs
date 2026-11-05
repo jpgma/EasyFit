@@ -80,6 +80,23 @@ internal static class ValidacaoAtividade
     public static bool IsValidStartedAt(DateTimeOffset? startedAt) =>
         startedAt is { } instante && instante <= DateTimeOffset.UtcNow.AddHours(1);
 
+    /// <summary>Traduz o filtro da lista para SQL fixo; $1 é sempre quem consulta.</summary>
+    /// <returns><c>false</c> para um filtro desconhecido.</returns>
+    public static bool TryGetFiltroSql(string? filtro, out string sql)
+    {
+        string? traduzido = filtro switch
+        {
+            null or "" => string.Empty,
+            "Minhas" => "AND a.usuario_id = $1",
+            "Pendentes" => "AND a.situacao_verificacao IN ('AguardandoFeedback', 'EmRevisao', 'Contestada')",
+            "Verificadas" => "AND a.situacao_verificacao = 'Verificada'",
+            "EmRevisao" => "AND a.situacao_verificacao = 'EmRevisao'",
+            _ => null,
+        };
+        sql = traduzido ?? string.Empty;
+        return traduzido is not null;
+    }
+
     public static int NormalizeLimite(int? limite) =>
         limite is > 0 and <= LimiteFeedMaximo ? limite.Value : LimiteFeedPadrao;
 }

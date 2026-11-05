@@ -33,8 +33,10 @@ internal sealed record ProgressoParticipanteResponse(
     bool ContaNestaSemana);
 
 /// <param name="SemanaAtual">Vazia quando o desafio não está em andamento.</param>
+/// <param name="SeusDias">Os dias da semana atual em que quem consulta treinou.</param>
 internal sealed record ProgressoResponse(
     int SessoesPorSemana,
     int TotalSemanas,
     SemanaResponse? SemanaAtual,
-    IReadOnlyList<ProgressoParticipanteResponse> Participantes);
+    IReadOnlyList<ProgressoParticipanteResponse> Participantes,
+    IReadOnlyList<DateOnly> SeusDias);

@@ -11,6 +11,7 @@ import type {
   AtividadeResumo,
   CriarAtividadeData,
   Evidencia,
+  FiltroAtividades,
 } from "./types";
 
 const atividadesKey = ["atividades"] as const;
@@ -23,11 +24,17 @@ function atividadesDoGrupoKey(grupoId: string) {
   return [...gruposKey, grupoId, "atividades"] as const;
 }
 
-export function useAtividadesFeed(grupoId: string, limite = 20) {
+export function useAtividadesFeed(
+  grupoId: string,
+  limite = 20,
+  filtro?: FiltroAtividades,
+  enabled = true,
+) {
   return useInfiniteQuery({
-    queryKey: [...atividadesDoGrupoKey(grupoId), limite],
+    queryKey: [...atividadesDoGrupoKey(grupoId), limite, filtro ?? "Todas"],
     queryFn: async ({ pageParam, signal }) => {
       const params = new URLSearchParams({ limite: String(limite) });
+      if (filtro) params.set("filtro", filtro);
       if (pageParam) params.set("cursor", pageParam);
       const { atividades, proximoCursor } = await getJson<{
         atividades: AtividadeResumo[];
@@ -37,6 +44,22 @@ export function useAtividadesFeed(grupoId: string, limite = 20) {
     },
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.proximoCursor,
+    enabled,
+    retry: shouldRetry,
+  });
+}
+
+/** O que ainda espera a reação de quem está usando o aplicativo. */
+export function useFilaAvaliacao(grupoId: string) {
+  return useQuery({
+    queryKey: [...atividadesDoGrupoKey(grupoId), "fila"],
+    queryFn: async ({ signal }) => {
+      const { atividades } = await getJson<{ atividades: AtividadeResumo[] }>(
+        `/api/grupos/${grupoId}/atividades/para-avaliar`,
+        signal,
+      );
+      return atividades;
+    },
     retry: shouldRetry,
   });
 }

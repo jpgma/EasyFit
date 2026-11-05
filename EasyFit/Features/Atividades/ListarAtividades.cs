@@ -10,11 +10,13 @@ internal static class ListarAtividades
         Guid grupoId,
         int? limite,
         string? cursor,
+        string? filtro,
         HttpContext context,
         NpgsqlDataSource dataSource,
         CancellationToken cancellationToken)
     {
-        if (cursor is not null && !PaginacaoAtividade.TryDecodeCursor(cursor, out _, out _))
+        if ((cursor is not null && !PaginacaoAtividade.TryDecodeCursor(cursor, out _, out _))
+            || !ValidacaoAtividade.TryGetFiltroSql(filtro, out var filtroSql))
         {
             return OperacaoAtividade.InvalidData();
         }
@@ -26,6 +28,7 @@ internal static class ListarAtividades
             usuarioId,
             ValidacaoAtividade.NormalizeLimite(limite),
             cursor,
+            filtroSql,
             cancellationToken);
 
         return pagina is null
@@ -39,6 +42,7 @@ internal static class ListarAtividades
         Guid usuarioId,
         int limite,
         string? cursor,
+        string filtroSql,
         CancellationToken cancellationToken)
     {
         var temCursor = PaginacaoAtividade.TryDecodeCursor(cursor, out var cursorStarted, out var cursorId);
@@ -56,34 +60,24 @@ internal static class ListarAtividades
             return null;
         }
 
-        var sql = ConsultasAtividade.SelectResumo + """
-
+        var sql = $"""
+            {ConsultasAtividade.SelectResumo}
             WHERE a.grupo_id = $2
-            """ + (temCursor ? """
-
-            AND (a.started_at, a.id) < ($3, $4)
-            """ : string.Empty) + (temCursor
-            ? """
-
-            ORDER BY a.started_at DESC, a.id DESC
-            LIMIT $5
-            """
-            : """
-
+            {filtroSql}
+            {(temCursor ? "AND (a.started_at, a.id) < ($4, $5)" : string.Empty)}
             ORDER BY a.started_at DESC, a.id DESC
             LIMIT $3
-            """);
+            """;
 
         await using var command = new NpgsqlCommand(sql, connection);
         command.Parameters.AddWithValue(usuarioId);
         command.Parameters.AddWithValue(grupoId);
+        command.Parameters.AddWithValue(limite + 1);
         if (temCursor)
         {
             command.Parameters.AddWithValue(cursorStarted);
             command.Parameters.AddWithValue(cursorId);
         }
-
-        command.Parameters.AddWithValue(limite + 1);
 
         return await ReadPaginaAsync(command, limite, cancellationToken);
     }
@@ -105,7 +99,8 @@ internal static class ListarAtividades
         string? proximo = null;
         if (itens.Count > limite)
         {
-            var ultimo = itens[limite];
+            // O cursor é o último item entregue: a próxima página começa logo depois dele.
+            var ultimo = itens[limite - 1];
             proximo = PaginacaoAtividade.EncodeCursor(ultimo.StartedAt, ultimo.Id);
             itens.RemoveAt(limite);
         }

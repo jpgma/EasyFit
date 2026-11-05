@@ -32,6 +32,7 @@ namespace EasyFit.Infrastructure.Json;
 [JsonSerializable(typeof(DesafiosResponse))]
 [JsonSerializable(typeof(EditarDesafioRequest))]
 [JsonSerializable(typeof(EntrarGrupoResponse))]
+[JsonSerializable(typeof(FilaAvaliacaoResponse))]
 [JsonSerializable(typeof(EntrarRequest))]
 [JsonSerializable(typeof(GrupoResponse))]
 [JsonSerializable(typeof(GruposResponse))]

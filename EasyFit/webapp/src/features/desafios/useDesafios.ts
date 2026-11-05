@@ -34,6 +34,7 @@ export type Progresso = {
   totalSemanas: number;
   semanaAtual: { numero: number; inicio: string; fim: string } | null;
   participantes: ProgressoParticipante[];
+  seusDias: string[];
 };
 
 export type CriarDesafioData = {

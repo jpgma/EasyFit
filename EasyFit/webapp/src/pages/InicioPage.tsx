@@ -9,12 +9,13 @@ import { useAtividadesFeed } from "@/features/atividades";
 import { useSessao } from "@/features/autenticacao";
 import {
   canGerenciarDesafios,
+  FaixaSemana,
   formatarDuracao,
   formatarTempoAteFim,
   useDesafio,
   useProgresso,
 } from "@/features/desafios";
-import { FeedAtividade } from "@/features/feed";
+import { AvisoAvaliacao, FeedAtividade } from "@/features/feed";
 import { useGrupo } from "@/features/grupos";
 import { LinhaParticipante, useResumoGrupo } from "@/features/progresso";
 import { getErrorMessage } from "@/services/api";
@@ -63,7 +64,12 @@ function SuaSemana({
     );
   }
 
-  const { sessoesPorSemana: meta, semanaAtual, participantes } = progresso.data;
+  const {
+    sessoesPorSemana: meta,
+    semanaAtual,
+    participantes,
+    seusDias,
+  } = progresso.data;
   const eu = participantes.find((p) => p.usuarioId === usuarioId);
   const verificadas = eu?.sessoesVerificadas ?? 0;
   const provisorias = eu?.sessoesProvisorias ?? 0;
@@ -114,6 +120,13 @@ function SuaSemana({
             </p>
           </div>
         </div>
+        {semanaAtual && (
+          <FaixaSemana
+            inicio={semanaAtual.inicio}
+            diasComTreino={seusDias}
+            fusoHorario={desafio.data.fusoHorario}
+          />
+        )}
         {eu && !eu.contaNestaSemana && (
           <p className="mt-3 rounded-xl bg-surface-muted p-3 text-sm text-muted">
             Você entrou no meio desta semana. Seus treinos contam para a meta a
@@ -257,6 +270,8 @@ export function InicioPage() {
         )}
       </div>
 
+      <AvisoAvaliacao grupoId={id} />
+
       <SectionTitle
         action={
           <Link
@@ -281,7 +296,11 @@ export function InicioPage() {
       )}
       <div className="grid gap-3 lg:grid-cols-2">
         {atividades.map((atividade) => (
-          <FeedAtividade key={atividade.id} atividade={atividade} />
+          <FeedAtividade
+            key={atividade.id}
+            atividade={atividade}
+            duracaoMinimaSegundos={desafio?.duracaoMinimaSegundos}
+          />
         ))}
       </div>
     </>

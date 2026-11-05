@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { shouldRetry } from "@/features/grupos";
+import { gruposKey, shouldRetry } from "@/features/grupos";
 import { getJson, postJson, putJson } from "@/services/api";
 import type {
   ComentarioRevisao,
@@ -35,6 +35,11 @@ export function useRegistrarReacao(atividadeId: string) {
       });
       void queryClient.invalidateQueries({ queryKey: ["desafios"] });
       void queryClient.invalidateQueries({ queryKey: ["atividades"] });
+      // As listas e a fila ficam sob o grupo; a classificação, em uma chave própria.
+      void queryClient.invalidateQueries({ queryKey: gruposKey });
+      void queryClient.invalidateQueries({
+        queryKey: ["progresso-competicao"],
+      });
     },
   });
 }
@@ -87,6 +92,11 @@ export function useRevisarAtividade(atividadeId: string) {
       });
       void queryClient.invalidateQueries({ queryKey: ["desafios"] });
       void queryClient.invalidateQueries({ queryKey: ["atividades"] });
+      // As listas e a fila ficam sob o grupo; a classificação, em uma chave própria.
+      void queryClient.invalidateQueries({ queryKey: gruposKey });
+      void queryClient.invalidateQueries({
+        queryKey: ["progresso-competicao"],
+      });
     },
   });
 }

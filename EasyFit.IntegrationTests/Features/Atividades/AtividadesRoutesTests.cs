@@ -129,6 +129,142 @@ public sealed class AtividadesRoutesTests : IAsyncLifetime
         Assert.Equal(1, anaProgresso.SessoesProvisorias);
     }
 
+    [Fact]
+    public async Task Listar_MostraDescricaoEContagensDeReacoes()
+    {
+        var ana = await _host.CreateUsuarioAsync("Ana");
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var bia = await _host.AddMembroAsync(grupoId, nome: "Bia");
+        var caio = await _host.AddMembroAsync(grupoId, nome: "Caio");
+        var id = await CriarManualAsync(ana, grupoId);
+        await ReagirAsync(bia, id, "Kudos");
+        await ReagirAsync(caio, id, "Suspeito");
+
+        var atividade = Assert.Single(await ListarAsync(ana, grupoId));
+
+        Assert.Equal("Treino leve", atividade.Descricao);
+        Assert.Equal((1, 1, 0), (atividade.Kudos, atividade.Suspeito, atividade.Rejeitar));
+    }
+
+    [Fact]
+    public async Task Listar_FiltraNoServidor_MantendoAPaginacao()
+    {
+        var ana = await _host.CreateUsuarioAsync("Ana");
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var bia = await _host.AddMembroAsync(grupoId, nome: "Bia");
+        var caio = await _host.AddMembroAsync(grupoId, nome: "Caio");
+
+        var pendente = await CriarManualAsync(ana, grupoId);
+        var emRevisao = await CriarManualAsync(ana, grupoId);
+        await ReagirAsync(bia, emRevisao, "Suspeito");
+        var verificada = await CriarManualAsync(bia, grupoId);
+        await ReagirAsync(ana, verificada, "Kudos");
+        await ReagirAsync(caio, verificada, "Kudos");
+
+        Assert.Equal(
+            new HashSet<Guid> { pendente, emRevisao },
+            (await ListarAsync(ana, grupoId, "?filtro=Minhas")).Select(a => a.Id).ToHashSet());
+        Assert.Equal(
+            new HashSet<Guid> { pendente, emRevisao },
+            (await ListarAsync(ana, grupoId, "?filtro=Pendentes")).Select(a => a.Id).ToHashSet());
+        Assert.Equal([verificada], (await ListarAsync(ana, grupoId, "?filtro=Verificadas")).Select(a => a.Id));
+        Assert.Equal([emRevisao], (await ListarAsync(ana, grupoId, "?filtro=EmRevisao")).Select(a => a.Id));
+
+        var primeira = await ana.Client.GetFromJsonAsync(
+            $"/api/grupos/{grupoId}/atividades?filtro=Minhas&limite=1",
+            AppJsonContext.Default.AtividadesPaginadasResponse,
+            Token);
+        Assert.NotNull(primeira!.ProximoCursor);
+        var segunda = await ana.Client.GetFromJsonAsync(
+            $"/api/grupos/{grupoId}/atividades?filtro=Minhas&limite=1&cursor={Uri.EscapeDataString(primeira.ProximoCursor)}",
+            AppJsonContext.Default.AtividadesPaginadasResponse,
+            Token);
+        Assert.Null(segunda!.ProximoCursor);
+        Assert.NotEqual(primeira.Atividades[0].Id, Assert.Single(segunda.Atividades).Id);
+    }
+
+    [Fact]
+    public async Task Listar_FiltroDesconhecido_Recusado()
+    {
+        var ana = await _host.CreateUsuarioAsync("Ana");
+        var grupoId = await _host.CreateGrupoAsync(ana);
+
+        var response = await ana.Client.GetAsync($"/api/grupos/{grupoId}/atividades?filtro=Outro", Token);
+
+        await ApiTestHost.AssertProblemAsync(response, HttpStatusCode.BadRequest, "DADOS_INVALIDOS");
+    }
+
+    [Fact]
+    public async Task ParaAvaliar_SoOQueEsperaAReacaoDeQuemConsulta()
+    {
+        var ana = await _host.CreateUsuarioAsync("Ana");
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var bia = await _host.AddMembroAsync(grupoId, nome: "Bia");
+        var caio = await _host.AddMembroAsync(grupoId, nome: "Caio");
+
+        var aguardando = await CriarManualAsync(ana, grupoId);
+        var jaReagida = await CriarManualAsync(ana, grupoId);
+        await ReagirAsync(bia, jaReagida, "Kudos");
+        var emRevisao = await CriarManualAsync(ana, grupoId);
+        await ReagirAsync(caio, emRevisao, "Suspeito");
+        await CriarManualAsync(bia, grupoId);
+        var expirada = await CriarManualAsync(ana, grupoId);
+        await _host.ExecuteAsync(
+            $"UPDATE atividades SET submitted_at = now() - interval '49 hours' WHERE id = '{expirada}'");
+
+        var fila = await bia.Client.GetFromJsonAsync(
+            $"/api/grupos/{grupoId}/atividades/para-avaliar",
+            AppJsonContext.Default.FilaAvaliacaoResponse,
+            Token);
+
+        Assert.Equal(
+            new HashSet<Guid> { aguardando, emRevisao },
+            fila!.Atividades.Select(a => a.Id).ToHashSet());
+    }
+
+    [Fact]
+    public async Task ParaAvaliar_ForaDoGrupo_NaoEncontrado()
+    {
+        var ana = await _host.CreateUsuarioAsync("Ana");
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var estranha = await _host.CreateUsuarioAsync("Estranha");
+
+        await ApiTestHost.AssertProblemAsync(
+            await estranha.Client.GetAsync($"/api/grupos/{grupoId}/atividades/para-avaliar", Token),
+            HttpStatusCode.NotFound,
+            "GRUPO_NAO_ENCONTRADO");
+    }
+
+    private static async Task<Guid> CriarManualAsync(TestUsuario usuario, Guid grupoId)
+    {
+        var response = await PostAtividadeAsync(
+            usuario,
+            grupoId,
+            Valid() with { TipoComprovacao = TipoComprovacao.RegistroManual });
+        response.EnsureSuccessStatusCode();
+        var atividade = await response.Content.ReadFromJsonAsync(AppJsonContext.Default.AtividadeResponse, Token);
+        return atividade!.Id;
+    }
+
+    private static async Task ReagirAsync(TestUsuario usuario, Guid atividadeId, string tipo)
+    {
+        var response = await usuario.Client.PutAsJsonAsync(
+            $"/api/atividades/{atividadeId}/reacao",
+            new EasyFit.Features.Reacoes.ReacaoRequest(tipo),
+            AppJsonContext.Default.ReacaoRequest,
+            Token);
+        response.EnsureSuccessStatusCode();
+    }
+
+    private static async Task<IReadOnlyList<AtividadeResumoResponse>> ListarAsync(
+        TestUsuario usuario,
+        Guid grupoId,
+        string query = "") =>
+        (await usuario.Client.GetFromJsonAsync(
+            $"/api/grupos/{grupoId}/atividades{query}",
+            AppJsonContext.Default.AtividadesPaginadasResponse,
+            Token))!.Atividades;
+
     private static CriarAtividadeRequest Valid() => new(
         TipoAtividade.Corrida,
         3600,

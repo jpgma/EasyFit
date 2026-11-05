@@ -42,6 +42,9 @@ public sealed class ProgressoRoutesTests : IAsyncLifetime
         Assert.Equal(4, anaProgresso.SessoesVerificadas);
         Assert.True(anaProgresso.MetaCumprida);
 
+        var hoje = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(-3).AddMinutes(-30));
+        Assert.Equal([hoje], progresso.SeusDias);
+
         var classificacao = await GetClassificacaoAsync(ana, desafioId);
 
         Assert.Equal(2, classificacao.Participantes.Count);

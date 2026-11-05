@@ -27,6 +27,7 @@ internal static class AtividadesRoutes
         var doGrupo = routes.MapGroup("/api/grupos/{grupoId:guid}/atividades").RequireSessao();
         doGrupo.MapGet("/", ListarAtividades.HandleAsync);
         doGrupo.MapPost("/", CriarAtividade.HandleAsync);
+        doGrupo.MapGet("/para-avaliar", ListarParaAvaliar.HandleAsync);
 
         var atividade = routes.MapGroup("/api/atividades/{id:guid}").RequireSessao();
         atividade.MapGet("/", ObterAtividade.HandleAsync);

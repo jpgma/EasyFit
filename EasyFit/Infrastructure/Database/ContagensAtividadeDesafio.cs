@@ -41,6 +41,16 @@ internal static class ContagensAtividadeDesafio
         GROUP BY a.usuario_id, {IndiceSemanaSql}
         """;
 
+    /// <summary>Dias com treino elegível e não rejeitado. $1 = desafio_id, $2 e $3 = a semana, $4 = usuario_id.</summary>
+    internal static string BuildDiasComAtividade() => $"""
+        SELECT DISTINCT (a.started_at AT TIME ZONE g.fuso_horario)::date
+        {FromElegiveisSql}
+          AND (a.started_at AT TIME ZONE g.fuso_horario)::date >= $2
+          AND (a.started_at AT TIME ZONE g.fuso_horario)::date <= $3
+          AND a.usuario_id = $4
+          AND a.situacao_verificacao <> 'Rejeitada'
+        """;
+
     internal static string BuildAgregadoPorUsuarioSemanaAtual() => $"""
         SELECT a.usuario_id,
             {VerificadasSql} AS verificadas,

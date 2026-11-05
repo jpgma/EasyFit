@@ -30,7 +30,9 @@ internal sealed record HistoricoSemanalResponse(
 internal sealed record DesafioDestaqueResponse(
     Guid Id,
     string Nome,
-    string Situacao);
+    string Situacao,
+    int SessoesPorSemana,
+    int DuracaoMinimaSegundos);
 
 internal sealed record ProgressoResumoResponse(
     int SessoesVerificadas,

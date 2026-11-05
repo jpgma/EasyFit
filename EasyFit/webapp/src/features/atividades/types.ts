@@ -37,10 +37,19 @@ export type AtividadeResumo = {
   situacaoVerificacao: SituacaoVerificacao;
   totalEvidencias: number;
   submittedAt: string;
+  descricao: string | null;
+  kudos: number;
+  suspeito: number;
+  rejeitar: number;
 };
 
-export type Atividade = AtividadeResumo & {
-  descricao: string | null;
+export type FiltroAtividades =
+  "Minhas" | "Pendentes" | "Verificadas" | "EmRevisao";
+
+export type Atividade = Omit<
+  AtividadeResumo,
+  "kudos" | "suspeito" | "rejeitar" | "totalEvidencias"
+> & {
   voce: boolean;
   evidencias: Evidencia[];
 };

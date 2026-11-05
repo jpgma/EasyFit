@@ -8,6 +8,23 @@ import {
   tipoAtividadeLabels,
   type AtividadeResumo,
 } from "@/features/atividades";
+import { tipoReacaoEmojis, tipoReacaoLabels } from "@/features/reacoes";
+
+function Contagem({
+  tipo,
+  total,
+}: {
+  tipo: keyof typeof tipoReacaoEmojis;
+  total: number;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1 text-xs text-muted tabular-nums">
+      <span aria-hidden="true">{tipoReacaoEmojis[tipo]}</span>
+      <span className="sr-only">{tipoReacaoLabels[tipo]}:</span>
+      {total}
+    </span>
+  );
+}
 
 export function FeedAtividade({
   atividade,
@@ -26,6 +43,10 @@ export function FeedAtividade({
     startedAt,
     situacaoVerificacao,
     totalEvidencias,
+    descricao,
+    kudos,
+    suspeito,
+    rejeitar,
   } = atividade;
   const abaixoDoMinimo =
     duracaoMinimaSegundos !== undefined &&
@@ -52,17 +73,25 @@ export function FeedAtividade({
               </span>
             )}
           </p>
+          {descricao && (
+            <p className="mt-2 line-clamp-2 text-sm break-words">{descricao}</p>
+          )}
           <div className="mt-3 flex items-center justify-between gap-2">
             <SituacaoBadge situacao={situacaoVerificacao} />
-            {totalEvidencias > 0 && (
-              <span className="flex items-center gap-1 text-xs text-muted">
-                <Camera aria-hidden="true" className="size-3.5" />
-                {totalEvidencias}
-                <span className="sr-only">
-                  {totalEvidencias === 1 ? "comprovante" : "comprovantes"}
+            <div className="flex items-center gap-3">
+              <Contagem tipo="Kudos" total={kudos} />
+              {suspeito > 0 && <Contagem tipo="Suspeito" total={suspeito} />}
+              {rejeitar > 0 && <Contagem tipo="Rejeitar" total={rejeitar} />}
+              {totalEvidencias > 0 && (
+                <span className="flex items-center gap-1 text-xs text-muted">
+                  <Camera aria-hidden="true" className="size-3.5" />
+                  {totalEvidencias}
+                  <span className="sr-only">
+                    {totalEvidencias === 1 ? "comprovante" : "comprovantes"}
+                  </span>
                 </span>
-              </span>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

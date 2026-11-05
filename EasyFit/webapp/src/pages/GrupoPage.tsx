@@ -27,10 +27,11 @@ import {
   useDesafios,
   useProgresso,
 } from "@/features/desafios";
-import { FeedAtividade } from "@/features/feed";
+import { AvisoAvaliacao, FeedAtividade } from "@/features/feed";
 import {
   canAlterarPapel,
   canConvidar,
+  canRevisarAtividade,
   canRemover,
   papelLabels,
   useAlterarPapel,
@@ -206,6 +207,10 @@ export function GrupoPage() {
   const membros = useMembros(id);
   const desafios = useDesafios(id);
   const feed = useAtividadesFeed(id, 3);
+  const podeRevisar = grupo.data
+    ? canRevisarAtividade(grupo.data.papel)
+    : false;
+  const disputas = useAtividadesFeed(id, 20, "EmRevisao", podeRevisar);
   const alterarPapel = useAlterarPapel(id);
   const remover = useRemoverMembro(id);
   const transferir = useTransferirGrupo(id);
@@ -242,6 +247,7 @@ export function GrupoPage() {
   const { nome, papel, totalMembros, maxMembros, fusoHorario } = grupo.data;
   const desafioAtual = resumo.data?.desafio;
   const atividades = feed.data?.pages[0]?.atividades ?? [];
+  const emDisputa = disputas.data?.pages.flatMap((p) => p.atividades) ?? [];
 
   const mutacaoAtiva = !acao
     ? undefined
@@ -316,6 +322,19 @@ export function GrupoPage() {
             </div>
           </div>
         </section>
+      )}
+
+      <AvisoAvaliacao grupoId={id} />
+
+      {emDisputa.length > 0 && (
+        <>
+          <SectionTitle>Disputas para decidir</SectionTitle>
+          <div className="grid gap-3 lg:grid-cols-2">
+            {emDisputa.map((atividade) => (
+              <FeedAtividade key={atividade.id} atividade={atividade} />
+            ))}
+          </div>
+        </>
       )}
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">

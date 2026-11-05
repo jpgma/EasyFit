@@ -21,11 +21,17 @@ internal sealed record AtividadeResumoResponse(
     string TipoComprovacao,
     string SituacaoVerificacao,
     int TotalEvidencias,
-    DateTimeOffset SubmittedAt);
+    DateTimeOffset SubmittedAt,
+    string? Descricao,
+    int Kudos,
+    int Suspeito,
+    int Rejeitar);
 
 internal sealed record AtividadesPaginadasResponse(
     IReadOnlyList<AtividadeResumoResponse> Atividades,
     string? ProximoCursor);
+
+internal sealed record FilaAvaliacaoResponse(IReadOnlyList<AtividadeResumoResponse> Atividades);
 
 internal sealed record AtividadeResponse(
     Guid Id,

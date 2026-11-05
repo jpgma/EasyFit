@@ -24,6 +24,18 @@ public sealed class ValidacaoAtividadeTests
     public void Duracao_RespeitaLimites(int segundos, bool valido) =>
         Assert.Equal(valido, ValidacaoAtividade.IsValidDuracao(segundos));
 
+    [Theory]
+    [InlineData(null, true)]
+    [InlineData("", true)]
+    [InlineData("Minhas", true)]
+    [InlineData("Pendentes", true)]
+    [InlineData("Verificadas", true)]
+    [InlineData("EmRevisao", true)]
+    [InlineData("minhas", false)]
+    [InlineData("' OR 1=1 --", false)]
+    public void Filtro_SoAceitaValoresConhecidos(string? filtro, bool valido) =>
+        Assert.Equal(valido, ValidacaoAtividade.TryGetFiltroSql(filtro, out _));
+
     [Fact]
     public void StartedAt_NaoAceitaHorarioDistanteNoFuturo()
     {

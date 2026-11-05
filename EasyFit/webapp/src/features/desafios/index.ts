@@ -14,6 +14,7 @@ export type {
   SituacaoDesafio,
 } from "./useDesafios";
 export {
+  addDias,
   formatarData,
   formatarDiaEMes,
   formatarDuracao,
@@ -22,6 +23,7 @@ export {
   getHojeNoFuso,
   getProximasSegundas,
 } from "./datas";
+export { FaixaSemana } from "./FaixaSemana";
 export {
   canGerenciarDesafios,
   isDesafioAberto,
