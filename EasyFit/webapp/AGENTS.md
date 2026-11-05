@@ -33,6 +33,16 @@ src/
 - Cada reação tem sempre o mesmo símbolo (`tipoReacaoEmojis`): 💪 `Kudos`, 🤨 `Suspeito`, ❌ `Rejeitar`. Use-o ao lado do texto ou sozinho quando faltar espaço; sozinho, inclua um texto para leitores de tela.
 - Todo texto visível em pt-BR.
 
+### Skill `ui-ux-pro-max`
+
+Todo trabalho de UI/UX (telas, componentes, layout, cores, tipografia, animação, acessibilidade, revisão visual) começa carregando a skill `ui-ux-pro-max` (`.claude/skills/ui-ux-pro-max/`). Use as buscas por `--domain` e `--stack react`/`--stack html-tailwind` e, antes de entregar, o checklist de `references/pro-rules.md`.
+
+As recomendações dela não se sobrepõem às regras deste repositório. Em caso de conflito, valem estas regras, o mockup e a ADR 0014. Em particular:
+
+- Não use `--design-system --persist`: os tokens ficam em `styles/index.css`, sem pasta `design-system/`.
+- Não adote fontes do Google Fonts nem ícones externos. Os símbolos de reação continuam sendo emojis.
+- Não troque a identidade visual do mockup por uma paleta ou estilo sugerido pela skill.
+
 ## Desempenho
 
 Pensado para conexões móveis lentas: bundles pequenos, páginas com `lazy`, evidências carregadas só quando solicitadas. O feed mostra apenas miniaturas, geradas no navegador e com `loading="lazy"`; a imagem completa só aparece ao abrir a atividade.
