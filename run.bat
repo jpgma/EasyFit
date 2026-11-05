@@ -132,12 +132,21 @@ if not exist "%TUNNEL_ROOT%\cert.pem" (
   %CLOUDFLARED% login
   if errorlevel 1 exit /b 1
 )
-if not exist "%TUNNEL_ROOT%\%TUNNEL_NAME%.json" (
+if exist "%TUNNEL_ROOT%\%TUNNEL_NAME%.json" goto :route_tunnel
+rem O túnel pode já existir na conta, criado em outra máquina ou antes de apagarem a pasta
+rem local: nesse caso, só baixa as credenciais de novo.
+%CLOUDFLARED% info %TUNNEL_NAME% >nul 2>&1
+if errorlevel 1 (
   echo.
   echo ==^> Criando o túnel %TUNNEL_NAME%
   %CLOUDFLARED% create --cred-file /home/nonroot/.cloudflared/%TUNNEL_NAME%.json %TUNNEL_NAME%
-  if errorlevel 1 exit /b 1
+) else (
+  echo.
+  echo ==^> Baixando as credenciais do túnel %TUNNEL_NAME%, que já existe
+  %CLOUDFLARED% token --cred-file /home/nonroot/.cloudflared/%TUNNEL_NAME%.json %TUNNEL_NAME%
 )
+if errorlevel 1 exit /b 1
+:route_tunnel
 echo.
 echo ==^> Apontando %TUNNEL_HOST% para o túnel
 %CLOUDFLARED% route dns --overwrite-dns %TUNNEL_NAME% %TUNNEL_HOST%
