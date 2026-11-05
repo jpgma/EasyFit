@@ -8,6 +8,7 @@ using EasyFit.Features.Grupos;
 using EasyFit.Features.Health;
 using EasyFit.Features.Progresso;
 using EasyFit.Features.Reacoes;
+using EasyFit.Features.Usuarios;
 using EasyFit.Infrastructure.Authentication;
 using EasyFit.Infrastructure.Database;
 using EasyFit.Infrastructure.Errors;
@@ -72,6 +73,7 @@ app.MapDesafiosRoutes();
 app.MapProgressoRoutes();
 app.MapAtividadesRoutes();
 app.MapReacoesRoutes();
+app.MapUsuariosRoutes();
 
 // Rota de API inexistente responde 404 em JSON, nunca com o index.html da SPA.
 app.Map("/api/{**rest}", () =>

@@ -1,6 +1,7 @@
 using EasyFit.Infrastructure.Authentication;
 using EasyFit.Infrastructure.Json;
 using Npgsql;
+using NpgsqlTypes;
 
 namespace EasyFit.Features.Atividades;
 
@@ -11,6 +12,7 @@ internal static class ListarAtividades
         int? limite,
         string? cursor,
         string? filtro,
+        Guid? autorId,
         HttpContext context,
         NpgsqlDataSource dataSource,
         CancellationToken cancellationToken)
@@ -29,6 +31,7 @@ internal static class ListarAtividades
             ValidacaoAtividade.NormalizeLimite(limite),
             cursor,
             filtroSql,
+            autorId,
             cancellationToken);
 
         return pagina is null
@@ -43,6 +46,7 @@ internal static class ListarAtividades
         int limite,
         string? cursor,
         string filtroSql,
+        Guid? autorId,
         CancellationToken cancellationToken)
     {
         var temCursor = PaginacaoAtividade.TryDecodeCursor(cursor, out var cursorStarted, out var cursorId);
@@ -64,7 +68,8 @@ internal static class ListarAtividades
             {ConsultasAtividade.SelectResumo}
             WHERE a.grupo_id = $2
             {filtroSql}
-            {(temCursor ? "AND (a.started_at, a.id) < ($4, $5)" : string.Empty)}
+            AND ($4::uuid IS NULL OR a.usuario_id = $4)
+            {(temCursor ? "AND (a.started_at, a.id) < ($5, $6)" : string.Empty)}
             ORDER BY a.started_at DESC, a.id DESC
             LIMIT $3
             """;
@@ -73,6 +78,7 @@ internal static class ListarAtividades
         command.Parameters.AddWithValue(usuarioId);
         command.Parameters.AddWithValue(grupoId);
         command.Parameters.AddWithValue(limite + 1);
+        command.Parameters.AddWithValue(NpgsqlDbType.Uuid, (object?)autorId ?? DBNull.Value);
         if (temCursor)
         {
             command.Parameters.AddWithValue(cursorStarted);

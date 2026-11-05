@@ -9,7 +9,8 @@ type Coluna = {
 
 type HistoryChartProps = {
   titulo: string;
-  meta: number;
+  /** Sem meta não há linha: o Perfil cruza grupos com metas diferentes. */
+  meta?: number;
   colunas: Coluna[];
 };
 
@@ -18,21 +19,25 @@ const alturaEmPx = 112;
 /** Barras simples em CSS: uma biblioteca de gráficos pesaria mais que o app inteiro. */
 export function HistoryChart({ titulo, meta, colunas }: HistoryChartProps) {
   const topo =
-    Math.max(meta, ...colunas.map(({ provisorio }) => provisorio)) + 1;
+    Math.max(meta ?? 0, ...colunas.map(({ provisorio }) => provisorio)) + 1;
 
   return (
     <div className="card p-4">
       <p className="text-sm font-semibold">{titulo}</p>
-      <p className="text-xs text-muted">Sessões por semana · linha = meta</p>
+      <p className="text-xs text-muted">
+        Sessões por semana{meta !== undefined && " · linha = meta"}
+      </p>
       <div
         className="relative mt-4 flex items-end gap-2"
         style={{ height: alturaEmPx }}
       >
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 border-t border-dashed border-primary/50"
-          style={{ bottom: `${(meta / topo) * 100}%` }}
-        />
+        {meta !== undefined && (
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 border-t border-dashed border-primary/50"
+            style={{ bottom: `${(meta / topo) * 100}%` }}
+          />
+        )}
         {colunas.map(({ chave, rotulo, valor, provisorio, naoParticipou }) => (
           <div
             key={chave}
@@ -62,7 +67,7 @@ export function HistoryChart({ titulo, meta, colunas }: HistoryChartProps) {
             )}
             {valor > 0 && (
               <div
-                className={`w-full rounded-md ${valor >= meta ? "bg-primary" : "bg-muted/40"}`}
+                className={`w-full rounded-md ${meta === undefined || valor >= meta ? "bg-primary" : "bg-muted/40"}`}
                 style={{ height: `${(valor / topo) * alturaEmPx}px` }}
               />
             )}

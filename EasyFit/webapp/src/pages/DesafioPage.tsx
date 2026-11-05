@@ -96,6 +96,7 @@ function ProgressoSection({ desafio }: { desafio: Desafio }) {
                   meta={progresso.data.sessoesPorSemana}
                   voce={p.usuarioId === usuario?.id}
                   contaNestaSemana={p.contaNestaSemana}
+                  grupoId={desafio.grupoId}
                 />
               ))}
             </div>

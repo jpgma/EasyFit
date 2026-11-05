@@ -29,12 +29,19 @@ export function useAtividadesFeed(
   limite = 20,
   filtro?: FiltroAtividades,
   enabled = true,
+  autorId?: string,
 ) {
   return useInfiniteQuery({
-    queryKey: [...atividadesDoGrupoKey(grupoId), limite, filtro ?? "Todas"],
+    queryKey: [
+      ...atividadesDoGrupoKey(grupoId),
+      limite,
+      filtro ?? "Todas",
+      autorId ?? "Todos",
+    ],
     queryFn: async ({ pageParam, signal }) => {
       const params = new URLSearchParams({ limite: String(limite) });
       if (filtro) params.set("filtro", filtro);
+      if (autorId) params.set("autorId", autorId);
       if (pageParam) params.set("cursor", pageParam);
       const { atividades, proximoCursor } = await getJson<{
         atividades: AtividadeResumo[];

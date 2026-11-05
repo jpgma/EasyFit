@@ -98,6 +98,7 @@ internal static class ObterResumoGrupo
             ORDER BY
                 d.cancelled_at IS NOT NULL,
                 d.data_fim < (now() AT TIME ZONE g.fuso_horario)::date,
+                CASE WHEN d.data_fim >= (now() AT TIME ZONE g.fuso_horario)::date THEN d.data_inicio END,
                 d.data_inicio DESC,
                 d.id
             """, connection);

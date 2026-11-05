@@ -35,6 +35,45 @@ internal static class CalculoSemanaDesafio
     public static bool ParticipaDaSemana(DateOnly inicioSemana, DateOnly entradaLocal) =>
         inicioSemana >= entradaLocal;
 
+    /// <returns>O índice da semana em curso, da última se o desafio acabou, ou -1 antes do início.</returns>
+    public static int GetIndiceSemanaMaisRecente(DateOnly inicio, DateOnly fim, DateOnly hoje)
+    {
+        if (hoje < inicio)
+        {
+            return -1;
+        }
+
+        return GetIndiceSemana(inicio, hoje > fim ? fim : hoje);
+    }
+
+    /// <summary>Semanas cumpridas em sequência, da mais recente para trás.</summary>
+    public static int GetSequenciaAtual(IReadOnlyList<bool> cumpridas, int indiceRecente)
+    {
+        var sequencia = 0;
+        for (var indice = indiceRecente; indice >= 0 && cumpridas[indice]; indice--)
+        {
+            sequencia++;
+        }
+
+        return sequencia;
+    }
+
+    /// <summary>A maior sequência de semanas consecutivas entre os índices cumpridos de um desafio.</summary>
+    public static int GetMelhorSequencia(IEnumerable<int> indicesCumpridos)
+    {
+        var melhor = 0;
+        var atual = 0;
+        int? anterior = null;
+        foreach (var indice in indicesCumpridos.Distinct().Order())
+        {
+            atual = indice - 1 == anterior ? atual + 1 : 1;
+            melhor = Math.Max(melhor, atual);
+            anterior = indice;
+        }
+
+        return melhor;
+    }
+
     /// <summary>Só as verificadas cumprem a meta. As pendentes aparecem apenas no progresso provisório.</summary>
     public static ProgressoSemanalDesafio CalculateProgresso(int verificadas, int pendentes, int sessoesPorSemana) =>
         new(verificadas, verificadas + pendentes, verificadas >= sessoesPorSemana);

@@ -20,7 +20,7 @@ internal static class ClassificacaoDesafio
         int sessoesPorSemana)
     {
         var totalSemanas = CalculoSemanaDesafio.CountSemanas(inicio, fim);
-        var indiceRecente = GetIndiceSemanaMaisRecente(inicio, fim, hoje, totalSemanas);
+        var indiceRecente = CalculoSemanaDesafio.GetIndiceSemanaMaisRecente(inicio, fim, hoje);
 
         var stats = participantes.Select(p =>
         {
@@ -43,16 +43,7 @@ internal static class ClassificacaoDesafio
                 }
             }
 
-            var sequencia = 0;
-            for (var indice = indiceRecente; indice >= 0; indice--)
-            {
-                if (!porSemana[indice])
-                {
-                    break;
-                }
-
-                sequencia++;
-            }
+            var sequencia = CalculoSemanaDesafio.GetSequenciaAtual(porSemana, indiceRecente);
 
             return new EstatisticasParticipante(
                 p.UsuarioId,
@@ -69,20 +60,5 @@ internal static class ClassificacaoDesafio
             .ThenBy(s => s.NomeExibicao, StringComparer.Ordinal)
             .ThenBy(s => s.UsuarioId)
             .ToList();
-    }
-
-    private static int GetIndiceSemanaMaisRecente(
-        DateOnly inicio,
-        DateOnly fim,
-        DateOnly hoje,
-        int totalSemanas)
-    {
-        if (hoje < inicio)
-        {
-            return -1;
-        }
-
-        var dia = hoje > fim ? fim : hoje;
-        return CalculoSemanaDesafio.GetIndiceSemana(inicio, dia);
     }
 }

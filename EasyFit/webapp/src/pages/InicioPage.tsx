@@ -175,6 +175,7 @@ function SuaSemana({
             meta={meta}
             voce={p.usuarioId === usuarioId}
             contaNestaSemana={p.contaNestaSemana}
+            grupoId={grupoId}
           />
         ))}
       </section>

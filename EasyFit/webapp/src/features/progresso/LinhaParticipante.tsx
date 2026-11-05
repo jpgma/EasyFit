@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import { Avatar } from "@/components/Avatar";
 import { Segments } from "@/components/Segments";
 
@@ -27,6 +28,7 @@ export function LinhaParticipante({
   meta,
   voce,
   contaNestaSemana = true,
+  grupoId,
 }: {
   usuarioId: string;
   nomeExibicao: string;
@@ -35,10 +37,12 @@ export function LinhaParticipante({
   meta: number;
   voce: boolean;
   contaNestaSemana?: boolean;
+  /** Com o grupo, a linha leva à página do membro. */
+  grupoId?: string;
 }) {
   const primeiroNome = nomeExibicao.trim().split(/\s+/)[0];
-  return (
-    <div className="flex items-center gap-3 rounded-xl px-2 py-2.5">
+  const conteudo = (
+    <>
       <Avatar nome={nomeExibicao} id={usuarioId} size={38} />
       <div className="min-w-0 flex-1">
         <div className="mb-1.5 flex items-center justify-between gap-2">
@@ -75,6 +79,19 @@ export function LinhaParticipante({
           <SituacaoParticipante verificadas={verificadas} meta={meta} />
         </div>
       )}
+    </>
+  );
+
+  return grupoId ? (
+    <Link
+      to={`/grupos/${grupoId}/membros/${usuarioId}`}
+      className="flex items-center gap-3 rounded-xl px-2 py-2.5 tap hover:bg-surface-muted"
+    >
+      {conteudo}
+    </Link>
+  ) : (
+    <div className="flex items-center gap-3 rounded-xl px-2 py-2.5">
+      {conteudo}
     </div>
   );
 }

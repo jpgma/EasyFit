@@ -708,7 +708,7 @@ Evitar introduzir páginas administrativas complexas.
 
 ## Q033 — Como apresentar o progresso?
 
-**Status:** PARCIALMENTE DECIDIDA — ver `decisoes/0013-competicao-e-progresso.md`
+**Status:** PARCIALMENTE DECIDIDA — ver `decisoes/0013-competicao-e-progresso.md` Perfil, página do membro e conquistas decididos em `decisoes/0018-perfil-e-pagina-do-membro.md`.
 
 Investigar formas simples de visualizar:
 
@@ -720,7 +720,7 @@ Investigar formas simples de visualizar:
 
 A interface deve distinguir progresso confirmado de progresso provisório.
 
-**Decidido para o MVP (Fase 7):** barras definitivo/provisório na Desafio e Início; classificação e sequência na tabela de ranking; histórico semanal por semana do desafio. Página Perfil permanece fora do escopo inicial.
+**Decidido para o MVP (Fase 7):** barras definitivo/provisório na Desafio e Início; classificação e sequência na tabela de ranking; histórico semanal por semana do desafio. A página Perfil, antes fora do escopo inicial, entrou com a decisão 0018.
 
 ---
 

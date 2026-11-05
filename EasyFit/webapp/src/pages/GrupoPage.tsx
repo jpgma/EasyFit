@@ -29,66 +29,15 @@ import {
 } from "@/features/desafios";
 import { AvisoAvaliacao, FeedAtividade } from "@/features/feed";
 import {
-  canAlterarPapel,
   canConvidar,
   canRevisarAtividade,
-  canRemover,
   papelLabels,
-  useAlterarPapel,
   useGrupo,
   useMembros,
-  useRemoverMembro,
   useSairDoGrupo,
-  useTransferirGrupo,
-  type Membro,
 } from "@/features/grupos";
 import { LinhaParticipante, useResumoGrupo } from "@/features/progresso";
 import { ApiError, getErrorMessage } from "@/services/api";
-
-type Acao =
-  | { tipo: "promover" | "rebaixar" | "remover" | "transferir"; membro: Membro }
-  | { tipo: "sair" };
-
-function getTextosDaAcao(acao: Acao, grupoNome: string) {
-  if (acao.tipo === "sair") {
-    return {
-      title: "Sair do grupo?",
-      message: `Você deixará de ver ${grupoNome}. Para voltar, precisará de um novo convite.`,
-      confirmLabel: "Sair do grupo",
-    };
-  }
-
-  const nome = acao.membro.nomeExibicao;
-  switch (acao.tipo) {
-    case "promover":
-      return {
-        title: `Tornar ${nome} administrador?`,
-        message: "Administradores podem convidar pessoas e remover membros.",
-        confirmLabel: "Tornar administrador",
-      };
-    case "rebaixar":
-      return {
-        title: `Tornar ${nome} membro?`,
-        message:
-          "Essa pessoa deixará de poder convidar e remover. Os convites que ela já criou continuam válidos.",
-        confirmLabel: "Tornar membro",
-      };
-    case "remover":
-      return {
-        title: `Remover ${nome} do grupo?`,
-        message:
-          "Essa pessoa perderá o acesso ao grupo e os convites pendentes dela serão cancelados.",
-        confirmLabel: "Remover",
-      };
-    case "transferir":
-      return {
-        title: `Transferir o grupo para ${nome}?`,
-        message:
-          "Essa pessoa passará a ser a proprietária e você se tornará administrador. Só ela poderá desfazer isso.",
-        confirmLabel: "Transferir",
-      };
-  }
-}
 
 function getIniciais(nome: string): string {
   return nome
@@ -105,11 +54,13 @@ function CabecalhoComDesafio({
   nome,
   totalMembros,
   usuarioId,
+  grupoId,
 }: {
   desafioId: string;
   nome: string;
   totalMembros: number;
   usuarioId: string | undefined;
+  grupoId: string;
 }) {
   const desafio = useDesafio(desafioId);
   const progresso = useProgresso(desafioId);
@@ -189,6 +140,7 @@ function CabecalhoComDesafio({
                 meta={meta}
                 voce={p.usuarioId === usuarioId}
                 contaNestaSemana={p.contaNestaSemana}
+                grupoId={grupoId}
               />
             ))}
           </div>
@@ -211,11 +163,8 @@ export function GrupoPage() {
     ? canRevisarAtividade(grupo.data.papel)
     : false;
   const disputas = useAtividadesFeed(id, 20, "EmRevisao", podeRevisar);
-  const alterarPapel = useAlterarPapel(id);
-  const remover = useRemoverMembro(id);
-  const transferir = useTransferirGrupo(id);
   const sair = useSairDoGrupo(id);
-  const [acao, setAcao] = useState<Acao | null>(null);
+  const [saindo, setSaindo] = useState(false);
 
   if (grupo.isPending) return <SplashScreen />;
 
@@ -249,56 +198,6 @@ export function GrupoPage() {
   const atividades = feed.data?.pages[0]?.atividades ?? [];
   const emDisputa = disputas.data?.pages.flatMap((p) => p.atividades) ?? [];
 
-  const mutacaoAtiva = !acao
-    ? undefined
-    : acao.tipo === "promover" || acao.tipo === "rebaixar"
-      ? alterarPapel
-      : acao.tipo === "remover"
-        ? remover
-        : acao.tipo === "transferir"
-          ? transferir
-          : sair;
-
-  const fecharDialogo = () => {
-    alterarPapel.reset();
-    remover.reset();
-    transferir.reset();
-    sair.reset();
-    setAcao(null);
-  };
-
-  const confirmar = () => {
-    if (!acao) return;
-    const options = { onSuccess: fecharDialogo };
-    switch (acao.tipo) {
-      case "promover":
-      case "rebaixar":
-        alterarPapel.mutate(
-          {
-            usuarioId: acao.membro.usuarioId,
-            papel: acao.tipo === "promover" ? "Administrador" : "Membro",
-          },
-          options,
-        );
-        break;
-      case "remover":
-        remover.mutate(acao.membro.usuarioId, options);
-        break;
-      case "transferir":
-        transferir.mutate(acao.membro.usuarioId, options);
-        break;
-      case "sair":
-        sair.mutate(undefined, {
-          onSuccess: () => void navigate("/", { replace: true }),
-        });
-        break;
-    }
-  };
-
-  const textos = acao
-    ? getTextosDaAcao(acao, nome)
-    : { title: "", message: "", confirmLabel: "" };
-
   return (
     <>
       {desafioAtual ? (
@@ -307,6 +206,7 @@ export function GrupoPage() {
           nome={nome}
           totalMembros={totalMembros}
           usuarioId={usuario?.id}
+          grupoId={id}
         />
       ) : (
         <section className="rounded-3xl bg-brand p-5 text-on-brand">
@@ -384,80 +284,32 @@ export function GrupoPage() {
             </p>
           )}
           {membros.data && (
-            <ul className="card divide-y divide-border">
-              {membros.data.map((membro) => {
-                const voce = membro.usuarioId === usuario?.id;
-                const podeAlterar = canAlterarPapel(papel, membro.papel);
-                const podeRemover = canRemover(papel, membro.papel);
-                return (
-                  <li key={membro.usuarioId} className="p-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar
-                        nome={membro.nomeExibicao}
-                        id={membro.usuarioId}
-                        size={38}
-                      />
-                      <p className="min-w-0 flex-1 truncate text-sm font-semibold">
-                        {membro.nomeExibicao}
-                        {voce && (
-                          <span className="font-normal text-muted">
-                            {" "}
-                            (você)
-                          </span>
-                        )}
-                      </p>
-                      <span className="chip">{papelLabels[membro.papel]}</span>
-                    </div>
-
-                    {(podeAlterar || podeRemover) && (
-                      <div className="mt-2 flex flex-wrap justify-end gap-1">
-                        {podeAlterar && membro.papel === "Membro" && (
-                          <button
-                            type="button"
-                            className="btn-ghost h-9 px-3 text-xs"
-                            onClick={() =>
-                              setAcao({ tipo: "promover", membro })
-                            }
-                          >
-                            Tornar administrador
-                          </button>
-                        )}
-                        {podeAlterar && membro.papel === "Administrador" && (
-                          <button
-                            type="button"
-                            className="btn-ghost h-9 px-3 text-xs"
-                            onClick={() =>
-                              setAcao({ tipo: "rebaixar", membro })
-                            }
-                          >
-                            Tornar membro
-                          </button>
-                        )}
-                        {papel === "Proprietario" && (
-                          <button
-                            type="button"
-                            className="btn-ghost h-9 px-3 text-xs"
-                            onClick={() =>
-                              setAcao({ tipo: "transferir", membro })
-                            }
-                          >
-                            Transferir grupo
-                          </button>
-                        )}
-                        {podeRemover && (
-                          <button
-                            type="button"
-                            className="btn-ghost h-9 px-3 text-xs"
-                            onClick={() => setAcao({ tipo: "remover", membro })}
-                          >
-                            Remover
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </li>
-                );
-              })}
+            <ul className="card divide-y divide-border overflow-hidden">
+              {membros.data.map((membro) => (
+                <li key={membro.usuarioId}>
+                  <Link
+                    to={`/grupos/${id}/membros/${membro.usuarioId}`}
+                    className="flex items-center gap-3 p-4 transition-colors hover:bg-surface-muted"
+                  >
+                    <Avatar
+                      nome={membro.nomeExibicao}
+                      id={membro.usuarioId}
+                      size={38}
+                    />
+                    <p className="min-w-0 flex-1 truncate text-sm font-semibold">
+                      {membro.nomeExibicao}
+                      {membro.usuarioId === usuario?.id && (
+                        <span className="font-normal text-muted"> (você)</span>
+                      )}
+                    </p>
+                    <span className="chip">{papelLabels[membro.papel]}</span>
+                    <ChevronRight
+                      aria-hidden="true"
+                      className="size-4 shrink-0 text-muted"
+                    />
+                  </Link>
+                </li>
+              ))}
             </ul>
           )}
         </div>
@@ -565,7 +417,7 @@ export function GrupoPage() {
           <button
             type="button"
             className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold text-danger hover:bg-danger-soft"
-            onClick={() => setAcao({ tipo: "sair" })}
+            onClick={() => setSaindo(true)}
           >
             <LogOut aria-hidden="true" className="size-4" />
             Sair do grupo
@@ -574,18 +426,21 @@ export function GrupoPage() {
       </section>
 
       <ConfirmDialog
-        open={acao !== null}
-        title={textos.title}
-        message={textos.message}
-        confirmLabel={textos.confirmLabel}
-        pending={mutacaoAtiva?.isPending ?? false}
-        error={
-          mutacaoAtiva?.isError
-            ? getErrorMessage(mutacaoAtiva.error)
-            : undefined
+        open={saindo}
+        title="Sair do grupo?"
+        message={`Você deixará de ver ${nome}. Para voltar, precisará de um novo convite.`}
+        confirmLabel="Sair do grupo"
+        pending={sair.isPending}
+        error={sair.isError ? getErrorMessage(sair.error) : undefined}
+        onConfirm={() =>
+          sair.mutate(undefined, {
+            onSuccess: () => void navigate("/", { replace: true }),
+          })
         }
-        onConfirm={confirmar}
-        onCancel={fecharDialogo}
+        onCancel={() => {
+          sair.reset();
+          setSaindo(false);
+        }}
       />
     </>
   );

@@ -86,6 +86,13 @@ export const router = createBrowserRouter([
                 },
               },
               {
+                path: "/grupos/:id/membros/:usuarioId",
+                lazy: async () => {
+                  const { MembroPage } = await import("@/pages/MembroPage");
+                  return { Component: MembroPage };
+                },
+              },
+              {
                 path: "/grupos/:id/revisar/:atividadeId",
                 lazy: async () => {
                   const { RevisarPage } = await import("@/pages/RevisarPage");

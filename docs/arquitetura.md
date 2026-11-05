@@ -858,6 +858,8 @@ A classificação inicial deverá priorizar:
 
 Evitar sistemas artificiais de pontuação no MVP.
 
+Conquistas são apenas reconhecimento: calculadas na leitura, visíveis só no próprio Perfil e sem efeito na classificação. A página de um membro mostra apenas dados daquele grupo. Ver `decisoes/0018-perfil-e-pagina-do-membro.md`.
+
 ---
 
 ## 9. Persistência
@@ -991,7 +993,16 @@ GET  /api/atividades/{id}/evidencias/{evidenciaId}
 GET  /api/atividades/{id}/evidencias/{evidenciaId}/miniatura
 ```
 
-A lista do grupo aceita `?filtro=Minhas|Pendentes|Verificadas|EmRevisao`, aplicado no servidor para não quebrar a paginação por cursor. `para-avaliar` devolve o que ainda espera a reação de quem consulta, dentro da janela de 48 horas. A criação usa somente JSON; o upload de evidências usa `multipart/form-data` em rota separada. Permissões e regras em `docs/decisoes/0011-atividades.md`.
+A lista do grupo aceita `?filtro=Minhas|Pendentes|Verificadas|EmRevisao` e `?autorId=`, aplicados no servidor para não quebrar a paginação por cursor. `para-avaliar` devolve o que ainda espera a reação de quem consulta, dentro da janela de 48 horas. A criação usa somente JSON; o upload de evidências usa `multipart/form-data` em rota separada. Permissões e regras em `docs/decisoes/0011-atividades.md`.
+
+### 10.4.1. Usuários
+
+```http
+GET  /api/usuarios/eu/perfil
+GET  /api/grupos/{id}/membros/{usuarioId}/perfil
+```
+
+Regras em `docs/decisoes/0018-perfil-e-pagina-do-membro.md`.
 
 ### 10.5. Reações
 
