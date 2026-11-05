@@ -39,7 +39,7 @@ export function ConfirmDialog({
         event.preventDefault();
         if (!pending) onCancel();
       }}
-      className="card m-auto w-[calc(100%-2rem)] max-w-sm p-6 text-foreground backdrop:bg-scrim backdrop:backdrop-blur-sm"
+      className="card m-auto w-[calc(100%-2rem)] max-w-sm rounded-3xl p-6 text-foreground backdrop:bg-scrim backdrop:backdrop-blur-sm"
     >
       <h2 id="confirm-dialog-title" className="mb-2 text-lg font-bold">
         {title}

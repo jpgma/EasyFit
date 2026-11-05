@@ -6,7 +6,12 @@ import {
 } from "@tanstack/react-query";
 import { gruposKey, shouldRetry } from "@/features/grupos";
 import { getJson, postFormData, postJson } from "@/services/api";
-import type { Atividade, AtividadeResumo, CriarAtividadeData } from "./types";
+import type {
+  Atividade,
+  AtividadeResumo,
+  CriarAtividadeData,
+  Evidencia,
+} from "./types";
 
 const atividadesKey = ["atividades"] as const;
 
@@ -18,11 +23,11 @@ function atividadesDoGrupoKey(grupoId: string) {
   return [...gruposKey, grupoId, "atividades"] as const;
 }
 
-export function useAtividadesFeed(grupoId: string) {
+export function useAtividadesFeed(grupoId: string, limite = 20) {
   return useInfiniteQuery({
-    queryKey: atividadesDoGrupoKey(grupoId),
+    queryKey: [...atividadesDoGrupoKey(grupoId), limite],
     queryFn: async ({ pageParam, signal }) => {
-      const params = new URLSearchParams({ limite: "20" });
+      const params = new URLSearchParams({ limite: String(limite) });
       if (pageParam) params.set("cursor", pageParam);
       const { atividades, proximoCursor } = await getJson<{
         atividades: AtividadeResumo[];
@@ -81,21 +86,12 @@ export function useCriarAtividade(grupoId: string) {
   });
 }
 
-export function useAnexarEvidencia(atividadeId: string) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (arquivo: File) => {
-      const form = new FormData();
-      form.append("arquivo", arquivo);
-      return postFormData<{ id: string; ordem: number; url: string }>(
-        `/api/atividades/${atividadeId}/evidencias`,
-        form,
-      );
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: atividadeKey(atividadeId),
-      });
-    },
-  });
+/** Fora de um hook: a atividade só existe depois de criada, no meio do envio do formulário. */
+export function anexarEvidencia(atividadeId: string, arquivo: File) {
+  const form = new FormData();
+  form.append("arquivo", arquivo);
+  return postFormData<Evidencia>(
+    `/api/atividades/${atividadeId}/evidencias`,
+    form,
+  );
 }

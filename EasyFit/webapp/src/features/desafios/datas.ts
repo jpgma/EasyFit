@@ -42,6 +42,26 @@ export function getDataFim(dataInicio: string, semanas: number): string {
   return addDias(dataInicio, semanas * 7 - 1);
 }
 
+/** Quanto falta para o fim do domingo no fuso do grupo, como "3 dias e 8h". */
+export function formatarTempoAteFim(fim: string, fusoHorario: string): string {
+  const hoje = getHojeNoFuso(fusoHorario);
+  const dias = Math.max(
+    0,
+    Math.round((toUtc(fim).getTime() - toUtc(hoje).getTime()) / diaEmMs),
+  );
+  const hora = Number(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: fusoHorario,
+      hour: "2-digit",
+      hourCycle: "h23",
+    }).format(new Date()),
+  );
+  const horas = 24 - hora;
+  return dias > 0
+    ? `${dias} ${dias === 1 ? "dia" : "dias"} e ${horas}h`
+    : `${horas}h`;
+}
+
 export function formatarData(data: string): string {
   return toUtc(data).toLocaleDateString("pt-BR", {
     timeZone: "UTC",

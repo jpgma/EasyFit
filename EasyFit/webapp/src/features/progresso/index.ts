@@ -1,3 +1,4 @@
+export { LinhaParticipante, SituacaoParticipante } from "./LinhaParticipante";
 export {
   useClassificacao,
   useHistoricoSemanal,

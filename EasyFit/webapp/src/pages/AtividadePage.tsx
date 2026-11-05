@@ -1,14 +1,14 @@
-import { ArrowLeft, CloudOff } from "lucide-react";
+import { CalendarDays, Clock, CloudOff } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { Avatar } from "@/components/Avatar";
 import { EmptyState } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
 import { SplashScreen } from "@/components/SplashScreen";
 import {
-  formatarDataHora,
+  formatarDataRelativa,
   formatarDuracao,
-  situacaoVerificacaoLabels,
   tipoAtividadeLabels,
-  tipoComprovacaoLabels,
+  TipoAtividadeIcone,
   useAtividade,
 } from "@/features/atividades";
 import { ReacoesAtividade } from "@/features/reacoes";
@@ -24,9 +24,9 @@ export function AtividadePage() {
     const notFound =
       atividade.error instanceof ApiError && atividade.error.status === 404;
     return (
-      <main className="flex min-h-dvh flex-col items-center justify-center px-5">
+      <div className="card">
         <EmptyState
-          icon={notFound ? CloudOff : CloudOff}
+          icon={CloudOff}
           title={
             notFound ? "Atividade não encontrada" : "Não foi possível carregar"
           }
@@ -35,15 +35,18 @@ export function AtividadePage() {
               ? "Esta atividade não existe ou você não tem acesso a ela."
               : getErrorMessage(atividade.error)
           }
+          action={
+            <Link to="/" className="btn-secondary">
+              Ir para o início
+            </Link>
+          }
         />
-        <Link to="/" className="btn-secondary mt-4">
-          Ir para o início
-        </Link>
-      </main>
+      </div>
     );
   }
 
   const {
+    usuarioId,
     nomeExibicao,
     grupoId,
     grupoNome,
@@ -51,83 +54,84 @@ export function AtividadePage() {
     duracaoSegundos,
     startedAt,
     descricao,
-    tipoComprovacao,
     situacaoVerificacao,
-    submittedAt,
     voce,
     evidencias,
   } = atividade.data;
 
   return (
-    <main className="mx-auto min-h-dvh max-w-2xl animate-fade-in px-5 py-6">
-      <Link to={`/grupos/${grupoId}`} className="btn-ghost -ml-2">
-        <ArrowLeft aria-hidden="true" className="h-5 w-5" />
-        {grupoNome}
-      </Link>
+    <div className="mx-auto max-w-4xl">
+      <PageHeader title="Atividade" back={`/grupos/${grupoId}/atividades`} />
 
-      <header className="card mt-4 p-5">
-        <div className="flex items-center gap-3">
-          <Avatar nome={nomeExibicao} />
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-bold">
-              {nomeExibicao}
-              {voce && <span className="font-normal text-muted"> (você)</span>}
-            </p>
-            <p className="text-sm text-muted">
-              {tipoAtividadeLabels[tipo]} · {formatarDuracao(duracaoSegundos)}
-            </p>
-          </div>
-          <span className="chip">
-            {situacaoVerificacaoLabels[situacaoVerificacao]}
-          </span>
-        </div>
-
-        <dl className="mt-4 space-y-2 text-sm">
-          <div className="flex justify-between gap-3">
-            <dt className="text-muted">Início</dt>
-            <dd className="font-medium">{formatarDataHora(startedAt)}</dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-muted">Enviada</dt>
-            <dd className="font-medium">{formatarDataHora(submittedAt)}</dd>
-          </div>
-          <div className="flex justify-between gap-3">
-            <dt className="text-muted">Comprovação</dt>
-            <dd className="font-medium">
-              {tipoComprovacaoLabels[tipoComprovacao]}
-            </dd>
-          </div>
-        </dl>
-
-        {descricao && (
-          <p className="mt-4 text-sm leading-relaxed">{descricao}</p>
-        )}
-      </header>
-
-      {evidencias.length > 0 && (
-        <section className="mt-6">
-          <h2 className="mb-3 text-base font-bold">Evidências</h2>
-          <ul className="grid gap-3 sm:grid-cols-2">
-            {evidencias.map((evidencia) => (
-              <li key={evidencia.id} className="card overflow-hidden">
+      <div className="grid gap-5 lg:grid-cols-[1.2fr_1fr]">
+        <div className="card overflow-hidden">
+          {evidencias.length === 0 ? (
+            <div className="grid aspect-[4/3] place-items-center bg-surface-muted text-sm text-muted">
+              Sem comprovante anexado
+            </div>
+          ) : (
+            <div className="flex snap-x snap-mandatory overflow-x-auto">
+              {evidencias.map((evidencia) => (
                 <img
+                  key={evidencia.id}
                   src={evidencia.url}
-                  alt={`Evidência ${evidencia.ordem}`}
-                  className="aspect-[4/3] w-full object-cover"
+                  alt={`Comprovante ${evidencia.ordem} de ${evidencias.length}`}
+                  className="aspect-[4/3] w-full shrink-0 snap-center object-cover"
                   loading="lazy"
                 />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+              ))}
+            </div>
+          )}
 
-      <ReacoesAtividade
-        atividadeId={id}
-        grupoId={grupoId}
-        situacaoVerificacao={situacaoVerificacao}
-        voce={voce}
-      />
-    </main>
+          <div className="p-5">
+            <div className="flex items-center gap-3">
+              <Avatar nome={nomeExibicao} id={usuarioId} size={44} />
+              <div className="min-w-0">
+                <p className="truncate font-semibold">
+                  {nomeExibicao}
+                  {voce && (
+                    <span className="font-normal text-muted"> (você)</span>
+                  )}
+                </p>
+                <p className="truncate text-xs text-muted">{grupoNome}</p>
+              </div>
+            </div>
+
+            <div className="mt-5 flex items-center gap-3">
+              <TipoAtividadeIcone tipo={tipo} className="size-12" />
+              <div className="min-w-0">
+                <p className="font-display text-xl font-bold">
+                  {tipoAtividadeLabels[tipo]}
+                </p>
+                <p className="flex flex-wrap items-center gap-x-3 text-sm text-muted">
+                  <span className="inline-flex items-center gap-1">
+                    <Clock aria-hidden="true" className="size-4" />
+                    {formatarDuracao(duracaoSegundos)}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <CalendarDays aria-hidden="true" className="size-4" />
+                    {formatarDataRelativa(startedAt)}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            {descricao && (
+              <p className="mt-4 text-[15px] leading-relaxed break-words">
+                {descricao}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <ReacoesAtividade
+          atividadeId={id}
+          grupoId={grupoId}
+          situacaoVerificacao={situacaoVerificacao}
+          voce={voce}
+          nomeAutor={nomeExibicao}
+        />
+      </div>
+    </div>
   );
 }

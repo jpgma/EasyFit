@@ -1,8 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ArrowRight, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { z } from "zod";
+import { PageHeader } from "@/components/PageHeader";
 import { TextField } from "@/components/TextField";
 import { useCriarGrupo } from "@/features/grupos";
 import { getErrorMessage } from "@/services/api";
@@ -44,14 +45,9 @@ export function CriarGrupoPage() {
   });
 
   return (
-    <main className="mx-auto min-h-dvh w-full max-w-md animate-fade-in px-6 py-6">
-      <Link to="/" className="btn-ghost -ml-2">
-        <ArrowLeft aria-hidden="true" className="h-5 w-5" />
-        Voltar
-      </Link>
-
-      <h1 className="mt-6 text-2xl font-bold">Criar grupo</h1>
-      <p className="mt-1.5 mb-8 text-sm text-balance text-muted">
+    <div className="mx-auto w-full max-w-xl">
+      <PageHeader title="Criar grupo" back="/" />
+      <p className="mb-6 text-sm text-balance text-muted">
         Um espaço privado para até 10 amigos. Depois de criar, você poderá
         convidar as pessoas.
       </p>
@@ -112,9 +108,8 @@ export function CriarGrupoPage() {
           disabled={criar.isPending}
         >
           {criar.isPending ? "Criando…" : "Criar grupo"}
-          <ArrowRight aria-hidden="true" className="h-5 w-5" />
         </button>
       </form>
-    </main>
+    </div>
   );
 }

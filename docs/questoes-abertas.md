@@ -688,7 +688,7 @@ A interface deve ser moderna, leve e mobile-first.
 
 Não utilizar dependências externas para carregar fontes ou recursos visuais.
 
-**Situação atual:** paleta, tipografia e temas claro e escuro foram definidos a partir do mockup. Ver `decisoes/0007-mockup-como-referencia-visual.md`. Falta avaliar a necessidade de um seletor manual de tema.
+**Situação atual:** paleta, tipografia e temas claro e escuro foram definidos a partir do mockup. Ver `decisoes/0014-novo-mockup-como-referencia-visual.md`. Falta avaliar a necessidade de um seletor manual de tema.
 
 ## Q032 — Quais páginas serão obrigatórias no MVP?
 

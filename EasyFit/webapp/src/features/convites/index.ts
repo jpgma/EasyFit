@@ -1,3 +1,4 @@
+export { ConviteForm } from "./ConviteForm";
 export {
   buildConviteLink,
   extractConviteToken,

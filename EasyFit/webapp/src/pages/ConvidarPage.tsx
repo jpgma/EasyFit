@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   Check,
   Clock,
   CloudOff,
@@ -10,9 +9,10 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
 import { SplashScreen } from "@/components/SplashScreen";
 import {
   buildConviteLink,
@@ -43,19 +43,12 @@ export function ConvidarPage() {
   const [copyFailed, setCopyFailed] = useState(false);
   const [revogando, setRevogando] = useState<Convite | null>(null);
 
-  const voltar = (
-    <Link to={`/grupos/${id}`} className="btn-ghost -ml-2 self-start">
-      <ArrowLeft aria-hidden="true" className="h-5 w-5" />
-      Voltar
-    </Link>
-  );
-
   if (grupo.isPending) return <SplashScreen />;
 
   if (grupo.isError || !podeConvidar) {
     return (
-      <main className="mx-auto flex min-h-dvh max-w-2xl flex-col px-5 py-6">
-        {voltar}
+      <div className="mx-auto max-w-xl">
+        <PageHeader title="Convidar amigos" back={`/grupos/${id}`} />
         {grupo.isError ? (
           <EmptyState
             icon={CloudOff}
@@ -69,7 +62,7 @@ export function ConvidarPage() {
             description="Peça a um administrador do grupo para gerar um convite."
           />
         )}
-      </main>
+      </div>
     );
   }
 
@@ -108,11 +101,12 @@ export function ConvidarPage() {
   };
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-2xl animate-fade-in flex-col px-5 py-6">
-      {voltar}
-
-      <h1 className="mt-4 text-xl font-bold">Convidar amigos</h1>
-      <p className="mt-1 text-sm break-words text-muted">{grupo.data.nome}</p>
+    <div className="mx-auto max-w-xl">
+      <PageHeader
+        title="Convidar amigos"
+        subtitle={grupo.data.nome}
+        back={`/grupos/${id}`}
+      />
 
       <div className="card mt-4 flex items-center gap-3 p-4">
         <UserPlus aria-hidden="true" className="h-5 w-5 shrink-0 text-muted" />
@@ -222,7 +216,7 @@ export function ConvidarPage() {
       )}
 
       <section className="mt-6">
-        <h2 className="mb-3 text-base font-bold">Convites pendentes</h2>
+        <h2 className="mb-3 text-lg font-bold">Convites pendentes</h2>
 
         {convites.isPending && (
           <p role="status" className="py-4 text-center text-sm text-muted">
@@ -288,6 +282,6 @@ export function ConvidarPage() {
           setRevogando(null);
         }}
       />
-    </main>
+    </div>
   );
 }

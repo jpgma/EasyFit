@@ -1,6 +1,6 @@
 # 0007 — Mockup como referência visual
 
-**Status:** DECIDIDA
+**Status:** SUBSTITUÍDA pela decisão 0014
 
 ## Contexto
 

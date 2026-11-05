@@ -1,56 +1,80 @@
-import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import { Avatar } from "@/components/Avatar";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { useToast } from "@/components/Toast";
+import { SituacaoBadge, type SituacaoVerificacao } from "@/features/atividades";
 import { canRevisarAtividade, useGrupo } from "@/features/grupos";
-import { situacaoVerificacaoLabels } from "@/features/atividades";
 import { getErrorMessage } from "@/services/api";
-import { tipoReacaoLabels } from "./labels";
+import { tipoReacaoEmojis, tipoReacaoLabels } from "./labels";
 import type { TipoReacao } from "./types";
-import { useReacoes, useRegistrarReacao, useRevisarAtividade } from "./useReacoes";
+import {
+  useReacoes,
+  useRegistrarReacao,
+  useRevisarAtividade,
+} from "./useReacoes";
 
-const tiposReacao: TipoReacao[] = ["Kudos", "Suspeito", "Rejeitar"];
+const descricoes: Record<TipoReacao, { texto: string; sua: string }> = {
+  Kudos: { texto: "deu moral", sua: "Você deu moral" },
+  Suspeito: { texto: "achou suspeito", sua: "Você marcou como suspeito" },
+  Rejeitar: { texto: "rejeitou", sua: "Você rejeitou" },
+};
+
+function Emoji({ tipo }: { tipo: TipoReacao }) {
+  return <span aria-hidden="true">{tipoReacaoEmojis[tipo]}</span>;
+}
 
 export function ReacoesAtividade({
   atividadeId,
   grupoId,
   situacaoVerificacao,
   voce,
+  nomeAutor,
 }: {
   atividadeId: string;
   grupoId: string;
-  situacaoVerificacao: string;
+  situacaoVerificacao: SituacaoVerificacao;
   voce: boolean;
+  nomeAutor: string;
 }) {
   const reacoes = useReacoes(atividadeId);
   const registrar = useRegistrarReacao(atividadeId);
   const revisar = useRevisarAtividade(atividadeId);
   const grupo = useGrupo(grupoId);
+  const { showToast } = useToast();
+  const [confirmandoRejeicao, setConfirmandoRejeicao] = useState(false);
   const [justificativa, setJustificativa] = useState("");
   const [decisao, setDecisao] = useState<"Verificada" | "Rejeitada">(
     "Verificada",
   );
 
+  const primeiroNome = nomeAutor.trim().split(/\s+/)[0];
+
+  const reagir = (tipo: TipoReacao, mensagem: string) =>
+    registrar.mutate(tipo, {
+      onSuccess: () => {
+        setConfirmandoRejeicao(false);
+        showToast(mensagem);
+      },
+    });
+
   if (reacoes.isPending) {
     return (
-      <section className="mt-6 flex items-center gap-2 text-sm text-muted">
-        <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+      <p role="status" className="card p-5 text-sm text-muted">
         Carregando reações…
-      </section>
+      </p>
     );
   }
 
   if (reacoes.isError) {
     return (
-      <section className="mt-6">
-        <p className="text-sm text-danger">{getErrorMessage(reacoes.error)}</p>
-      </section>
+      <p role="alert" className="form-error">
+        {getErrorMessage(reacoes.error)}
+      </p>
     );
   }
 
   const {
     totalRevisores,
-    kudos,
-    suspeito,
-    rejeitar,
     suaReacao,
     voceERevisor,
     janelaAberta,
@@ -63,128 +87,171 @@ export function ReacoesAtividade({
     janelaAberta &&
     situacaoVerificacao === "AguardandoFeedback";
 
-  const admin =
-    grupo.data && canRevisarAtividade(grupo.data.papel)
-      ? grupo.data.papel
-      : null;
   const mostrarRevisaoAdmin =
-    admin !== null && situacaoVerificacao === "EmRevisao";
+    grupo.data !== undefined &&
+    canRevisarAtividade(grupo.data.papel) &&
+    situacaoVerificacao === "EmRevisao";
 
   return (
-    <section className="mt-6">
-      <h2 className="mb-3 text-base font-bold">Reações</h2>
-
-      {totalRevisores === 0 ? (
-        <p className="text-sm text-muted">
-          Não havia revisores no grupo quando a atividade foi registrada; ela foi
-          verificada automaticamente.
-        </p>
-      ) : (
-        <>
-          <p className="text-sm text-muted">
-            {kudos} kudos · {suspeito} suspeito · {rejeitar} rejeição
-            {rejeitar === 1 ? "" : "ões"} · {totalRevisores} revisor
-            {totalRevisores === 1 ? "" : "es"}
-            {!janelaAberta && situacaoVerificacao === "AguardandoFeedback" && (
-              <span> · prazo encerrado</span>
-            )}
+    <div className="space-y-5">
+      <div className="card p-5">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm font-semibold">Verificação</p>
+          <SituacaoBadge situacao={situacaoVerificacao} />
+        </div>
+        {totalRevisores === 0 ? (
+          <p className="mt-4 text-sm text-muted">
+            Não havia outros membros no grupo quando a atividade foi registrada,
+            então ela foi verificada automaticamente.
           </p>
-
-          {podeReagir && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {tiposReacao.map((tipo) => (
-                <button
-                  key={tipo}
-                  type="button"
-                  disabled={registrar.isPending}
-                  className={
-                    suaReacao === tipo ? "btn-primary" : "btn-secondary"
-                  }
-                  onClick={() => registrar.mutate(tipo)}
+        ) : (
+          <ul className="mt-4 space-y-3">
+            {lista.length === 0 && (
+              <li className="text-sm text-muted">Ninguém reagiu ainda.</li>
+            )}
+            {lista.map((item) => {
+              const { texto } = descricoes[item.tipo];
+              return (
+                <li
+                  key={item.usuarioId}
+                  className="flex items-center gap-3 text-sm"
                 >
-                  {tipoReacaoLabels[tipo]}
-                </button>
-              ))}
-            </div>
-          )}
+                  <Avatar
+                    nome={item.nomeExibicao}
+                    id={item.usuarioId}
+                    size={30}
+                  />
+                  <span className="min-w-0 flex-1 truncate">
+                    <b>{item.nomeExibicao.trim().split(/\s+/)[0]}</b> {texto}
+                  </span>
+                  <Emoji tipo={item.tipo} />
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
 
-          {registrar.isError && (
-            <p className="mt-2 text-sm text-danger">
+      {voce && totalRevisores > 0 && (
+        <p className="rounded-2xl bg-surface-muted p-4 text-sm text-muted">
+          Essa atividade é sua. Seus amigos vão avaliar.
+        </p>
+      )}
+
+      {!podeReagir && suaReacao && (
+        <p className="rounded-2xl bg-surface-muted p-4 text-sm font-medium">
+          {descricoes[suaReacao].sua}
+        </p>
+      )}
+
+      {podeReagir && (
+        <div className="space-y-2">
+          {suaReacao && (
+            <p className="rounded-2xl bg-surface-muted p-4 text-sm font-medium">
+              {descricoes[suaReacao].sua}. Você pode trocar até o prazo acabar.
+            </p>
+          )}
+          <button
+            type="button"
+            className="btn-primary w-full"
+            disabled={registrar.isPending || suaReacao === "Kudos"}
+            onClick={() =>
+              reagir("Kudos", `Você deu moral para ${primeiroNome}!`)
+            }
+          >
+            <Emoji tipo="Kudos" />
+            Dar moral
+          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              className="btn-warning"
+              disabled={registrar.isPending || suaReacao === "Suspeito"}
+              onClick={() =>
+                reagir("Suspeito", "Marcado como suspeito para revisão.")
+              }
+            >
+              <Emoji tipo="Suspeito" />
+              {tipoReacaoLabels.Suspeito}
+            </button>
+            <button
+              type="button"
+              className="btn-danger"
+              disabled={registrar.isPending || suaReacao === "Rejeitar"}
+              onClick={() => setConfirmandoRejeicao(true)}
+            >
+              <Emoji tipo="Rejeitar" />
+              {tipoReacaoLabels.Rejeitar}
+            </button>
+          </div>
+          <p className="pt-1 text-center text-xs text-muted">
+            “Suspeito” sinaliza uma dúvida, e um administrador decide.
+          </p>
+          {registrar.isError && !confirmandoRejeicao && (
+            <p role="alert" className="form-error">
               {getErrorMessage(registrar.error)}
             </p>
           )}
-
-          {lista.length > 0 && (
-            <ul className="card mt-4 divide-y divide-border">
-              {lista.map((item) => (
-                <li
-                  key={item.usuarioId}
-                  className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
-                >
-                  <span className="truncate font-medium">
-                    {item.nomeExibicao}
-                  </span>
-                  <span className="chip shrink-0">
-                    {tipoReacaoLabels[item.tipo]}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </>
+        </div>
       )}
 
       {mostrarRevisaoAdmin && (
-        <div className="card mt-6 p-4">
-          <h3 className="text-sm font-bold">Revisão administrativa</h3>
-          <p className="mt-1 text-sm text-muted">
-            Situação: {situacaoVerificacaoLabels.EmRevisao}
-          </p>
-          <label className="mt-4 block text-sm">
-            <span className="text-muted">Decisão</span>
+        <div className="card p-5">
+          <h3 className="text-base font-bold">Revisão administrativa</h3>
+          <label className="mt-4 block">
+            <span className="input-label">Decisão</span>
             <select
-              className="input mt-1 w-full"
+              className="input-field"
               value={decisao}
-              onChange={(e) =>
-                setDecisao(e.target.value as "Verificada" | "Rejeitada")
+              onChange={(event) =>
+                setDecisao(event.target.value as "Verificada" | "Rejeitada")
               }
             >
               <option value="Verificada">Aprovar atividade</option>
               <option value="Rejeitada">Rejeitar atividade</option>
             </select>
           </label>
-          <label className="mt-3 block text-sm">
-            <span className="text-muted">Justificativa</span>
+          <label className="mt-3 block">
+            <span className="input-label">Justificativa</span>
             <textarea
-              className="input mt-1 min-h-20 w-full resize-y"
+              className="input-field h-auto min-h-20 resize-y py-3"
               maxLength={500}
               value={justificativa}
-              onChange={(e) => setJustificativa(e.target.value)}
+              onChange={(event) => setJustificativa(event.target.value)}
               placeholder="Explique brevemente a decisão."
             />
           </label>
           <button
             type="button"
             className="btn-primary mt-4 w-full"
-            disabled={
-              revisar.isPending || justificativa.trim().length === 0
-            }
+            disabled={revisar.isPending || justificativa.trim().length === 0}
             onClick={() =>
-              revisar.mutate({
-                decisao,
-                justificativa: justificativa.trim(),
-              })
+              revisar.mutate({ decisao, justificativa: justificativa.trim() })
             }
           >
             {revisar.isPending ? "Registrando…" : "Registrar decisão"}
           </button>
           {revisar.isError && (
-            <p className="mt-2 text-sm text-danger">
+            <p role="alert" className="form-error mt-3">
               {getErrorMessage(revisar.error)}
             </p>
           )}
         </div>
       )}
-    </section>
+
+      <ConfirmDialog
+        open={confirmandoRejeicao}
+        title="Rejeitar atividade?"
+        message={`Isso pode fazer este treino de ${primeiroNome} deixar de contar na meta. Se você só tem dúvidas, prefira “Suspeito”.`}
+        confirmLabel="Rejeitar atividade"
+        pending={registrar.isPending}
+        error={registrar.isError ? getErrorMessage(registrar.error) : undefined}
+        onConfirm={() => reagir("Rejeitar", "Atividade rejeitada.")}
+        onCancel={() => {
+          registrar.reset();
+          setConfirmandoRejeicao(false);
+        }}
+      />
+    </div>
   );
 }

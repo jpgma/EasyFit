@@ -1,7 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  ArrowLeft,
-  ArrowRight,
   CalendarDays,
   Clock,
   CloudOff,
@@ -10,9 +8,10 @@ import {
   Users,
 } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
-import { Link, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { z } from "zod";
 import { EmptyState } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
 import { SplashScreen } from "@/components/SplashScreen";
 import { TextField } from "@/components/TextField";
 import {
@@ -130,7 +129,7 @@ function CriarDesafioForm({
         <textarea
           id="descricao"
           rows={3}
-          className={`input-field resize-none ${errors.descricao ? "border-danger" : ""}`}
+          className={`input-field h-auto resize-none py-3 ${errors.descricao ? "border-danger" : ""}`}
           aria-invalid={errors.descricao ? true : undefined}
           aria-describedby={errors.descricao ? "descricao-erro" : undefined}
           {...register("descricao")}
@@ -216,7 +215,6 @@ function CriarDesafioForm({
         disabled={criar.isPending}
       >
         {criar.isPending ? "Criando…" : "Criar desafio"}
-        <ArrowRight aria-hidden="true" className="h-5 w-5" />
       </button>
     </form>
   );
@@ -226,21 +224,14 @@ export function CriarDesafioPage() {
   const { id = "" } = useParams();
   const grupo = useGrupo(id);
 
-  const voltar = (
-    <Link to={`/grupos/${id}`} className="btn-ghost -ml-2 self-start">
-      <ArrowLeft aria-hidden="true" className="h-5 w-5" />
-      Voltar
-    </Link>
-  );
-
   if (grupo.isPending) return <SplashScreen />;
 
   if (grupo.isError || !canGerenciarDesafios(grupo.data.papel)) {
     const notFound =
       grupo.error instanceof ApiError && grupo.error.status === 404;
     return (
-      <main className="mx-auto flex min-h-dvh max-w-md flex-col px-6 py-6">
-        {voltar}
+      <div className="mx-auto max-w-xl">
+        <PageHeader title="Criar desafio" back={`/grupos/${id}`} />
         {grupo.isError && !notFound ? (
           <EmptyState
             icon={CloudOff}
@@ -258,21 +249,19 @@ export function CriarDesafioPage() {
             }
           />
         )}
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md animate-fade-in flex-col px-6 py-6">
-      {voltar}
-
-      <h1 className="mt-6 text-2xl font-bold">Criar desafio</h1>
-      <p className="mt-1.5 mb-8 text-sm text-balance text-muted">
+    <div className="mx-auto w-full max-w-xl">
+      <PageHeader title="Criar desafio" back={`/grupos/${id}`} />
+      <p className="mb-6 text-sm text-balance text-muted">
         Todos os participantes seguem a mesma meta, em semanas de segunda a
         domingo.
       </p>
 
       <CriarDesafioForm grupoId={id} fusoHorario={grupo.data.fusoHorario} />
-    </main>
+    </div>
   );
 }

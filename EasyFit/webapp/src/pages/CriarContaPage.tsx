@@ -1,9 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ArrowRight, Lock, Mail, Ticket, User } from "lucide-react";
+import { ChevronLeft, Lock, Mail, Ticket, User } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Link, useLocation } from "react-router";
 import { z } from "zod";
-import { BrandMark } from "@/components/BrandMark";
+import { Logo } from "@/components/BrandMark";
 import { TextField } from "@/components/TextField";
 import { useRegistrar } from "@/features/autenticacao";
 import { extractConviteToken } from "@/features/convites";
@@ -50,29 +50,25 @@ export function CriarContaPage() {
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   return (
-    <main className="flex min-h-dvh flex-col">
-      <div className="mx-auto w-full max-w-md px-6 pt-6">
+    <main className="mx-auto min-h-dvh w-full max-w-sm px-6 py-6">
+      <div className="flex items-center justify-between">
         <Link
           to={conviteDoLink ? `/convite#${conviteDoLink}` : "/entrar"}
-          className="btn-ghost -ml-2"
+          aria-label="Voltar"
+          className="grid size-10 place-items-center rounded-full bg-surface shadow-card tap"
         >
-          <ArrowLeft aria-hidden="true" className="h-5 w-5" />
-          Voltar
+          <ChevronLeft aria-hidden="true" className="size-5" />
         </Link>
+        <Logo />
+        <div className="size-10" />
       </div>
 
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-8">
-        <div className="mb-8 animate-slide-up">
-          <div className="mb-3">
-            <BrandMark size="sm" />
-          </div>
-          <h1 className="text-2xl font-bold">Criar conta</h1>
-          <p className="mt-1.5 text-sm text-balance text-muted">
-            {conviteDoLink
-              ? "Crie sua conta para entrar no grupo que convidou você."
-              : "Crie sua conta para participar dos desafios do seu grupo."}
-          </p>
-        </div>
+      <div className="animate-slide-up">
+        <h1 className="mt-8 text-3xl font-bold">Criar sua conta</h1>
+        <p className="mt-2 text-muted">
+          O EasyFit funciona por convite. Seus dados ficam visíveis só para o
+          seu grupo.
+        </p>
 
         <form
           noValidate
@@ -88,7 +84,7 @@ export function CriarContaPage() {
               }),
             )(event)
           }
-          className="animate-slide-up space-y-4 [animation-delay:0.1s]"
+          className="mt-7 space-y-4"
         >
           <TextField
             label="Nome"
@@ -146,13 +142,19 @@ export function CriarContaPage() {
 
           <button
             type="submit"
-            className="btn-primary mt-6 w-full"
+            className="btn-primary w-full"
             disabled={registrar.isPending}
           >
-            {registrar.isPending ? "Criando conta…" : "Criar conta e entrar"}
-            <ArrowRight aria-hidden="true" className="h-5 w-5" />
+            {registrar.isPending ? "Criando conta…" : "Criar conta"}
           </button>
         </form>
+
+        <p className="mt-6 text-center text-sm text-muted">
+          Já tem conta?{" "}
+          <Link to="/entrar" className="font-semibold text-link">
+            Entrar
+          </Link>
+        </p>
       </div>
     </main>
   );

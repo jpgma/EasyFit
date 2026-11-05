@@ -1,9 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useLocation } from "react-router";
 import { z } from "zod";
-import { BrandMark } from "@/components/BrandMark";
+import { Logo } from "@/components/BrandMark";
 import { TextField } from "@/components/TextField";
 import { useEntrar } from "@/features/autenticacao";
 import { getErrorMessage } from "@/services/api";
@@ -21,6 +22,7 @@ export function EntrarPage() {
   const { state } = useLocation() as {
     state: { conviteToken?: string } | null;
   };
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const {
     register,
     handleSubmit,
@@ -28,87 +30,94 @@ export function EntrarPage() {
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   return (
-    <main className="flex min-h-dvh flex-col">
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-12">
-        <div className="mb-10 animate-slide-up text-center">
-          <div className="mb-4">
-            <BrandMark />
-          </div>
-          <h1 className="text-3xl font-bold">EasyFit</h1>
-          <p className="mt-2 text-balance text-muted">
-            Desafios fitness semanais com amigos. Mantenha a consistência
-            juntos.
-          </p>
-        </div>
-
-        <form
-          noValidate
-          onSubmit={(event) =>
-            void handleSubmit((data) => entrar.mutate(data))(event)
-          }
-          className="animate-slide-up space-y-4 [animation-delay:0.1s]"
-        >
-          <TextField
-            label="E-mail"
-            icon={Mail}
-            type="email"
-            autoComplete="email"
-            inputMode="email"
-            placeholder="seu@email.com"
-            error={errors.email?.message}
-            {...register("email")}
-          />
-          <TextField
-            label="Senha"
-            icon={Lock}
-            type="password"
-            autoComplete="current-password"
-            placeholder="••••••••"
-            error={errors.senha?.message}
-            {...register("senha")}
-          />
-
-          {entrar.isError && (
-            <p role="alert" className="form-error">
-              {getErrorMessage(entrar.error)}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            className="btn-primary w-full"
-            disabled={entrar.isPending}
-          >
-            {entrar.isPending ? "Entrando…" : "Entrar"}
-            <ArrowRight aria-hidden="true" className="h-5 w-5" />
-          </button>
-
-          <div className="relative pt-2">
-            <div className="absolute inset-0 flex items-center pt-2">
-              <div className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-background px-3 text-sm text-muted">ou</span>
-            </div>
-          </div>
-
-          <Link
-            to="/criar-conta"
-            state={
-              state?.conviteToken
-                ? { conviteToken: state.conviteToken }
-                : undefined
-            }
-            className="btn-secondary w-full"
-          >
-            Criar conta
-          </Link>
-        </form>
-
-        <p className="mt-8 text-center text-2xs text-muted">
-          EasyFit é um app privado para grupos de amigos.
+    <div className="grid min-h-dvh lg:grid-cols-2">
+      <div className="hidden flex-col justify-between bg-brand p-12 text-on-brand lg:flex">
+        <p className="font-display text-xl font-bold">EasyFit</p>
+        <p className="font-display text-5xl leading-tight font-bold">
+          Treinar fica mais fácil quando a turma toda está junta.
         </p>
+        <p className="text-sm opacity-80">Grupos privados de até 10 amigos.</p>
       </div>
-    </main>
+
+      <main className="flex flex-col justify-center px-6 py-10">
+        <div className="mx-auto w-full max-w-sm animate-slide-up">
+          <Logo />
+          <h1 className="mt-10 text-3xl font-bold">Bora treinar?</h1>
+          <p className="mt-2 text-muted">
+            Metas semanais com seus amigos, comprovantes e muito incentivo.
+          </p>
+
+          <form
+            noValidate
+            onSubmit={(event) =>
+              void handleSubmit((data) => entrar.mutate(data))(event)
+            }
+            className="mt-8 space-y-4"
+          >
+            <TextField
+              label="E-mail"
+              icon={Mail}
+              type="email"
+              autoComplete="email"
+              inputMode="email"
+              placeholder="voce@email.com"
+              error={errors.email?.message}
+              {...register("email")}
+            />
+            <TextField
+              label="Senha"
+              icon={Lock}
+              type={mostrarSenha ? "text" : "password"}
+              autoComplete="current-password"
+              error={errors.senha?.message}
+              trailing={
+                <button
+                  type="button"
+                  aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                  className="text-muted"
+                  onClick={() => setMostrarSenha(!mostrarSenha)}
+                >
+                  {mostrarSenha ? (
+                    <EyeOff aria-hidden="true" className="size-4" />
+                  ) : (
+                    <Eye aria-hidden="true" className="size-4" />
+                  )}
+                </button>
+              }
+              {...register("senha")}
+            />
+
+            {entrar.isError && (
+              <p role="alert" className="form-error">
+                {getErrorMessage(entrar.error)}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              className="btn-primary w-full"
+              disabled={entrar.isPending}
+            >
+              {entrar.isPending ? "Entrando…" : "Entrar"}
+            </button>
+          </form>
+
+          <div className="mt-8 rounded-2xl border border-dashed border-border-strong p-4 text-center text-sm">
+            <p className="text-muted">Recebeu um convite de um amigo?</p>
+            <Link
+              to="/criar-conta"
+              state={
+                state?.conviteToken
+                  ? { conviteToken: state.conviteToken }
+                  : undefined
+              }
+              className="mt-1 inline-block font-semibold text-link"
+            >
+              Criar conta com convite
+            </Link>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }

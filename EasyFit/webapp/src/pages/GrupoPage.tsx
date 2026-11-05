@@ -1,10 +1,10 @@
 import {
-  ArrowLeft,
+  CheckCircle2,
   ChevronRight,
   CloudOff,
-  Dumbbell,
   LogOut,
   Plus,
+  Target,
   UserPlus,
   Users,
 } from "lucide-react";
@@ -13,16 +13,20 @@ import { Link, useNavigate, useParams } from "react-router";
 import { Avatar } from "@/components/Avatar";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
+import { SectionTitle } from "@/components/PageHeader";
 import { SplashScreen } from "@/components/SplashScreen";
+import { useAtividadesFeed } from "@/features/atividades";
 import { useSessao } from "@/features/autenticacao";
 import {
   canGerenciarDesafios,
   formatarData,
   formatarDuracao,
+  formatarTempoAteFim,
   situacaoLabels,
+  useDesafio,
   useDesafios,
+  useProgresso,
 } from "@/features/desafios";
-import { useAtividadesFeed } from "@/features/atividades";
 import { FeedAtividade } from "@/features/feed";
 import {
   canAlterarPapel,
@@ -37,6 +41,7 @@ import {
   useTransferirGrupo,
   type Membro,
 } from "@/features/grupos";
+import { LinhaParticipante, useResumoGrupo } from "@/features/progresso";
 import { ApiError, getErrorMessage } from "@/services/api";
 
 type Acao =
@@ -84,14 +89,121 @@ function getTextosDaAcao(acao: Acao, grupoNome: string) {
   }
 }
 
+function getIniciais(nome: string): string {
+  return nome
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((palavra) => palavra.charAt(0).toUpperCase())
+    .join("");
+}
+
+/** O cartão do grupo e a turma mostram o desafio atual; sem ele, sobra só o nome do grupo. */
+function CabecalhoComDesafio({
+  desafioId,
+  nome,
+  totalMembros,
+  usuarioId,
+}: {
+  desafioId: string;
+  nome: string;
+  totalMembros: number;
+  usuarioId: string | undefined;
+}) {
+  const desafio = useDesafio(desafioId);
+  const progresso = useProgresso(desafioId);
+
+  const meta = progresso.data?.sessoesPorSemana ?? 0;
+  const participantes = progresso.data?.participantes ?? [];
+  const totalFeito = participantes.reduce(
+    (soma, p) => soma + Math.min(p.sessoesVerificadas, meta),
+    0,
+  );
+  const objetivo = meta * participantes.length;
+  const faltam = objetivo - totalFeito;
+  const fim = progresso.data?.semanaAtual?.fim;
+  const ordenados = [...participantes].sort(
+    (a, b) =>
+      b.sessoesVerificadas - a.sessoesVerificadas ||
+      b.sessoesProvisorias - a.sessoesProvisorias,
+  );
+
+  return (
+    <>
+      <section className="overflow-hidden rounded-3xl bg-brand p-5 text-on-brand">
+        <div className="flex items-center gap-3">
+          <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-lime font-display text-xl font-bold text-on-lime">
+            {getIniciais(nome)}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-2xl font-bold">{nome}</h1>
+            <p className="truncate text-sm opacity-90">
+              {totalMembros} {totalMembros === 1 ? "membro" : "membros"}
+              {desafio.data && ` · ${desafio.data.nome}`}
+            </p>
+          </div>
+        </div>
+        {objetivo > 0 && (
+          <div className="mt-5">
+            <div className="flex items-end justify-between">
+              <p className="text-sm opacity-90">Treinos do grupo na semana</p>
+              <p className="font-display text-2xl font-bold">
+                {totalFeito}
+                <span className="text-base opacity-80">/{objetivo}</span>
+              </p>
+            </div>
+            <div
+              aria-hidden="true"
+              className="mt-2 h-2.5 overflow-hidden rounded-full bg-on-brand/20"
+            >
+              <div
+                className="h-full rounded-full bg-lime"
+                style={{ width: `${(totalFeito / objetivo) * 100}%` }}
+              />
+            </div>
+            <p className="mt-2 text-xs opacity-90">
+              {faltam > 0
+                ? `Faltam ${faltam} treinos verificados para todo mundo bater a meta`
+                : "Todo mundo bateu a meta!"}
+              {fim &&
+                desafio.data &&
+                ` · ${formatarTempoAteFim(fim, desafio.data.fusoHorario)}`}
+            </p>
+          </div>
+        )}
+      </section>
+
+      {ordenados.length > 0 && (
+        <>
+          <SectionTitle>Como está a turma</SectionTitle>
+          <div className="card p-3">
+            {ordenados.map((p) => (
+              <LinhaParticipante
+                key={p.usuarioId}
+                usuarioId={p.usuarioId}
+                nomeExibicao={p.nomeExibicao}
+                verificadas={p.sessoesVerificadas}
+                provisorias={p.sessoesProvisorias}
+                meta={meta}
+                voce={p.usuarioId === usuarioId}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </>
+  );
+}
+
 export function GrupoPage() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const { data: usuario } = useSessao();
   const grupo = useGrupo(id);
+  const resumo = useResumoGrupo(id);
   const membros = useMembros(id);
   const desafios = useDesafios(id);
-  const feed = useAtividadesFeed(id);
+  const feed = useAtividadesFeed(id, 3);
   const alterarPapel = useAlterarPapel(id);
   const remover = useRemoverMembro(id);
   const transferir = useTransferirGrupo(id);
@@ -104,7 +216,7 @@ export function GrupoPage() {
     const notFound =
       grupo.error instanceof ApiError && grupo.error.status === 404;
     return (
-      <main className="flex min-h-dvh flex-col items-center justify-center">
+      <div className="card">
         <EmptyState
           icon={notFound ? Users : CloudOff}
           title={
@@ -115,15 +227,19 @@ export function GrupoPage() {
               ? "Este grupo não existe ou você não faz parte dele."
               : getErrorMessage(grupo.error)
           }
+          action={
+            <Link to="/" className="btn-secondary">
+              Ir para o início
+            </Link>
+          }
         />
-        <Link to="/" className="btn-secondary">
-          Ir para o início
-        </Link>
-      </main>
+      </div>
     );
   }
 
   const { nome, papel, totalMembros, maxMembros, fusoHorario } = grupo.data;
+  const desafioAtual = resumo.data?.desafio;
+  const atividades = feed.data?.pages[0]?.atividades ?? [];
 
   const mutacaoAtiva = !acao
     ? undefined
@@ -176,247 +292,261 @@ export function GrupoPage() {
     : { title: "", message: "", confirmLabel: "" };
 
   return (
-    <main className="mx-auto min-h-dvh max-w-2xl animate-fade-in px-5 py-6">
-      <Link to="/" className="btn-ghost -ml-2">
-        <ArrowLeft aria-hidden="true" className="h-5 w-5" />
-        Início
-      </Link>
-
-      <header className="card mt-4 p-5">
-        <h1 className="text-xl font-bold break-words">{nome}</h1>
-        <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
-          <Users aria-hidden="true" className="h-4 w-4 shrink-0" />
-          {totalMembros} de {maxMembros} membros
-        </p>
-        <p className="mt-1 text-sm text-muted">
-          Fuso horário: {fusoHorario.replaceAll("_", " ")}
-        </p>
-      </header>
-
-      {canConvidar(papel) && (
-        <Link
-          to={`/grupos/${id}/convidar`}
-          className="btn-secondary mt-4 w-full"
-        >
-          <UserPlus aria-hidden="true" className="h-5 w-5" />
-          Convidar amigos
-        </Link>
+    <>
+      {desafioAtual ? (
+        <CabecalhoComDesafio
+          desafioId={desafioAtual.id}
+          nome={nome}
+          totalMembros={totalMembros}
+          usuarioId={usuario?.id}
+        />
+      ) : (
+        <section className="rounded-3xl bg-brand p-5 text-on-brand">
+          <div className="flex items-center gap-3">
+            <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-lime font-display text-xl font-bold text-on-lime">
+              {getIniciais(nome)}
+            </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="truncate text-2xl font-bold">{nome}</h1>
+              <p className="text-sm opacity-90">
+                {totalMembros} de {maxMembros} membros
+              </p>
+            </div>
+          </div>
+        </section>
       )}
 
-      <section className="mt-6">
-        <h2 className="mb-3 text-base font-bold">Desafios</h2>
-
-        {desafios.isPending && (
-          <p role="status" className="py-8 text-center text-sm text-muted">
-            Carregando…
-          </p>
-        )}
-
-        {desafios.isError && (
-          <p role="alert" className="form-error">
-            {getErrorMessage(desafios.error)}
-          </p>
-        )}
-
-        {desafios.data?.length === 0 && (
-          <p className="card p-4 text-sm text-muted">
-            Este grupo ainda não tem desafios.
-          </p>
-        )}
-
-        {desafios.data && desafios.data.length > 0 && (
-          <ul className="space-y-3">
-            {desafios.data.map((desafio) => (
-              <li key={desafio.id}>
-                <Link
-                  to={`/desafios/${desafio.id}`}
-                  className="card flex items-center gap-3 p-4 transition-colors hover:bg-surface-muted"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-bold">{desafio.nome}</p>
-                    <p className="text-sm text-muted">
-                      {desafio.sessoesPorSemana} por semana ·{" "}
-                      {formatarDuracao(desafio.duracaoMinimaSegundos)}
-                    </p>
-                    <p className="text-sm text-muted">
-                      {formatarData(desafio.dataInicio)} a{" "}
-                      {formatarData(desafio.dataFim)}
-                    </p>
-                  </div>
-                  <span className="chip">
-                    {situacaoLabels[desafio.situacao]}
-                  </span>
-                  <ChevronRight
-                    aria-hidden="true"
-                    className="h-5 w-5 shrink-0 text-muted"
-                  />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {canGerenciarDesafios(papel) && (
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        {desafioAtual ? (
           <Link
-            to={`/grupos/${id}/desafios/novo`}
-            className="btn-secondary mt-3 w-full"
+            to={`/desafios/${desafioAtual.id}`}
+            className="card flex items-center gap-3 p-4 tap"
           >
-            <Plus aria-hidden="true" className="h-5 w-5" />
-            Criar desafio
+            <Target aria-hidden="true" className="size-5 text-primary" />
+            <span className="flex-1 text-sm font-semibold">Meta do grupo</span>
+            <ChevronRight aria-hidden="true" className="size-4 text-muted" />
+          </Link>
+        ) : (
+          canGerenciarDesafios(papel) && (
+            <Link
+              to={`/grupos/${id}/desafios/novo`}
+              className="card flex items-center gap-3 p-4 tap"
+            >
+              <Plus aria-hidden="true" className="size-5 text-primary" />
+              <span className="flex-1 text-sm font-semibold">
+                Criar desafio
+              </span>
+              <ChevronRight aria-hidden="true" className="size-4 text-muted" />
+            </Link>
+          )
+        )}
+        {canConvidar(papel) && (
+          <Link
+            to={`/grupos/${id}/convidar`}
+            className="card flex items-center gap-3 p-4 tap"
+          >
+            <UserPlus aria-hidden="true" className="size-5 text-primary" />
+            <span className="flex-1 text-sm font-semibold">
+              Convidar amigos
+            </span>
+            <ChevronRight aria-hidden="true" className="size-4 text-muted" />
           </Link>
         )}
-      </section>
+      </div>
 
-      <section className="mt-6">
-        <h2 className="mb-3 text-base font-bold">Feed</h2>
-
-        <Link
-          to={`/grupos/${id}/atividades/nova`}
-          className="btn-primary mb-4 w-full"
-        >
-          <Dumbbell aria-hidden="true" className="h-5 w-5" />
-          Registrar atividade
-        </Link>
-
-        {feed.isPending && (
-          <p role="status" className="py-8 text-center text-sm text-muted">
-            Carregando…
-          </p>
-        )}
-
-        {feed.isError && (
-          <p role="alert" className="form-error">
-            {getErrorMessage(feed.error)}
-          </p>
-        )}
-
-        {feed.data &&
-          feed.data.pages.every((p) => p.atividades.length === 0) && (
-            <p className="card p-4 text-sm text-muted">
-              Ninguém registrou atividades ainda. Seja a primeira pessoa!
+      <div className="grid gap-x-6 lg:grid-cols-2">
+        <div>
+          <SectionTitle>Membros</SectionTitle>
+          {membros.isError && (
+            <p role="alert" className="form-error">
+              {getErrorMessage(membros.error)}
             </p>
           )}
-
-        {feed.data && feed.data.pages.some((p) => p.atividades.length > 0) && (
-          <ul className="space-y-3">
-            {feed.data.pages.flatMap((pagina) =>
-              pagina.atividades.map((atividade) => (
-                <li key={atividade.id}>
-                  <FeedAtividade atividade={atividade} />
-                </li>
-              )),
-            )}
-          </ul>
-        )}
-
-        {feed.hasNextPage && (
-          <button
-            type="button"
-            className="btn-secondary mt-3 w-full"
-            disabled={feed.isFetchingNextPage}
-            onClick={() => void feed.fetchNextPage()}
-          >
-            {feed.isFetchingNextPage ? "Carregando…" : "Carregar mais"}
-          </button>
-        )}
-      </section>
-
-      <section className="mt-6">
-        <h2 className="mb-3 text-base font-bold">Membros</h2>
-
-        {membros.isPending && (
-          <p role="status" className="py-8 text-center text-sm text-muted">
-            Carregando…
-          </p>
-        )}
-
-        {membros.isError && (
-          <p role="alert" className="form-error">
-            {getErrorMessage(membros.error)}
-          </p>
-        )}
-
-        {membros.data && (
-          <ul className="card divide-y divide-border">
-            {membros.data.map((membro) => {
-              const voce = membro.usuarioId === usuario?.id;
-              const podeAlterar = canAlterarPapel(papel, membro.papel);
-              const podeRemover = canRemover(papel, membro.papel);
-              return (
-                <li key={membro.usuarioId} className="p-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar nome={membro.nomeExibicao} />
-                    <p className="min-w-0 flex-1 truncate text-sm font-bold">
-                      {membro.nomeExibicao}
-                      {voce && (
-                        <span className="font-normal text-muted"> (você)</span>
-                      )}
-                    </p>
-                    <span className="chip">{papelLabels[membro.papel]}</span>
-                  </div>
-
-                  {(podeAlterar || podeRemover) && (
-                    <div className="mt-2 flex flex-wrap justify-end gap-1">
-                      {podeAlterar && membro.papel === "Membro" && (
-                        <button
-                          type="button"
-                          className="btn-ghost text-sm"
-                          onClick={() => setAcao({ tipo: "promover", membro })}
-                        >
-                          Tornar administrador
-                        </button>
-                      )}
-                      {podeAlterar && membro.papel === "Administrador" && (
-                        <button
-                          type="button"
-                          className="btn-ghost text-sm"
-                          onClick={() => setAcao({ tipo: "rebaixar", membro })}
-                        >
-                          Tornar membro
-                        </button>
-                      )}
-                      {papel === "Proprietario" && (
-                        <button
-                          type="button"
-                          className="btn-ghost text-sm"
-                          onClick={() =>
-                            setAcao({ tipo: "transferir", membro })
-                          }
-                        >
-                          Transferir grupo
-                        </button>
-                      )}
-                      {podeRemover && (
-                        <button
-                          type="button"
-                          className="btn-ghost text-sm"
-                          onClick={() => setAcao({ tipo: "remover", membro })}
-                        >
-                          Remover
-                        </button>
-                      )}
+          {membros.data && (
+            <ul className="card divide-y divide-border">
+              {membros.data.map((membro) => {
+                const voce = membro.usuarioId === usuario?.id;
+                const podeAlterar = canAlterarPapel(papel, membro.papel);
+                const podeRemover = canRemover(papel, membro.papel);
+                return (
+                  <li key={membro.usuarioId} className="p-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar
+                        nome={membro.nomeExibicao}
+                        id={membro.usuarioId}
+                        size={38}
+                      />
+                      <p className="min-w-0 flex-1 truncate text-sm font-semibold">
+                        {membro.nomeExibicao}
+                        {voce && (
+                          <span className="font-normal text-muted">
+                            {" "}
+                            (você)
+                          </span>
+                        )}
+                      </p>
+                      <span className="chip">{papelLabels[membro.papel]}</span>
                     </div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
 
-      <section className="mt-6">
+                    {(podeAlterar || podeRemover) && (
+                      <div className="mt-2 flex flex-wrap justify-end gap-1">
+                        {podeAlterar && membro.papel === "Membro" && (
+                          <button
+                            type="button"
+                            className="btn-ghost h-9 px-3 text-xs"
+                            onClick={() =>
+                              setAcao({ tipo: "promover", membro })
+                            }
+                          >
+                            Tornar administrador
+                          </button>
+                        )}
+                        {podeAlterar && membro.papel === "Administrador" && (
+                          <button
+                            type="button"
+                            className="btn-ghost h-9 px-3 text-xs"
+                            onClick={() =>
+                              setAcao({ tipo: "rebaixar", membro })
+                            }
+                          >
+                            Tornar membro
+                          </button>
+                        )}
+                        {papel === "Proprietario" && (
+                          <button
+                            type="button"
+                            className="btn-ghost h-9 px-3 text-xs"
+                            onClick={() =>
+                              setAcao({ tipo: "transferir", membro })
+                            }
+                          >
+                            Transferir grupo
+                          </button>
+                        )}
+                        {podeRemover && (
+                          <button
+                            type="button"
+                            className="btn-ghost h-9 px-3 text-xs"
+                            onClick={() => setAcao({ tipo: "remover", membro })}
+                          >
+                            Remover
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
+        <div>
+          <SectionTitle
+            action={
+              <Link
+                to={`/grupos/${id}/atividades`}
+                className="text-sm font-semibold text-link"
+              >
+                Ver todas
+              </Link>
+            }
+          >
+            Atividade recente
+          </SectionTitle>
+          {feed.isError && (
+            <p role="alert" className="form-error">
+              {getErrorMessage(feed.error)}
+            </p>
+          )}
+          {feed.data && atividades.length === 0 && (
+            <div className="card">
+              <EmptyState
+                icon={CheckCircle2}
+                title="Nenhuma atividade ainda"
+                description="Quando alguém do grupo registrar um treino, ele aparece aqui."
+              />
+            </div>
+          )}
+          <div className="space-y-3">
+            {atividades.map((atividade) => (
+              <FeedAtividade key={atividade.id} atividade={atividade} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <SectionTitle
+        action={
+          canGerenciarDesafios(papel) && (
+            <Link
+              to={`/grupos/${id}/desafios/novo`}
+              className="text-sm font-semibold text-link"
+            >
+              Criar desafio
+            </Link>
+          )
+        }
+      >
+        Desafios
+      </SectionTitle>
+      {desafios.isError && (
+        <p role="alert" className="form-error">
+          {getErrorMessage(desafios.error)}
+        </p>
+      )}
+      {desafios.data?.length === 0 && (
+        <p className="card p-4 text-sm text-muted">
+          Este grupo ainda não tem desafios.
+        </p>
+      )}
+      {desafios.data && desafios.data.length > 0 && (
+        <ul className="card divide-y divide-border overflow-hidden">
+          {desafios.data.map((desafio) => (
+            <li key={desafio.id}>
+              <Link
+                to={`/desafios/${desafio.id}`}
+                className="flex items-center gap-3 p-4 transition-colors hover:bg-surface-muted"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold">
+                    {desafio.nome}
+                  </p>
+                  <p className="text-xs text-muted">
+                    {desafio.sessoesPorSemana} por semana ·{" "}
+                    {formatarDuracao(desafio.duracaoMinimaSegundos)} ·{" "}
+                    {formatarData(desafio.dataInicio)} a{" "}
+                    {formatarData(desafio.dataFim)}
+                  </p>
+                </div>
+                <span className="chip">{situacaoLabels[desafio.situacao]}</span>
+                <ChevronRight
+                  aria-hidden="true"
+                  className="size-4 shrink-0 text-muted"
+                />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <p className="mt-6 text-center text-xs text-muted">
+        Fuso do grupo: {fusoHorario.replaceAll("_", " ")}
+      </p>
+
+      <section className="mt-3">
         {papel === "Proprietario" ? (
-          <p className="text-sm text-muted">
+          <p className="text-center text-xs text-muted">
             Para sair do grupo, transfira a propriedade para outro membro. Se
             você estiver sozinho, ainda não é possível sair nem apagar o grupo.
           </p>
         ) : (
           <button
             type="button"
-            className="btn-ghost w-full"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold text-danger hover:bg-danger-soft"
             onClick={() => setAcao({ tipo: "sair" })}
           >
-            <LogOut aria-hidden="true" className="h-5 w-5" />
+            <LogOut aria-hidden="true" className="size-4" />
             Sair do grupo
           </button>
         )}
@@ -436,6 +566,6 @@ export function GrupoPage() {
         onConfirm={confirmar}
         onCancel={fecharDialogo}
       />
-    </main>
+    </>
   );
 }

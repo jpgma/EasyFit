@@ -44,6 +44,8 @@ Use exatamente estas grafias:
 
 `Usuario`, `Sessao`, `Autenticacao`, `Cadastro`, `Grupo`, `Membro`, `Papel`, `Proprietario`, `Administrador`, `Convite`, `Desafio`, `Participante`, `Meta`, `Semana`, `Atividade`, `Evidencia`, `Comprovacao`, `Revisor`, `Revisao`, `Reacao`, `Kudos`, `Suspeito`, `Rejeitar`, `Rejeicao`, `Progresso`, `Classificacao`, `Sequencia`, `Feed`.
 
+Na interface, `Kudos` aparece como "Dar moral" e "deu moral". Cada reação tem um símbolo fixo: 💪 `Kudos`, 🤨 `Suspeito`, ❌ `Rejeitar`.
+
 Situações de verificação: `AguardandoFeedback`, `Verificada`, `EmRevisao`, `Contestada`, `Rejeitada`.
 
 Situações de um desafio: `Agendado`, `Ativo`, `Encerrado`, `Cancelado`.

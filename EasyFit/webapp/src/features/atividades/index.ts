@@ -1,5 +1,6 @@
 export {
   formatarDataHora,
+  formatarDataRelativa,
   formatarDuracao,
   situacaoVerificacaoLabels,
   tipoAtividadeLabels,
@@ -7,8 +8,10 @@ export {
   tiposAtividade,
 } from "./labels";
 export { comprimirImagem } from "./comprimirImagem";
+export { SituacaoBadge } from "./SituacaoBadge";
+export { TipoAtividadeIcone, tipoAtividadeIcones } from "./TipoAtividadeIcone";
 export {
-  useAnexarEvidencia,
+  anexarEvidencia,
   useAtividade,
   useAtividadesFeed,
   useAtividadesRecentes,

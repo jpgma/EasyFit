@@ -1,4 +1,4 @@
-export { tipoReacaoLabels } from "./labels";
+export { tipoReacaoEmojis, tipoReacaoLabels } from "./labels";
 export { ReacoesAtividade } from "./ReacoesAtividade";
 export {
   useReacoes,

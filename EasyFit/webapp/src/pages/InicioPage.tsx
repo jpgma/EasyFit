@@ -1,290 +1,281 @@
-import {
-  Check,
-  ChevronRight,
-  CloudOff,
-  LogOut,
-  Plus,
-  Target,
-  Ticket,
-  Users,
-} from "lucide-react";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { ChevronRight, Clock, CloudOff, Plus, Target } from "lucide-react";
+import { Link, useParams } from "react-router";
+import { Avatar } from "@/components/Avatar";
 import { EmptyState } from "@/components/EmptyState";
-import { TextField } from "@/components/TextField";
-import { useSair, useSessao } from "@/features/autenticacao";
-import { extractConviteToken } from "@/features/convites";
-import { useAtividadesRecentes } from "@/features/atividades";
+import { SectionTitle } from "@/components/PageHeader";
+import { ProgressRing } from "@/components/ProgressRing";
+import { SplashScreen } from "@/components/SplashScreen";
+import { useAtividadesFeed } from "@/features/atividades";
+import { useSessao } from "@/features/autenticacao";
+import {
+  canGerenciarDesafios,
+  formatarDuracao,
+  formatarTempoAteFim,
+  useDesafio,
+  useProgresso,
+} from "@/features/desafios";
 import { FeedAtividade } from "@/features/feed";
-import { situacaoLabels } from "@/features/desafios";
-import { papelLabels, useGrupos, type GrupoResumo } from "@/features/grupos";
-import { useResumoGrupo } from "@/features/progresso";
-import { ProgressBar } from "@/components/ProgressBar";
+import { useGrupo } from "@/features/grupos";
+import { LinhaParticipante, useResumoGrupo } from "@/features/progresso";
 import { getErrorMessage } from "@/services/api";
 
-function GrupoCard({ grupo }: { grupo: GrupoResumo }) {
-  const resumo = useResumoGrupo(grupo.id);
+function getSaudacao(agora: Date): string {
+  const hora = agora.getHours();
+  if (hora < 12) return "Bom dia";
+  return hora < 18 ? "Boa tarde" : "Boa noite";
+}
+
+function getMotivacao(verificadas: number, provisorias: number, meta: number) {
+  if (verificadas >= meta) {
+    return "Meta da semana batida! 🎉 Agora é só manter o ritmo.";
+  }
+  if (provisorias >= meta) return "Meta alcançada, aguardando verificação.";
+  const faltam = meta - provisorias;
+  return faltam === 1
+    ? "Falta só mais um treino!"
+    : `Faltam ${faltam} treinos. Dá tempo!`;
+}
+
+function SuaSemana({
+  grupoId,
+  desafioId,
+  usuarioId,
+}: {
+  grupoId: string;
+  desafioId: string;
+  usuarioId: string;
+}) {
+  const desafio = useDesafio(desafioId);
+  const progresso = useProgresso(desafioId);
+
+  if (progresso.isError || desafio.isError) {
+    return (
+      <p role="alert" className="form-error">
+        {getErrorMessage(progresso.error ?? desafio.error)}
+      </p>
+    );
+  }
+  if (!progresso.data || !desafio.data) {
+    return (
+      <p role="status" className="card p-5 text-sm text-muted">
+        Carregando sua semana…
+      </p>
+    );
+  }
+
+  const { sessoesPorSemana: meta, semanaAtual, participantes } = progresso.data;
+  const eu = participantes.find((p) => p.usuarioId === usuarioId);
+  const verificadas = eu?.sessoesVerificadas ?? 0;
+  const provisorias = eu?.sessoesProvisorias ?? 0;
+  const ordenados = [...participantes].sort(
+    (a, b) =>
+      b.sessoesVerificadas - a.sessoesVerificadas ||
+      b.sessoesProvisorias - a.sessoesProvisorias,
+  );
+  const bateram = participantes.filter((p) => p.metaCumprida).length;
 
   return (
-    <li>
-      <Link
-        to={
-          resumo.data?.desafio
-            ? `/desafios/${resumo.data.desafio.id}`
-            : `/grupos/${grupo.id}`
-        }
-        className="card block p-4 transition-colors hover:bg-surface-muted"
-      >
-        <div className="flex items-center gap-3">
+    <div className="grid gap-5 lg:grid-cols-[1.1fr_1fr]">
+      <section className="card p-5">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm font-semibold">Sua semana</p>
+          <span className="chip chip-soft">{meta} treinos por semana</span>
+        </div>
+        <div className="mt-4 flex items-center gap-5">
+          <ProgressRing
+            label="Seu progresso nesta semana"
+            valor={verificadas}
+            provisorio={provisorias}
+            max={meta}
+          >
+            <div>
+              <p className="font-display text-4xl leading-none font-bold">
+                {Math.min(verificadas, meta)}
+                <span className="text-xl text-muted">/{meta}</span>
+              </p>
+              <p className="mt-1 text-2xs text-muted">sessões</p>
+            </div>
+          </ProgressRing>
           <div className="min-w-0 flex-1">
-            <p className="truncate font-bold">{grupo.nome}</p>
-            <p className="text-sm text-muted">
-              {grupo.totalMembros}{" "}
-              {grupo.totalMembros === 1 ? "membro" : "membros"} ·{" "}
-              {papelLabels[grupo.papel]}
+            <p className="font-display text-xl leading-snug font-bold">
+              {getMotivacao(verificadas, provisorias, meta)}
+            </p>
+            {semanaAtual && (
+              <p className="mt-2 flex items-center gap-1.5 text-sm text-muted">
+                <Clock aria-hidden="true" className="size-4 shrink-0" />
+                Semana fecha em{" "}
+                {formatarTempoAteFim(semanaAtual.fim, desafio.data.fusoHorario)}
+              </p>
+            )}
+            <p className="mt-1 text-sm text-muted">
+              Mínimo de {formatarDuracao(desafio.data.duracaoMinimaSegundos)}{" "}
+              por sessão
             </p>
           </div>
-          <ChevronRight
-            aria-hidden="true"
-            className="h-5 w-5 shrink-0 text-muted"
-          />
         </div>
-
-        {resumo.isPending && (
-          <p role="status" className="mt-3 text-2xs text-muted">
-            Carregando desafio…
+        {provisorias > verificadas && (
+          <p className="mt-3 text-xs text-muted">
+            {provisorias - verificadas} aguardando verificação
           </p>
         )}
+        <Link
+          to={`/grupos/${grupoId}/atividades/nova`}
+          className="btn-primary mt-5 w-full"
+        >
+          <Plus aria-hidden="true" className="size-5" />
+          Registrar atividade
+        </Link>
+      </section>
 
-        {resumo.isError && (
-          <p role="alert" className="form-error mt-3 text-sm">
-            {getErrorMessage(resumo.error)}
-          </p>
-        )}
-
-        {resumo.data && !resumo.data.desafio && (
-          <p className="mt-3 text-sm text-muted">
-            Nenhum desafio neste grupo ainda.
-          </p>
-        )}
-
-        {resumo.data?.desafio && (
-          <div className="mt-4 border-t border-border pt-4">
-            <div className="flex items-start gap-2">
-              <Target
-                aria-hidden="true"
-                className="mt-0.5 h-4 w-4 shrink-0 text-muted"
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">
-                  {resumo.data.desafio.nome}
-                </p>
-                <p className="text-2xs text-muted">
-                  {situacaoLabels[
-                    resumo.data.desafio.situacao as keyof typeof situacaoLabels
-                  ] ?? resumo.data.desafio.situacao}
-                </p>
-              </div>
-            </div>
-
-            {resumo.data.meuProgresso && resumo.data.sessoesPorSemana && (
-              <div className="mt-3">
-                <div className="mb-1 flex items-center justify-between text-sm">
-                  <span>
-                    {resumo.data.meuProgresso.semanaNumero
-                      ? `Semana ${resumo.data.meuProgresso.semanaNumero}`
-                      : "Esta semana"}
-                  </span>
-                  <span className="flex items-center gap-1 font-semibold">
-                    {resumo.data.meuProgresso.metaCumprida && (
-                      <Check aria-label="Meta cumprida" className="h-4 w-4" />
-                    )}
-                    {resumo.data.meuProgresso.sessoesVerificadas}/
-                    {resumo.data.sessoesPorSemana}
-                  </span>
-                </div>
-                <ProgressBar
-                  label="Seu progresso neste desafio"
-                  valor={resumo.data.meuProgresso.sessoesVerificadas}
-                  provisorio={resumo.data.meuProgresso.sessoesProvisorias}
-                  max={resumo.data.sessoesPorSemana}
-                />
-              </div>
-            )}
-
-            {resumo.data.classificacao.length > 0 && (
-              <ol className="mt-3 space-y-1 text-2xs text-muted">
-                {resumo.data.classificacao.map((item) => (
-                  <li key={item.posicao}>
-                    {item.posicao}. {item.nomeExibicao} · {item.semanasCumpridas}{" "}
-                    {item.semanasCumpridas === 1 ? "semana" : "semanas"}
-                  </li>
-                ))}
-              </ol>
-            )}
+      <section className="card p-4">
+        <div className="flex items-center justify-between gap-2 px-2 pb-2">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold">
+              {desafio.data.nome}
+            </p>
+            <p className="text-xs text-muted">
+              {bateram} de {participantes.length} já bateram a meta
+            </p>
           </div>
-        )}
-      </Link>
-    </li>
+          <Link
+            to={`/grupos/${grupoId}`}
+            className="flex shrink-0 items-center text-sm font-semibold text-link"
+          >
+            Ver grupo
+            <ChevronRight aria-hidden="true" className="size-4" />
+          </Link>
+        </div>
+        {ordenados.map((p) => (
+          <LinhaParticipante
+            key={p.usuarioId}
+            usuarioId={p.usuarioId}
+            nomeExibicao={p.nomeExibicao}
+            verificadas={p.sessoesVerificadas}
+            provisorias={p.sessoesProvisorias}
+            meta={meta}
+            voce={p.usuarioId === usuarioId}
+          />
+        ))}
+      </section>
+    </div>
   );
 }
 
 export function InicioPage() {
+  const { id = "" } = useParams();
   const { data: usuario } = useSessao();
-  const sair = useSair();
-  const grupos = useGrupos();
-  const recentes = useAtividadesRecentes((grupos.data?.length ?? 0) > 0);
-  const navigate = useNavigate();
-  const [confirmingSair, setConfirmingSair] = useState(false);
-  const [convite, setConvite] = useState("");
+  const grupo = useGrupo(id);
+  const resumo = useResumoGrupo(id);
+  const feed = useAtividadesFeed(id, 4);
 
-  if (!usuario) return null;
+  if (grupo.isPending || !usuario) return <SplashScreen />;
 
-  const conviteToken = extractConviteToken(convite);
+  if (grupo.isError) {
+    return (
+      <div className="card">
+        <EmptyState
+          icon={CloudOff}
+          title="Não foi possível carregar"
+          description={getErrorMessage(grupo.error)}
+          action={
+            <Link to="/" className="btn-secondary">
+              Voltar
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
+  const agora = new Date();
+  const hoje = new Intl.DateTimeFormat("pt-BR", {
+    weekday: "short",
+    day: "numeric",
+    month: "long",
+  })
+    .format(agora)
+    .replace(".", "");
+  const primeiroNome = usuario.nomeExibicao.trim().split(/\s+/)[0];
+  const desafio = resumo.data?.desafio;
+  const atividades = feed.data?.pages[0]?.atividades ?? [];
 
   return (
-    <main className="mx-auto min-h-dvh max-w-2xl animate-fade-in pb-8">
-      <header className="flex items-center justify-between gap-3 px-5 pt-6">
+    <>
+      <header className="flex items-center gap-3">
+        <Avatar nome={usuario.nomeExibicao} id={usuario.id} size={44} />
         <div className="min-w-0">
-          <p className="text-sm text-muted">Olá,</p>
+          <p className="text-sm text-muted first-letter:uppercase">{hoje}</p>
           <h1 className="truncate text-2xl font-bold">
-            {usuario.nomeExibicao}
+            {getSaudacao(agora)}, {primeiroNome}!
           </h1>
         </div>
-        <button
-          type="button"
-          className="btn-ghost shrink-0"
-          onClick={() => setConfirmingSair(true)}
-        >
-          <LogOut aria-hidden="true" className="h-5 w-5" />
-          Sair
-        </button>
       </header>
 
-      <section className="px-5 pt-6">
-        <h2 className="mb-3 text-base font-bold">Seus grupos</h2>
-
-        {grupos.isPending && (
-          <p role="status" className="py-8 text-center text-sm text-muted">
-            Carregando…
+      <div className="mt-6">
+        {resumo.isError && (
+          <p role="alert" className="form-error">
+            {getErrorMessage(resumo.error)}
           </p>
         )}
-
-        {grupos.isError && (
-          <div className="card">
-            <EmptyState
-              icon={CloudOff}
-              title="Não foi possível carregar"
-              description={getErrorMessage(grupos.error)}
-            />
-          </div>
-        )}
-
-        {grupos.data?.length === 0 && (
-          <div className="card">
-            <EmptyState
-              icon={Users}
-              title="Você ainda não faz parte de um grupo"
-              description="Crie um grupo para seus amigos ou use o convite que você recebeu."
-            />
-          </div>
-        )}
-
-        {grupos.data && grupos.data.length > 0 && (
-          <ul className="space-y-3">
-            {grupos.data.map((grupo) => (
-              <GrupoCard key={grupo.id} grupo={grupo} />
-            ))}
-          </ul>
-        )}
-
-        <Link to="/grupos/novo" className="btn-secondary mt-4 w-full">
-          <Plus aria-hidden="true" className="h-5 w-5" />
-          Criar grupo
-        </Link>
-      </section>
-
-      {grupos.data && grupos.data.length > 0 && (
-        <section className="px-5 pt-8">
-          <h2 className="mb-3 text-base font-bold">Últimas atividades</h2>
-
-          {recentes.isPending && (
-            <p role="status" className="py-6 text-center text-sm text-muted">
-              Carregando…
-            </p>
-          )}
-
-          {recentes.isError && (
-            <p role="alert" className="form-error">
-              {getErrorMessage(recentes.error)}
-            </p>
-          )}
-
-          {recentes.data &&
-            recentes.data.pages.every((p) => p.atividades.length === 0) && (
-              <p className="card p-4 text-sm text-muted">
-                Ainda não há atividades nos seus grupos.
-              </p>
-            )}
-
-          {recentes.data &&
-            recentes.data.pages.some((p) => p.atividades.length > 0) && (
-              <ul className="space-y-3">
-                {recentes.data.pages.flatMap((pagina) =>
-                  pagina.atividades.map((atividade) => (
-                    <li key={atividade.id}>
-                      <FeedAtividade atividade={atividade} mostrarGrupo />
-                    </li>
-                  )),
-                )}
-              </ul>
-            )}
-        </section>
-      )}
-
-      <section className="px-5 pt-8">
-        <h2 className="mb-3 text-base font-bold">Tenho um convite</h2>
-        <form
-          noValidate
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (conviteToken) void navigate(`/convite#${conviteToken}`);
-          }}
-          className="space-y-3"
-        >
-          <TextField
-            label="Link do convite"
-            icon={Ticket}
-            type="text"
-            autoComplete="off"
-            placeholder="Cole aqui o link que você recebeu"
-            value={convite}
-            onChange={(event) => setConvite(event.target.value)}
+        {resumo.data && desafio && (
+          <SuaSemana
+            grupoId={id}
+            desafioId={desafio.id}
+            usuarioId={usuario.id}
           />
-          <button
-            type="submit"
-            className="btn-primary w-full"
-            disabled={!conviteToken}
-          >
-            Continuar
-          </button>
-        </form>
-      </section>
+        )}
+        {resumo.data && !desafio && (
+          <div className="card">
+            <EmptyState
+              icon={Target}
+              title="Nenhum desafio ativo"
+              description={
+                canGerenciarDesafios(grupo.data.papel)
+                  ? "O grupo está sem meta no momento. Crie um desafio para começar."
+                  : "O grupo está sem meta no momento. Peça a um administrador para criar um desafio."
+              }
+              action={
+                canGerenciarDesafios(grupo.data.papel) ? (
+                  <Link
+                    to={`/grupos/${id}/desafios/novo`}
+                    className="btn-primary"
+                  >
+                    Criar desafio
+                  </Link>
+                ) : undefined
+              }
+            />
+          </div>
+        )}
+      </div>
 
-      <ConfirmDialog
-        open={confirmingSair}
-        title="Sair da conta?"
-        message="Você precisará entrar novamente com seu e-mail e senha."
-        confirmLabel="Sair"
-        pending={sair.isPending}
-        error={sair.isError ? getErrorMessage(sair.error) : undefined}
-        onConfirm={() => sair.mutate()}
-        onCancel={() => {
-          sair.reset();
-          setConfirmingSair(false);
-        }}
-      />
-    </main>
+      <SectionTitle
+        action={
+          <Link
+            to={`/grupos/${id}/atividades`}
+            className="text-sm font-semibold text-link"
+          >
+            Ver todas
+          </Link>
+        }
+      >
+        Atividades recentes
+      </SectionTitle>
+      {feed.isError && (
+        <p role="alert" className="form-error">
+          {getErrorMessage(feed.error)}
+        </p>
+      )}
+      {feed.data && atividades.length === 0 && (
+        <p className="card p-4 text-sm text-muted">
+          Quando alguém do grupo registrar um treino, ele aparece aqui.
+        </p>
+      )}
+      <div className="grid gap-3 lg:grid-cols-2">
+        {atividades.map((atividade) => (
+          <FeedAtividade key={atividade.id} atividade={atividade} />
+        ))}
+      </div>
+    </>
   );
 }

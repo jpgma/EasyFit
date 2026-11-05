@@ -69,11 +69,12 @@ export function useDesafios(grupoId: string) {
   });
 }
 
-export function useDesafio(desafioId: string) {
+export function useDesafio(desafioId: string, enabled = true) {
   return useQuery({
     queryKey: desafioKey(desafioId),
     queryFn: ({ signal }) =>
       getJson<Desafio>(`/api/desafios/${desafioId}`, signal),
+    enabled,
     retry: shouldRetry,
   });
 }

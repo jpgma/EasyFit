@@ -21,7 +21,10 @@ export function useClassificacao(desafioId: string) {
   return useQuery({
     queryKey: classificacaoKey(desafioId),
     queryFn: ({ signal }) =>
-      getJson<Classificacao>(`/api/desafios/${desafioId}/classificacao`, signal),
+      getJson<Classificacao>(
+        `/api/desafios/${desafioId}/classificacao`,
+        signal,
+      ),
     retry: shouldRetry,
   });
 }

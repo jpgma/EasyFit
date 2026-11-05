@@ -1,6 +1,6 @@
-import { ArrowRight, Check, CloudOff, Ticket, Users } from "lucide-react";
+import { CloudOff, Ticket, Users } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { BrandMark } from "@/components/BrandMark";
+import { Logo } from "@/components/BrandMark";
 import { EmptyState } from "@/components/EmptyState";
 import { SplashScreen } from "@/components/SplashScreen";
 import { useSessao } from "@/features/autenticacao";
@@ -17,13 +17,30 @@ function ConviteIndisponivel({
   description: string;
 }) {
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center">
-      <EmptyState icon={icon} title={title} description={description} />
-      <Link to="/" className="btn-secondary">
-        Ir para o início
-      </Link>
+    <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-6">
+      <div className="card">
+        <EmptyState
+          icon={icon}
+          title={title}
+          description={description}
+          action={
+            <Link to="/" className="btn-secondary">
+              Ir para o início
+            </Link>
+          }
+        />
+      </div>
     </main>
   );
+}
+
+function getIniciais(nome: string): string {
+  return nome
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((palavra) => palavra.charAt(0).toUpperCase())
+    .join("");
 }
 
 export function ConvitePage() {
@@ -50,7 +67,7 @@ export function ConvitePage() {
       consulta.error.status === 404 ? (
       <ConviteIndisponivel
         title="Este convite não é válido"
-        description="Ele pode ter expirado, já ter sido usado ou ter sido cancelado. Peça um novo link a quem convidou você."
+        description="Ele pode ter expirado ou sido cancelado. Peça um novo link para quem te chamou."
       />
     ) : (
       <ConviteIndisponivel
@@ -66,43 +83,37 @@ export function ConvitePage() {
   const logado = Boolean(sessao.data);
 
   return (
-    <main className="flex min-h-dvh flex-col">
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-8">
-        <div className="mb-8 animate-slide-up text-center">
-          <p className="mb-3 text-sm font-semibold text-muted">
-            Você foi convidado!
-          </p>
-          <div className="mb-4">
-            <BrandMark />
-          </div>
-          <h1 className="text-2xl font-bold break-words">{grupoNome}</h1>
-          <p className="mt-1.5 text-muted">Grupo privado de desafios fitness</p>
-        </div>
+    <main className="mx-auto flex min-h-dvh max-w-sm flex-col px-6 py-6">
+      <Logo />
 
-        <div className="card mb-4 animate-slide-up space-y-3 p-5 [animation-delay:0.1s]">
-          <p className="text-sm font-bold break-words">
-            {convidadoPor} convidou você
-          </p>
-          <p className="flex items-center gap-2 text-sm text-muted">
-            <Users aria-hidden="true" className="h-4 w-4 shrink-0" />
+      <div className="card mt-8 animate-slide-up overflow-hidden">
+        <div className="bg-brand px-6 pt-6 pb-14 text-sm text-on-brand">
+          {convidadoPor} te convidou
+        </div>
+        <div className="-mt-10 px-6 pb-6">
+          <div className="grid size-20 place-items-center rounded-3xl border-4 border-surface bg-lime font-display text-2xl font-bold text-on-lime">
+            {getIniciais(grupoNome)}
+          </div>
+          <h1 className="mt-3 text-2xl font-bold break-words">{grupoNome}</h1>
+          <p className="mt-2 flex items-center gap-2 text-sm text-muted">
+            <Users aria-hidden="true" className="size-4 shrink-0" />
             {totalMembros} de {maxMembros} membros
           </p>
+          <p className="mt-5 rounded-2xl bg-surface-muted p-4 text-sm text-muted">
+            Ao entrar, você concorda em registrar suas atividades e avaliar as
+            dos colegas com sinceridade.
+          </p>
         </div>
+      </div>
 
-        <p className="mb-6 flex animate-slide-up items-start gap-2.5 text-sm text-muted [animation-delay:0.2s]">
-          <Check aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0" />
-          Ao entrar, você concorda em registrar suas atividades e avaliar as dos
-          colegas com sinceridade.
-        </p>
-
+      <div className="mt-auto space-y-2 pt-6">
         {vagas <= 0 && (
-          <p role="alert" className="form-error mb-4">
-            Este grupo atingiu o número máximo de membros.
+          <p role="alert" className="form-error">
+            {grupoNome} já tem {maxMembros} membros, o máximo permitido.
           </p>
         )}
-
         {aceitar.isError && (
-          <p role="alert" className="form-error mb-4">
+          <p role="alert" className="form-error">
             {getErrorMessage(aceitar.error)}
           </p>
         )}
@@ -116,27 +127,27 @@ export function ConvitePage() {
               onClick={() =>
                 aceitar.mutate(token, {
                   onSuccess: ({ grupoId }) =>
-                    void navigate(`/grupos/${grupoId}`, { replace: true }),
+                    void navigate(`/grupos/${grupoId}/inicio`, {
+                      replace: true,
+                    }),
                 })
               }
             >
-              {aceitar.isPending ? "Entrando…" : "Aceitar convite e entrar"}
-              <ArrowRight aria-hidden="true" className="h-5 w-5" />
+              {aceitar.isPending ? "Entrando…" : "Aceitar convite"}
             </button>
-            <Link to="/" className="btn-ghost mt-2 w-full">
+            <Link to="/" className="btn-ghost w-full">
               Agora não
             </Link>
           </>
         ) : (
           vagas > 0 && (
-            <div className="space-y-3">
+            <>
               <Link
                 to="/criar-conta"
                 state={{ conviteToken: token }}
                 className="btn-primary w-full"
               >
                 Criar conta e entrar
-                <ArrowRight aria-hidden="true" className="h-5 w-5" />
               </Link>
               <Link
                 to="/entrar"
@@ -148,7 +159,7 @@ export function ConvitePage() {
               >
                 Já tenho conta
               </Link>
-            </div>
+            </>
           )
         )}
       </div>

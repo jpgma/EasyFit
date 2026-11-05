@@ -19,7 +19,7 @@ Cada participante registra suas atividades e apresenta uma comprovação compat�
 
 - 💪 Kudos: atividade considerada legítima.
 - 🤨 Suspeito: atividade sinalizada para revisão.
-- 🚫 Rejeitar: atividade considerada inválida.
+- ❌ Rejeitar: atividade considerada inválida.
 
 O resultado da validação é calculado a partir das reações da comunidade e determina quais atividades podem contribuir para o progresso do desafio.
 
@@ -445,7 +445,7 @@ Node.js será necessário apenas durante o desenvolvimento e compilação.
 
 ### 5.2. Direção visual
 
-A aparência e os fluxos das telas seguem o mockup do projeto, conforme `docs/decisoes/0007-mockup-como-referencia-visual.md`. Em regras, nomes e segurança, este documento prevalece.
+A aparência e os fluxos das telas seguem o mockup do projeto, conforme `docs/decisoes/0014-novo-mockup-como-referencia-visual.md`. Em regras, nomes e segurança, este documento prevalece.
 
 A interface deverá utilizar o Apple Human Interface Guidelines como referência estética e de usabilidade, sem reproduzir literalmente componentes proprietários.
 
