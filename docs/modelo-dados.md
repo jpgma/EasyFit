@@ -25,6 +25,19 @@ Uma linha por sessão: cada dispositivo tem a sua. Ver `decisoes/0006-autenticac
 | `expires_at` | `timestamptz` | Obrigatória. Renovada com o uso |
 | `revoked_at` | `timestamptz` | Preenchida ao sair |
 
+## `redefinicoes_senha`
+
+Links de uso único criados pelo operador com o comando `reset-senha`. Ver `decisoes/0019-conta-e-redefinicao-de-senha.md`.
+
+| Coluna | Tipo | Observações |
+|---|---|---|
+| `id` | `uuid` | Chave primária |
+| `usuario_id` | `uuid` | Referencia `usuarios`, com `ON DELETE CASCADE` |
+| `token_hash` | `bytea` | SHA-256 do token, único |
+| `created_at` | `timestamptz` | Padrão `now()` |
+| `expires_at` | `timestamptz` | 1 hora depois da criação |
+| `used_at` | `timestamptz` | Preenchida ao usar, ou quando outro link é gerado |
+
 ## `grupos`
 
 | Coluna | Tipo | Observações |

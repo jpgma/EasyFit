@@ -56,6 +56,14 @@ docker compose --env-file .env -f deploy/compose.yaml run --rm app migrate
 docker compose --env-file .env -f deploy/compose.yaml up -d
 ```
 
+### Senha esquecida
+
+Não há envio de e-mail. O operador gera um link de uso único, válido por 1 hora, e o passa à pessoa. O comando encerra as sessões da conta:
+
+```bash
+docker compose --env-file .env -f deploy/compose.yaml run --rm app reset-senha pessoa@exemplo.com
+```
+
 ### Primeira conta
 
 O cadastro fica fechado em produção. Para criar a primeira conta:

@@ -42,7 +42,7 @@ Rode `--full` ao mexer em SQL, migrações, `Program.cs`, `deploy/` ou dependên
 
 Use exatamente estas grafias:
 
-`Usuario`, `Sessao`, `Autenticacao`, `Cadastro`, `Grupo`, `Membro`, `Papel`, `Proprietario`, `Administrador`, `Convite`, `Desafio`, `Participante`, `Meta`, `Semana`, `Atividade`, `Evidencia`, `Comprovacao`, `Revisor`, `Revisao`, `Reacao`, `Comentario`, `Kudos`, `Suspeito`, `Rejeitar`, `Rejeicao`, `Progresso`, `Classificacao`, `Sequencia`, `Conquista`, `Feed`.
+`Usuario`, `Sessao`, `Autenticacao`, `Cadastro`, `Redefinicao`, `Grupo`, `Membro`, `Papel`, `Proprietario`, `Administrador`, `Convite`, `Desafio`, `Participante`, `Meta`, `Semana`, `Atividade`, `Evidencia`, `Comprovacao`, `Revisor`, `Revisao`, `Reacao`, `Comentario`, `Kudos`, `Suspeito`, `Rejeitar`, `Rejeicao`, `Progresso`, `Classificacao`, `Sequencia`, `Conquista`, `Feed`.
 
 Na interface, `Kudos` aparece como "Dar moral" e "deu moral". Cada reação tem um símbolo fixo: 💪 `Kudos`, 🤨 `Suspeito`, ❌ `Rejeitar`.
 

@@ -1,5 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ApiError, getJson, postEmpty, postJson } from "@/services/api";
+import {
+  ApiError,
+  getJson,
+  postEmpty,
+  postJson,
+  postJsonEmpty,
+  putJson,
+} from "@/services/api";
 
 export type Usuario = {
   id: string;
@@ -70,6 +77,43 @@ export function useSair() {
     onSuccess: () => {
       queryClient.setQueryData(sessaoKey, null);
       // Nada da conta anterior pode continuar disponível para a próxima.
+      queryClient.removeQueries({
+        predicate: (query) => query.queryKey[0] !== sessaoKey[0],
+      });
+    },
+  });
+}
+
+export function useAlterarNome() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (nomeExibicao: string) =>
+      putJson<SessaoResponse>("/api/usuarios/eu", { nomeExibicao }),
+    onSuccess: ({ usuario }) => {
+      queryClient.setQueryData(sessaoKey, usuario);
+      // O nome aparece nas listas e na classificação de todos os grupos.
+      void queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey[0] !== sessaoKey[0],
+      });
+    },
+  });
+}
+
+export function useAlterarSenha() {
+  return useMutation({
+    mutationFn: (data: { senhaAtual: string; novaSenha: string }) =>
+      postJsonEmpty("/api/usuarios/eu/senha", data),
+  });
+}
+
+export function useRedefinirSenha() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { token: string; novaSenha: string }) =>
+      postJsonEmpty(`${basePath}/redefinir-senha`, data),
+    // Todas as sessões da conta foram encerradas, inclusive uma aberta neste navegador.
+    onSuccess: () => {
+      queryClient.setQueryData(sessaoKey, null);
       queryClient.removeQueries({
         predicate: (query) => query.queryKey[0] !== sessaoKey[0],
       });

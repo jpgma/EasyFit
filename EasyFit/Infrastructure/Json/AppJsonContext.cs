@@ -15,7 +15,9 @@ namespace EasyFit.Infrastructure.Json;
 
 // Todo tipo serializado pela API precisa estar registrado aqui (exigência do Native AOT).
 [JsonSourceGenerationOptions(JsonSerializerDefaults.Web)]
+[JsonSerializable(typeof(AlterarNomeRequest))]
 [JsonSerializable(typeof(AlterarPapelRequest))]
+[JsonSerializable(typeof(AlterarSenhaRequest))]
 [JsonSerializable(typeof(AtividadeResponse))]
 [JsonSerializable(typeof(AtividadesPaginadasResponse))]
 [JsonSerializable(typeof(CriarAtividadeRequest))]
@@ -35,6 +37,7 @@ namespace EasyFit.Infrastructure.Json;
 [JsonSerializable(typeof(EntrarGrupoResponse))]
 [JsonSerializable(typeof(FilaAvaliacaoResponse))]
 [JsonSerializable(typeof(MeuPerfilResponse))]
+[JsonSerializable(typeof(RedefinirSenhaRequest))]
 [JsonSerializable(typeof(PerfilMembroResponse))]
 [JsonSerializable(typeof(EntrarRequest))]
 [JsonSerializable(typeof(GrupoResponse))]

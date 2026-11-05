@@ -2,19 +2,17 @@ import {
   Award,
   ChevronRight,
   Flame,
-  LogOut,
   Plus,
+  Settings,
   Timer,
   Trophy,
   type LucideIcon,
 } from "lucide-react";
-import { useState } from "react";
 import { Link } from "react-router";
 import { Avatar } from "@/components/Avatar";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { HistoryChart } from "@/components/HistoryChart";
 import { PageHeader, SectionTitle } from "@/components/PageHeader";
-import { useSair, useSessao } from "@/features/autenticacao";
+import { useSessao } from "@/features/autenticacao";
 import { ConviteForm } from "@/features/convites";
 import { formatarDiaEMes } from "@/features/desafios";
 import { papelLabels, useGrupos } from "@/features/grupos";
@@ -43,14 +41,23 @@ export function PerfilPage() {
   const { data: usuario } = useSessao();
   const perfil = useMeuPerfil();
   const grupos = useGrupos();
-  const sair = useSair();
-  const [confirmandoSair, setConfirmandoSair] = useState(false);
 
   if (!usuario) return null;
 
   return (
     <div className="mx-auto max-w-4xl">
-      <PageHeader title="Perfil" />
+      <PageHeader
+        title="Perfil"
+        action={
+          <Link
+            to="/perfil/configuracoes"
+            aria-label="Configurações"
+            className="grid size-10 place-items-center rounded-full bg-surface shadow-card tap"
+          >
+            <Settings aria-hidden="true" className="size-5" />
+          </Link>
+        }
+      />
 
       <div className="grid gap-x-6 lg:grid-cols-2">
         <div>
@@ -177,31 +184,8 @@ export function PerfilPage() {
           <div className="mt-4">
             <ConviteForm />
           </div>
-
-          <button
-            type="button"
-            className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold text-danger hover:bg-danger-soft"
-            onClick={() => setConfirmandoSair(true)}
-          >
-            <LogOut aria-hidden="true" className="size-4" />
-            Sair da conta
-          </button>
         </div>
       </div>
-
-      <ConfirmDialog
-        open={confirmandoSair}
-        title="Sair da conta?"
-        message="Você pode entrar de novo quando quiser. Seus treinos continuam salvos."
-        confirmLabel="Sair"
-        pending={sair.isPending}
-        error={sair.isError ? getErrorMessage(sair.error) : undefined}
-        onConfirm={() => sair.mutate()}
-        onCancel={() => {
-          sair.reset();
-          setConfirmandoSair(false);
-        }}
-      />
     </div>
   );
 }

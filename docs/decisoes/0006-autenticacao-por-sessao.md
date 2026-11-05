@@ -1,6 +1,6 @@
 # 0006 — Autenticação por sessão
 
-**Status:** DECIDIDA
+**Status:** DECIDIDA. Parcialmente substituída pela decisão 0019 (alteração e redefinição de senha).
 
 ## Contexto
 
@@ -40,7 +40,7 @@ A Fase 2 precisa de cadastro, login e sessões persistentes. `arquitetura.md` §
 - **CSRF:** `SameSite=Lax`, e toda escrita em `/api` precisa de `Origin` igual ao `Host`, ou de `Sec-Fetch-Site: same-origin` quando não há `Origin`. Qualquer outro caso recebe 403 `ORIGEM_INVALIDA`. Todo proxy à frente da API precisa preservar o `Host`, como fazem o Caddy e a configuração do Vite.
 - **Tentativas:** 10 por minuto, por IP, somando `entrar` e `registrar`. O IP vem de `X-Forwarded-For`, em que se pode confiar porque só o Caddy alcança o contêiner da aplicação.
 - **Cadastro:** `Autenticacao:CadastroAberto` é falso quando não definido. Para criar a primeira conta em produção: ligue, crie a conta e desligue. A Fase 3 passa a exigir convite.
-- **Recuperação de senha:** fora do MVP. Se necessário, o operador redefine o hash diretamente no banco.
+- **Recuperação de senha:** revista pela decisão 0019: o operador gera um link de uso único. Continua sem envio de e-mail.
 - **Autorização:** `RequireSessao()` em `Infrastructure/Authentication` verifica apenas a autenticação. O pertencimento ao grupo continua sendo responsabilidade de cada endpoint.
 
 ## Impacto
@@ -50,4 +50,4 @@ A Fase 2 precisa de cadastro, login e sessões persistentes. `arquitetura.md` §
 - Um login leva cerca de 250 ms no binário Native AOT com o limite de 0,50 CPU, medido em x64 por falta da VM. Falta confirmar em ARM64 real (Q025).
 - **Compromisso aceito:** o cadastro responde 409 `EMAIL_JA_CADASTRADO` e, portanto, revela que o e-mail existe. Evitar isso exigiria confirmação por e-mail. A exposição é limitada pelo cadastro fechado e pelo limite de tentativas.
 - Um grupo atrás do mesmo IP divide o limite de tentativas, o que é aceitável para até 10 pessoas.
-- Trocar de senha não existe nesta fase. Quando existir, deve revogar as demais sessões do usuário.
+- Trocar de senha chegou com a decisão 0019 e revoga as demais sessões do usuário.

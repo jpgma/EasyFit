@@ -34,5 +34,10 @@ internal static class AutenticacaoRoutes
         group.MapPost("/entrar", Entrar.HandleAsync).RequireRateLimiting(TentativasPolicy);
         group.MapPost("/sair", Sair.HandleAsync);
         group.MapGet("/sessao", ObterSessao.HandleAsync).RequireSessao();
+        group.MapPost("/redefinir-senha", RedefinirSenha.HandleAsync).RequireRateLimiting(TentativasPolicy);
+
+        var conta = routes.MapGroup("/api/usuarios/eu").RequireSessao();
+        conta.MapPut("/", AlterarNome.HandleAsync);
+        conta.MapPost("/senha", AlterarSenha.HandleAsync).RequireRateLimiting(TentativasPolicy);
     }
 }

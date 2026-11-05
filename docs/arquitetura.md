@@ -941,6 +941,9 @@ POST /api/autenticacao/entrar
 POST /api/autenticacao/sair
 GET  /api/autenticacao/sessao
 POST /api/autenticacao/registrar
+POST /api/autenticacao/redefinir-senha
+PUT  /api/usuarios/eu
+POST /api/usuarios/eu/senha
 ```
 
 ### 10.2. Grupos

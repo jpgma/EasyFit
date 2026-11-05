@@ -44,6 +44,40 @@ internal static class Sessoes
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
+    public static async Task SetSenhaAsync(
+        NpgsqlConnection connection,
+        NpgsqlTransaction transaction,
+        Guid usuarioId,
+        string passwordHash,
+        CancellationToken cancellationToken)
+    {
+        await using var command = new NpgsqlCommand(
+            "UPDATE usuarios SET password_hash = $2 WHERE id = $1",
+            connection,
+            transaction);
+        command.Parameters.AddWithValue(usuarioId);
+        command.Parameters.AddWithValue(passwordHash);
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    /// <summary>Encerra as sessões do usuário, exceto a de <paramref name="manterTokenHash"/>, quando informada.</summary>
+    public static async Task RevokeDoUsuarioAsync(
+        NpgsqlConnection connection,
+        NpgsqlTransaction transaction,
+        Guid usuarioId,
+        byte[]? manterTokenHash,
+        CancellationToken cancellationToken)
+    {
+        await using var command = new NpgsqlCommand("""
+            UPDATE sessoes_autenticacao
+            SET revoked_at = now()
+            WHERE usuario_id = $1 AND revoked_at IS NULL AND ($2::bytea IS NULL OR token_hash <> $2)
+            """, connection, transaction);
+        command.Parameters.AddWithValue(usuarioId);
+        command.Parameters.AddWithValue(NpgsqlTypes.NpgsqlDbType.Bytea, (object?)manterTokenHash ?? DBNull.Value);
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
     public static async Task<string> InsertAsync(
         NpgsqlConnection connection,
         NpgsqlTransaction transaction,

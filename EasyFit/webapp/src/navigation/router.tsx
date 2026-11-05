@@ -48,6 +48,14 @@ export const router = createBrowserRouter([
                 },
               },
               {
+                path: "/perfil/configuracoes",
+                lazy: async () => {
+                  const { ConfiguracoesPage } =
+                    await import("@/pages/ConfiguracoesPage");
+                  return { Component: ConfiguracoesPage };
+                },
+              },
+              {
                 path: "/grupos/novo",
                 lazy: async () => {
                   const { CriarGrupoPage } =
@@ -139,6 +147,15 @@ export const router = createBrowserRouter([
         lazy: async () => {
           const { ConvitePage } = await import("@/pages/ConvitePage");
           return { Component: ConvitePage };
+        },
+      },
+      {
+        // Fora dos guards: o link funciona com ou sem uma sessão aberta neste navegador.
+        path: "/redefinir-senha",
+        lazy: async () => {
+          const { RedefinirSenhaPage } =
+            await import("@/pages/RedefinirSenhaPage");
+          return { Component: RedefinirSenhaPage };
         },
       },
       { path: "*", element: <Navigate to="/" replace /> },

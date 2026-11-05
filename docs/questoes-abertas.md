@@ -103,7 +103,7 @@ Não instalar SDK .NET ou Node.js no servidor de produção.
 
 ## Q004 — Qual estratégia de autenticação será utilizada?
 
-**Status:** DECIDIDA — ver `decisoes/0006-autenticacao-por-sessao.md`
+**Status:** DECIDIDA — ver `decisoes/0006-autenticacao-por-sessao.md` Alteração e redefinição de senha em `decisoes/0019-conta-e-redefinicao-de-senha.md`.
 
 O EasyFit utilizará sessões persistentes com cookies HttpOnly.
 

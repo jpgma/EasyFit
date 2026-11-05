@@ -56,6 +56,11 @@ if (args is ["migrate"])
     return await MigrationCommand.RunAsync(app.Services);
 }
 
+if (args is ["reset-senha", var email])
+{
+    return await ResetSenhaCommand.RunAsync(app.Services, email);
+}
+
 app.UseForwardedHeaders();
 app.UseExceptionHandler(handler => handler.Run(ApiProblem.WriteInternalErrorAsync));
 app.UseStaticFiles(new StaticFileOptions
