@@ -1,6 +1,7 @@
 # Produção. Execute a partir da raiz do repositório:
 #   docker compose --env-file .env -f deploy/compose.yaml up -d
 #   docker compose --env-file .env -f deploy/compose.yaml run --rm app migrate
+#   docker compose --env-file .env -f deploy/compose.yaml run --rm backup backup
 
 services:
   app:
@@ -49,6 +50,26 @@ services:
       timeout: 5s
       retries: 5
     mem_limit: 768m
+    cpus: 0.50
+
+  # Só roda sob demanda: docker compose ... run --rm backup backup. Ver deploy/backup.sh.
+  backup:
+    image: postgres:17.11-alpine
+    profiles: [backup]
+    entrypoint: ["sh", "/backup.sh"]
+    environment:
+      PGHOST: db
+      PGUSER: easyfit
+      PGDATABASE: easyfit
+      PGPASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backup.sh:/backup.sh:ro
+      - ${DATA_DIR:-/srv/easyfit}/evidencias:/dados/evidencias
+      - ${BACKUP_DIR:-/srv/easyfit/backups}:/backups
+    mem_limit: 256m
     cpus: 0.50
 
   proxy:

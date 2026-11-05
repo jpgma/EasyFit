@@ -1,0 +1,64 @@
+#!/bin/sh
+# Backup e restauração do banco e das evidências. Ver docs/decisoes/0022-backups.md.
+# Roda no serviço "backup" de compose.yaml, que fornece as variáveis PG* e os volumes:
+#   docker compose ... run --rm backup backup
+#   docker compose ... run --rm backup restore AAAAMMDD-HHMMSS   (com o app parado)
+set -eu
+
+destino=/backups
+evidencias=/dados/evidencias
+retencao_dias=7
+
+falhar() {
+  echo "ERRO: $1" >&2
+  exit 1
+}
+
+backup() {
+  data=$(date +%Y%m%d-%H%M%S)
+  dump="$destino/easyfit-$data.dump"
+  arquivo="$destino/evidencias-$data.tar.gz"
+
+  # Grava em .tmp e só renomeia depois de conferir: um backup pela metade nunca parece válido.
+  pg_dump --format=custom --file="$dump.tmp"
+  pg_restore --list "$dump.tmp" >/dev/null || falhar "o dump gerado não pode ser lido."
+
+  tar -czf "$arquivo.tmp" -C "$evidencias" .
+  gzip -t "$arquivo.tmp" || falhar "o arquivo de evidências gerado está corrompido."
+
+  mv "$dump.tmp" "$dump"
+  mv "$arquivo.tmp" "$arquivo"
+
+  find "$destino" -maxdepth 1 -type f \
+    \( -name 'easyfit-*.dump' -o -name 'evidencias-*.tar.gz' \) \
+    -mtime +"$retencao_dias" -delete
+  rm -f "$destino"/*.tmp
+
+  echo "Backup $data concluído:"
+  ls -lh "$dump" "$arquivo"
+}
+
+restore() {
+  data=${1:-}
+  [ -n "$data" ] || falhar "informe a data do backup, por exemplo 20261105-030000."
+  dump="$destino/easyfit-$data.dump"
+  arquivo="$destino/evidencias-$data.tar.gz"
+  [ -f "$dump" ] || falhar "$dump não existe."
+  [ -f "$arquivo" ] || falhar "$arquivo não existe."
+
+  echo "Restaurando o banco a partir de $dump"
+  pg_restore --clean --if-exists --no-owner --single-transaction --dbname="$PGDATABASE" "$dump"
+
+  echo "Restaurando as evidências a partir de $arquivo"
+  find "$evidencias" -mindepth 1 -delete
+  # Como root, o tar preserva o dono dos arquivos (o usuário da aplicação).
+  tar -xzf "$arquivo" -C "$evidencias"
+
+  echo "Restauração de $data concluída."
+}
+
+case "${1:-}" in
+  backup) backup ;;
+  restore) restore "${2:-}" ;;
+  *) falhar "uso: backup.sh backup | restore AAAAMMDD-HHMMSS" ;;
+esac

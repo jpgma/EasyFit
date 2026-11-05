@@ -57,7 +57,7 @@ Ter uma VM funcional com Docker Compose, HTTPS e armazenamento persistente.
 
 ## Q002 — Como organizar os backups?
 
-**Status:** ABERTA
+**Status:** DECIDIDA — ver `decisoes/0022-backups.md`. `pg_dump` e `tar` diários em `BACKUP_DIR`, com 7 dias de retenção; a cópia externa é feita por pasta sincronizada.
 
 Investigar alternativas para:
 
@@ -498,7 +498,7 @@ Evitar Redux inicialmente.
 
 ## Q022 — Como implementar funcionamento offline?
 
-**Status:** PROPOSTA
+**Status:** DECIDIDA — ver `decisoes/0021-pwa-e-service-worker.md`.
 
 O MVP deverá permitir:
 
@@ -537,7 +537,7 @@ Redimensionar antes do upload, sem exigir bibliotecas pesadas.
 
 ## Q024 — Como implementar atualização do PWA?
 
-**Status:** ABERTA
+**Status:** DECIDIDA — ver `decisoes/0021-pwa-e-service-worker.md`. A navegação busca a rede primeiro, e a versão nova assume quando a pessoa toca em "Atualizar".
 
 Investigar:
 

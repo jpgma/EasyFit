@@ -30,3 +30,4 @@ runcmd:
   # 1654 é o usuário "app" da imagem chiseled da aplicação.
   - install -d -m 0755 /srv/easyfit
   - install -d -m 0750 -o 1654 -g 1654 /srv/easyfit/evidencias
+  - install -d -m 0700 /srv/easyfit/backups

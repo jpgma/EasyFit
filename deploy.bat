@@ -32,7 +32,7 @@ echo.
 echo ==^> Aguardando a preparação da VM e copiando a configuração
 "%SSH%" %SSH_OPTS% %TARGET% "cloud-init status --wait >/dev/null; mkdir -p /opt/easyfit/deploy"
 if errorlevel 1 goto :fail
-"%SCP%" %SSH_OPTS% deploy/compose.yaml deploy/Caddyfile deploy/remote.sh %TARGET%:/opt/easyfit/deploy/
+"%SCP%" %SSH_OPTS% deploy/compose.yaml deploy/Caddyfile deploy/remote.sh deploy/backup.sh %TARGET%:/opt/easyfit/deploy/
 if errorlevel 1 goto :fail
 
 echo.

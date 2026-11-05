@@ -9,6 +9,8 @@ rem   run.bat --tunnel     igual ao padrão, mas publica em https://fit.jpgmarau
 rem                          da Cloudflare, com o cadastro sem convite fechado. Pode ser combinado com
 rem                          --rebuild. Na primeira vez, pede o login na Cloudflare pelo navegador.
 rem   run.bat logs         acompanha os logs da aplicação
+rem   run.bat backup       grava um backup do banco e das evidências em BACKUP_DIR
+rem   run.bat restore D    restaura o backup da data D (AAAAMMDD-HHMMSS), com o app parado
 rem   run.bat stop         para os serviços e mantém os dados
 rem   run.bat reset        para os serviços e APAGA os dados locais
 chcp 65001 >nul
@@ -27,6 +29,11 @@ set "DB_CONNECTION=Host=db;Port=5432;Database=easyfit;Username=easyfit;Password=
 set "EASYFIT_IMAGE=easyfit:local"
 set "CADASTRO_ABERTO=true"
 set "DATA_DIR=%DATA_ROOT:\=/%"
+
+rem Fora de DATA_ROOT: run.bat reset apaga os dados, mas mantém os backups.
+rem Defina BACKUP_DIR antes, por exemplo com uma pasta do OneDrive, para ter cópia fora desta máquina.
+if not defined BACKUP_DIR set "BACKUP_DIR=%LOCALAPPDATA%\EasyFit\backups"
+set "BACKUP_DIR=%BACKUP_DIR:\=/%"
 
 rem Fora de DATA_ROOT: run.bat reset apaga os dados, mas mantém o túnel.
 set "TUNNEL_HOST=fit.jpgmaraujo.com.br"
@@ -63,9 +70,11 @@ if /i "%~1"=="--tunnel" (
   goto :parse
 )
 if /i "%~1"=="logs" goto :logs
+if /i "%~1"=="backup" goto :backup
+if /i "%~1"=="restore" goto :restore
 if /i "%~1"=="stop" goto :stop
 if /i "%~1"=="reset" goto :reset
-echo Uso: run.bat [--rebuild^|rebuild] [--tunnel] ^| logs ^| stop ^| reset
+echo Uso: run.bat [--rebuild^|rebuild] [--tunnel] ^| logs ^| backup ^| restore AAAAMMDD-HHMMSS ^| stop ^| reset
 exit /b 2
 
 :start
@@ -150,6 +159,26 @@ exit /b 0
 :logs
 %COMPOSE% logs -f app
 exit /b %errorlevel%
+
+:backup
+%COMPOSE% run --rm backup backup
+if errorlevel 1 goto :fail
+echo Backups em %BACKUP_DIR%
+exit /b 0
+
+:restore
+if "%~2"=="" (
+  echo Uso: run.bat restore AAAAMMDD-HHMMSS. Backups em %BACKUP_DIR%
+  exit /b 2
+)
+rem O app fica parado para ninguém escrever no banco durante a restauração.
+%COMPOSE% stop app
+if errorlevel 1 goto :fail
+%COMPOSE% run --rm backup restore %~2
+if errorlevel 1 goto :fail
+%COMPOSE% start app
+if errorlevel 1 goto :fail
+exit /b 0
 
 :stop
 %COMPOSE% down --remove-orphans

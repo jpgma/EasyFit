@@ -549,6 +549,8 @@ Implementar:
 - Tela de indisponibilidade de conexão.
 - Estratégia de atualização do aplicativo.
 
+Implementação em `decisoes/0021-pwa-e-service-worker.md`.
+
 ### 6.2. Persistência de login
 
 O login deverá permanecer ativo após fechar e reabrir o aplicativo.
@@ -1188,6 +1190,8 @@ Um backup mantido somente na mesma VM não é suficiente contra perda do volume 
 
 A restauração deve ser documentada e testada.
 
+Implementação em `decisoes/0022-backups.md`: serviço `backup` de `deploy/compose.yaml`, com destino em `BACKUP_DIR` (padrão `/srv/easyfit/backups`).
+
 ---
 
 ## 16. Docker Compose
@@ -1379,6 +1383,8 @@ Desenvolver em fatias verticais funcionais.
 - HTTPS.
 - Backups.
 - Deploy na Oracle Cloud.
+
+Situação: PWA em `decisoes/0021-pwa-e-service-worker.md`; backups em `decisoes/0022-backups.md`; HTTPS pelo Caddy na VM e pelo túnel da Cloudflare no `run.bat --tunnel`. O deploy na Oracle Cloud está bloqueado por falta de capacidade na região e a hospedagem definitiva segue indefinida (ver `decisoes/0005-implantacao-via-ssh.md`).
 
 ---
 

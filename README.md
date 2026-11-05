@@ -33,6 +33,8 @@ Para testar localmente o mesmo que vai para produção (Native AOT, PostgreSQL e
 .\run.bat         # constrói, migra e sobe em http://localhost
 .\run.bat --tunnel  # igual, e publica em https://fit.jpgmaraujo.com.br
 .\run.bat logs    # acompanha os logs da aplicação
+.\run.bat backup  # grava um backup do banco e das evidências
+.\run.bat restore 20261105-030000  # restaura um backup, com o app parado
 .\run.bat stop    # para os serviços e mantém os dados
 .\run.bat reset   # para os serviços e apaga os dados locais
 ```
@@ -58,6 +60,38 @@ docker buildx build --platform linux/arm64 -f deploy/Dockerfile -t easyfit:lates
 docker compose --env-file .env -f deploy/compose.yaml run --rm app migrate
 docker compose --env-file .env -f deploy/compose.yaml up -d
 ```
+
+### Backups
+
+O serviço `backup` grava em `BACKUP_DIR` o dump do banco e um arquivo das evidências, mantém os últimos 7 dias e confere se os arquivos podem ser lidos. As datas nos nomes estão em UTC. Ver `docs/decisoes/0022-backups.md`.
+
+```bash
+docker compose --env-file .env -f deploy/compose.yaml run --rm backup backup
+```
+
+Agende uma execução diária:
+
+```bash
+# Linux (crontab -e), às 3h:
+0 3 * * * cd /opt/easyfit && docker compose --env-file .env -f deploy/compose.yaml run --rm backup backup >> /var/log/easyfit-backup.log 2>&1
+```
+
+```powershell
+# Windows, para a pilha do run.bat, às 3h:
+schtasks /create /sc daily /st 03:00 /tn EasyFitBackup /tr "\"D:\Repos\jpgma\EasyFit\run.bat\" backup"
+```
+
+Um backup que só existe na mesma máquina não protege contra a perda do disco. Aponte `BACKUP_DIR` para uma pasta sincronizada (OneDrive, Google Drive) ou copie os arquivos para fora regularmente. No `run.bat`, defina a variável de ambiente `BACKUP_DIR` antes de executá-lo; o padrão é `%LOCALAPPDATA%\EasyFit\backups`. Os backups contêm as evidências e os hashes das senhas: mantenha a pasta privada.
+
+Para restaurar:
+
+```bash
+docker compose --env-file .env -f deploy/compose.yaml stop app
+docker compose --env-file .env -f deploy/compose.yaml run --rm backup restore 20261105-030000
+docker compose --env-file .env -f deploy/compose.yaml start app
+```
+
+Teste a restauração de tempos em tempos, com a pilha local: `.\run.bat backup`, `.\run.bat reset`, `.\run.bat` e `.\run.bat restore <data>`. Depois, confira se as atividades e as imagens voltaram.
 
 ### Senha esquecida
 
