@@ -11,6 +11,7 @@ internal enum DesafioOperacaoStatus
     AcessoNegado,
     DesafioEncerrado,
     DesafioCancelado,
+    DesafioSobreposto,
     DadosInvalidos,
 }
 
@@ -30,6 +31,10 @@ internal static class OperacaoDesafio
             StatusCodes.Status409Conflict,
             "DESAFIO_CANCELADO",
             "Este desafio foi cancelado."),
+        DesafioOperacaoStatus.DesafioSobreposto => ApiProblem.Create(
+            StatusCodes.Status409Conflict,
+            "DESAFIO_SOBREPOSTO",
+            "Já existe um desafio neste período. Escolha datas que comecem depois do fim dele."),
         DesafioOperacaoStatus.DadosInvalidos => InvalidData(),
         _ => throw new ArgumentOutOfRangeException(nameof(status)),
     };

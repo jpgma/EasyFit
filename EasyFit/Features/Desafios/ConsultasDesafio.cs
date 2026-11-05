@@ -2,23 +2,26 @@ using Npgsql;
 
 namespace EasyFit.Features.Desafios;
 
+internal sealed record EstadoDesafio(Guid GrupoId, string Situacao);
+
 /// <summary>
 /// Toda consulta parte do vínculo de quem pergunta: sem ser membro ativo do grupo,
 /// o desafio simplesmente não aparece.
 /// </summary>
 internal static class ConsultasDesafio
 {
-    // Participante ativo é quem tem a linha e continua no grupo; voltar ao grupo devolve a participação.
+    // Participa quem é membro ativo e entrou antes da última semana começar.
     public const string SelectDesafio = """
         SELECT d.id, d.grupo_id, d.nome, d.descricao, d.data_inicio, d.data_fim,
             d.duracao_minima_segundos, d.sessoes_por_semana, d.cancelled_at IS NOT NULL,
             (now() AT TIME ZONE g.fuso_horario)::date,
             g.fuso_horario, m.papel,
-            EXISTS (SELECT 1 FROM participantes_desafio p WHERE p.desafio_id = d.id AND p.usuario_id = $1),
+            (m.joined_at AT TIME ZONE g.fuso_horario)::date <= d.data_fim - 6,
             (SELECT count(*)::int
-             FROM participantes_desafio p
-             JOIN membros_grupo t ON t.grupo_id = d.grupo_id AND t.usuario_id = p.usuario_id AND t.removed_at IS NULL
-             WHERE p.desafio_id = d.id)
+             FROM membros_grupo t
+             WHERE t.grupo_id = d.grupo_id
+               AND t.removed_at IS NULL
+               AND (t.joined_at AT TIME ZONE g.fuso_horario)::date <= d.data_fim - 6)
         FROM desafios d
         JOIN grupos g ON g.id = d.grupo_id
         JOIN membros_grupo m ON m.grupo_id = d.grupo_id AND m.usuario_id = $1 AND m.removed_at IS NULL
@@ -40,6 +43,40 @@ internal static class ConsultasDesafio
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         return await reader.ReadAsync(cancellationToken) ? ReadDesafio(reader) : null;
+    }
+
+    public static DesafioOperacaoStatus? GetBloqueio(string situacao) => situacao switch
+    {
+        SituacaoDesafio.Encerrado => DesafioOperacaoStatus.DesafioEncerrado,
+        SituacaoDesafio.Cancelado => DesafioOperacaoStatus.DesafioCancelado,
+        _ => null,
+    };
+
+    public static async Task<EstadoDesafio?> GetEstadoAsync(
+        NpgsqlConnection connection,
+        NpgsqlTransaction? transaction,
+        Guid desafioId,
+        CancellationToken cancellationToken)
+    {
+        await using var command = new NpgsqlCommand("""
+            SELECT d.grupo_id, d.data_inicio, d.data_fim, d.cancelled_at IS NOT NULL,
+                (now() AT TIME ZONE g.fuso_horario)::date
+            FROM desafios d
+            JOIN grupos g ON g.id = d.grupo_id
+            WHERE d.id = $1
+            """, connection, transaction);
+        command.Parameters.AddWithValue(desafioId);
+
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        return await reader.ReadAsync(cancellationToken)
+            ? new EstadoDesafio(
+                reader.GetGuid(0),
+                ProgressoDesafio.GetSituacao(
+                    reader.GetFieldValue<DateOnly>(1),
+                    reader.GetFieldValue<DateOnly>(2),
+                    reader.GetBoolean(3),
+                    reader.GetFieldValue<DateOnly>(4)))
+            : null;
     }
 
     public static DesafioResponse ReadDesafio(NpgsqlDataReader reader)

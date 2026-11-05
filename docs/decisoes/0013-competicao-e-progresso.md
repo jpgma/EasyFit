@@ -1,6 +1,6 @@
 # 0013 — Competição, classificação e resumo
 
-**Status:** DECIDIDA
+**Status:** DECIDIDA. Parcialmente substituída pela decisão 0016 (adesão tardia e SQL de contagens).
 
 ## Contexto
 
@@ -29,7 +29,7 @@ A Fase 7 precisa de classificação, histórico semanal, sequências de metas cu
 
 **Adesão tardia (0009)**
 
-- Quem adere com o desafio em andamento é **tratado como os demais** no calendário: todas as semanas do desafio entram no histórico e na classificação; semanas anteriores à adesão contam como **não cumpridas** (`joined_at` **não** exclui semanas).
+- Revista pela decisão 0016: as semanas anteriores à primeira semana inteira do membro não contam e aparecem como "não participou". Antes, quem aderia tarde era tratado como os demais no calendário, com essas semanas como não cumpridas.
 
 **Classificação (§8.5)**
 
@@ -64,7 +64,7 @@ Fonte canônica: `EasyFit/Infrastructure/Database/ContagensAtividadeDesafio.cs`.
 Atividades elegíveis:
 
 - Mesmo `grupo_id` do desafio.
-- Autor participante (`participantes_desafio`) e membro ativo (`membros_grupo.removed_at IS NULL`).
+- Autor membro ativo (`membros_grupo.removed_at IS NULL`), em semana que começou no dia da entrada dele ou depois (decisão 0016).
 - `duracao_segundos >= duracao_minima_segundos`.
 - Data local (`started_at AT TIME ZONE fuso_horario`) dentro do período do desafio e, quando aplicável, do intervalo da semana.
 

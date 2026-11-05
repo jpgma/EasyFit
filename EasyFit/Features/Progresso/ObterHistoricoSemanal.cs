@@ -27,7 +27,8 @@ internal static class ObterHistoricoSemanal
             matriz,
             desafio.DataInicio,
             desafio.DataFim,
-            desafio.SessoesPorSemana);
+            desafio.SessoesPorSemana,
+            desafio.EntradaUsuario);
 
         return Results.Ok(new HistoricoSemanalResponse(
             desafio.SessoesPorSemana,

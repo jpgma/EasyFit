@@ -20,6 +20,7 @@ export type HistoricoSemana = {
   sessoesVerificadas: number;
   sessoesProvisorias: number;
   metaCumprida: boolean;
+  participou: boolean;
 };
 
 export type HistoricoSemanal = {
@@ -37,6 +38,7 @@ export type ResumoGrupo = {
     sessoesProvisorias: number;
     metaCumprida: boolean;
     semanaNumero: number | null;
+    contaNestaSemana: boolean;
   } | null;
   classificacao: {
     posicao: number;

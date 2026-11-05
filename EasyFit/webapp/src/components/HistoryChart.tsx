@@ -3,6 +3,8 @@ type Coluna = {
   rotulo: string;
   valor: number;
   provisorio: number;
+  /** Semana anterior à entrada da pessoa no grupo: não conta contra ela. */
+  naoParticipou?: boolean;
 };
 
 type HistoryChartProps = {
@@ -31,13 +33,25 @@ export function HistoryChart({ titulo, meta, colunas }: HistoryChartProps) {
           className="absolute inset-x-0 border-t border-dashed border-primary/50"
           style={{ bottom: `${(meta / topo) * 100}%` }}
         />
-        {colunas.map(({ chave, rotulo, valor, provisorio }) => (
+        {colunas.map(({ chave, rotulo, valor, provisorio, naoParticipou }) => (
           <div
             key={chave}
             role="img"
-            aria-label={`${rotulo}: ${valor} verificadas de ${provisorio} registradas`}
+            aria-label={
+              naoParticipou
+                ? `${rotulo}: não participou`
+                : `${rotulo}: ${valor} verificadas de ${provisorio} registradas`
+            }
             className="flex flex-1 flex-col justify-end gap-px"
           >
+            {naoParticipou && (
+              <span
+                aria-hidden="true"
+                className="text-center text-xs text-muted"
+              >
+                –
+              </span>
+            )}
             {provisorio > valor && (
               <div
                 className="w-full rounded-t-md bg-primary/35"
@@ -65,6 +79,9 @@ export function HistoryChart({ titulo, meta, colunas }: HistoryChartProps) {
           </span>
         ))}
       </div>
+      {colunas.some(({ naoParticipou }) => naoParticipou) && (
+        <p className="mt-2 text-2xs text-muted">– não participou</p>
+      )}
     </div>
   );
 }

@@ -19,7 +19,8 @@ internal sealed record HistoricoSemanaResponse(
     DateOnly Fim,
     int SessoesVerificadas,
     int SessoesProvisorias,
-    bool MetaCumprida);
+    bool MetaCumprida,
+    bool Participou);
 
 internal sealed record HistoricoSemanalResponse(
     int SessoesPorSemana,
@@ -35,7 +36,8 @@ internal sealed record ProgressoResumoResponse(
     int SessoesVerificadas,
     int SessoesProvisorias,
     bool MetaCumprida,
-    int? SemanaNumero);
+    int? SemanaNumero,
+    bool ContaNestaSemana);
 
 internal sealed record ClassificacaoResumoItemResponse(
     int Posicao,

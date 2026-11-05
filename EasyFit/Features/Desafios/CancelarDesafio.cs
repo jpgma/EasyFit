@@ -21,7 +21,7 @@ internal static class CancelarDesafio
         return OperacaoDesafio.ToResult(status);
     }
 
-    /// <summary>O cancelamento preserva o desafio e os participantes para o histórico.</summary>
+    /// <summary>O cancelamento preserva o desafio para o histórico.</summary>
     private static async Task<DesafioOperacaoStatus> ExecutarAsync(
         NpgsqlDataSource dataSource,
         Guid desafioId,
@@ -31,7 +31,7 @@ internal static class CancelarDesafio
         await using var connection = await dataSource.OpenConnectionAsync(cancellationToken);
         await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
 
-        var encontrado = await ParticipantesDesafio.GetEstadoAsync(connection, transaction, desafioId, cancellationToken);
+        var encontrado = await ConsultasDesafio.GetEstadoAsync(connection, transaction, desafioId, cancellationToken);
         if (encontrado is null)
         {
             return DesafioOperacaoStatus.DesafioNaoEncontrado;
@@ -50,8 +50,8 @@ internal static class CancelarDesafio
         }
 
         // Lido de novo depois da trava: outro cancelamento pode ter terminado durante a espera.
-        var estado = await ParticipantesDesafio.GetEstadoAsync(connection, transaction, desafioId, cancellationToken);
-        if (ParticipantesDesafio.GetBloqueio(estado!.Situacao) is { } bloqueio)
+        var estado = await ConsultasDesafio.GetEstadoAsync(connection, transaction, desafioId, cancellationToken);
+        if (ConsultasDesafio.GetBloqueio(estado!.Situacao) is { } bloqueio)
         {
             return bloqueio;
         }

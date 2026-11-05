@@ -115,11 +115,12 @@ function CabecalhoComDesafio({
 
   const meta = progresso.data?.sessoesPorSemana ?? 0;
   const participantes = progresso.data?.participantes ?? [];
-  const totalFeito = participantes.reduce(
+  const contando = participantes.filter((p) => p.contaNestaSemana);
+  const totalFeito = contando.reduce(
     (soma, p) => soma + Math.min(p.sessoesVerificadas, meta),
     0,
   );
-  const objetivo = meta * participantes.length;
+  const objetivo = meta * contando.length;
   const faltam = objetivo - totalFeito;
   const fim = progresso.data?.semanaAtual?.fim;
   const ordenados = [...participantes].sort(
@@ -186,6 +187,7 @@ function CabecalhoComDesafio({
                 provisorias={p.sessoesProvisorias}
                 meta={meta}
                 voce={p.usuarioId === usuarioId}
+                contaNestaSemana={p.contaNestaSemana}
               />
             ))}
           </div>

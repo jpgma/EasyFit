@@ -238,7 +238,7 @@ Não dividir uma atividade entre semanas.
 
 ## Q010 — Como tratar desafios concorrentes?
 
-**Status:** DECIDIDA — ver `decisoes/0009-desafios.md`. Vários desafios podem coexistir, e a meta não muda depois da criação. A elegibilidade de cada atividade será calculada na Fase 5.
+**Status:** DECIDIDA — ver `decisoes/0009-desafios.md`. Vários desafios podem coexistir, e a meta não muda depois da criação. A elegibilidade de cada atividade será calculada na Fase 5. Revista em `decisoes/0016-um-desafio-por-vez.md`: um desafio por vez em cada grupo, sem sobreposição.
 
 Uma atividade poderá contribuir para mais de um desafio ativo.
 
@@ -255,7 +255,7 @@ Manter a atividade independente do desafio e calcular sua elegibilidade separada
 
 ## Q011 — O que acontece quando alguém entra ou sai de um grupo?
 
-**Status:** DECIDIDA — ver `decisoes/0008-grupos-e-convites.md`. A participação em desafios está em `decisoes/0009-desafios.md`. O efeito sobre revisões e reações segue os princípios registrados na decisão 0008 e será detalhado na Fase 6.
+**Status:** DECIDIDA — ver `decisoes/0008-grupos-e-convites.md`. A participação em desafios está em `decisoes/0009-desafios.md`. O efeito sobre revisões e reações segue os princípios registrados na decisão 0008 e será detalhado na Fase 6. Participação revista em `decisoes/0016-um-desafio-por-vez.md`: automática para todo membro ativo.
 
 Definir:
 

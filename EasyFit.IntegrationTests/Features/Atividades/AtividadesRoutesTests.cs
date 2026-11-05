@@ -116,9 +116,7 @@ public sealed class AtividadesRoutesTests : IAsyncLifetime
             """);
 
         await _host.ExecuteAsync($"""
-            INSERT INTO participantes_desafio (desafio_id, usuario_id)
-            SELECT '{desafioId}', usuario_id FROM membros_grupo
-            WHERE grupo_id = '{grupoId}' AND removed_at IS NULL
+            UPDATE membros_grupo SET joined_at = now() - interval '60 days' WHERE grupo_id = '{grupoId}'
             """);
 
         await PostAtividadeAsync(ana, grupoId, Valid() with { DuracaoSegundos = 3600, TipoComprovacao = TipoComprovacao.RegistroManual });

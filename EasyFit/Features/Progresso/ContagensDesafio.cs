@@ -10,7 +10,8 @@ internal sealed record DesafioCompeticaoContext(
     DateOnly DataFim,
     DateOnly Hoje,
     int SessoesPorSemana,
-    bool Cancelado);
+    bool Cancelado,
+    DateOnly EntradaUsuario);
 
 internal static class ContagensDesafio
 {
@@ -24,7 +25,8 @@ internal static class ContagensDesafio
         await using var command = new NpgsqlCommand("""
             SELECT d.grupo_id, d.data_inicio, d.data_fim,
                 (now() AT TIME ZONE g.fuso_horario)::date,
-                d.sessoes_por_semana, d.cancelled_at IS NOT NULL
+                d.sessoes_por_semana, d.cancelled_at IS NOT NULL,
+                (m.joined_at AT TIME ZONE g.fuso_horario)::date
             FROM desafios d
             JOIN grupos g ON g.id = d.grupo_id
             JOIN membros_grupo m ON m.grupo_id = d.grupo_id AND m.usuario_id = $2 AND m.removed_at IS NULL
@@ -46,7 +48,8 @@ internal static class ContagensDesafio
             reader.GetFieldValue<DateOnly>(2),
             reader.GetFieldValue<DateOnly>(3),
             reader.GetInt32(4),
-            reader.GetBoolean(5));
+            reader.GetBoolean(5),
+            reader.GetFieldValue<DateOnly>(6));
     }
 
     public static async Task<IReadOnlyList<(Guid UsuarioId, string NomeExibicao)>> LoadParticipantesAsync(
@@ -55,13 +58,14 @@ internal static class ContagensDesafio
         CancellationToken cancellationToken)
     {
         await using var command = new NpgsqlCommand("""
-            SELECT p.usuario_id, u.nome_exibicao
-            FROM participantes_desafio p
-            JOIN desafios d ON d.id = p.desafio_id
-            JOIN membros_grupo m ON m.grupo_id = d.grupo_id AND m.usuario_id = p.usuario_id AND m.removed_at IS NULL
-            JOIN usuarios u ON u.id = p.usuario_id
-            WHERE p.desafio_id = $1
-            ORDER BY u.nome_exibicao, p.usuario_id
+            SELECT m.usuario_id, u.nome_exibicao
+            FROM desafios d
+            JOIN grupos g ON g.id = d.grupo_id
+            JOIN membros_grupo m ON m.grupo_id = d.grupo_id AND m.removed_at IS NULL
+            JOIN usuarios u ON u.id = m.usuario_id
+            WHERE d.id = $1
+              AND (m.joined_at AT TIME ZONE g.fuso_horario)::date <= d.data_fim - 6
+            ORDER BY u.nome_exibicao, m.usuario_id
             """, connection);
         command.Parameters.AddWithValue(desafioId);
 

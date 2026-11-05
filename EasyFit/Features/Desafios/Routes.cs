@@ -13,7 +13,7 @@ internal static class DesafiosRoutes
         var desafio = routes.MapGroup("/api/desafios/{id:guid}").RequireSessao();
         desafio.MapGet("/", ObterDesafio.HandleAsync);
         desafio.MapGet("/progresso", ObterProgresso.HandleAsync);
-        desafio.MapPost("/participar", ParticiparDesafio.HandleAsync);
+        desafio.MapPut("/", EditarDesafio.HandleAsync);
         desafio.MapPost("/cancelar", CancelarDesafio.HandleAsync);
     }
 }

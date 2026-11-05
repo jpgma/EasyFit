@@ -9,7 +9,8 @@ internal static class HistoricoSemanalDesafio
         Dictionary<(Guid UsuarioId, int IndiceSemana), (int Verificadas, int Pendentes)> matriz,
         DateOnly inicio,
         DateOnly fim,
-        int sessoesPorSemana)
+        int sessoesPorSemana,
+        DateOnly entradaUsuario)
     {
         var totalSemanas = CalculoSemanaDesafio.CountSemanas(inicio, fim);
         var semanas = new List<HistoricoSemanaResponse>(totalSemanas);
@@ -28,7 +29,8 @@ internal static class HistoricoSemanalDesafio
                 inicioSemana.AddDays(6),
                 progresso.Verificadas,
                 progresso.Provisorias,
-                progresso.MetaCumprida));
+                progresso.MetaCumprida,
+                CalculoSemanaDesafio.ParticipaDaSemana(inicioSemana, entradaUsuario)));
         }
 
         return semanas;

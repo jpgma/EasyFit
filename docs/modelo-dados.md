@@ -81,16 +81,6 @@ As datas são dias do calendário no fuso do grupo. Só semanas inteiras, garant
 | `created_at` | `timestamptz` | Padrão `now()` |
 | `cancelled_at` | `timestamptz` | Preenchida ao cancelar |
 
-## `participantes_desafio`
-
-Uma linha por usuário e desafio. Participante ativo é quem tem a linha e continua no grupo: sair do grupo não apaga a linha, e voltar devolve a participação.
-
-| Coluna | Tipo | Observações |
-|---|---|---|
-| `desafio_id` | `uuid` | Parte da chave primária. Referencia `desafios` |
-| `usuario_id` | `uuid` | Parte da chave primária. Referencia `usuarios`. Indexada |
-| `joined_at` | `timestamptz` | Padrão `now()` |
-
 ## `atividades`
 
 Ver `decisoes/0011-atividades.md` e migração `006-create-atividades.sql`.

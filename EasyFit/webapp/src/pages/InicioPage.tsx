@@ -72,7 +72,8 @@ function SuaSemana({
       b.sessoesVerificadas - a.sessoesVerificadas ||
       b.sessoesProvisorias - a.sessoesProvisorias,
   );
-  const bateram = participantes.filter((p) => p.metaCumprida).length;
+  const contando = participantes.filter((p) => p.contaNestaSemana);
+  const bateram = contando.filter((p) => p.metaCumprida).length;
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1.1fr_1fr]">
@@ -113,6 +114,12 @@ function SuaSemana({
             </p>
           </div>
         </div>
+        {eu && !eu.contaNestaSemana && (
+          <p className="mt-3 rounded-xl bg-surface-muted p-3 text-sm text-muted">
+            Você entrou no meio desta semana. Seus treinos contam para a meta a
+            partir da próxima segunda.
+          </p>
+        )}
         {provisorias > verificadas && (
           <p className="mt-3 text-xs text-muted">
             {provisorias - verificadas} aguardando verificação
@@ -134,7 +141,7 @@ function SuaSemana({
               {desafio.data.nome}
             </p>
             <p className="text-xs text-muted">
-              {bateram} de {participantes.length} já bateram a meta
+              {bateram} de {contando.length} já bateram a meta
             </p>
           </div>
           <Link
@@ -154,6 +161,7 @@ function SuaSemana({
             provisorias={p.sessoesProvisorias}
             meta={meta}
             voce={p.usuarioId === usuarioId}
+            contaNestaSemana={p.contaNestaSemana}
           />
         ))}
       </section>

@@ -17,16 +17,19 @@ internal static class ContagensAtividadeDesafio
             'AguardandoFeedback', 'EmRevisao', 'Contestada'))::int
         """;
 
-    /// <summary>Corpo comum: atividades elegíveis de participantes ativos. Parâmetro $1 = desafio_id.</summary>
-    internal const string FromElegiveisSql = """
+    /// <summary>
+    /// Corpo comum: atividades elegíveis de membros ativos, só em semanas que começaram no dia
+    /// da entrada do membro ou depois. Parâmetro $1 = desafio_id.
+    /// </summary>
+    internal const string FromElegiveisSql = $"""
         FROM atividades a
         JOIN desafios d ON d.id = $1 AND d.grupo_id = a.grupo_id
         JOIN grupos g ON g.id = d.grupo_id
-        JOIN participantes_desafio p ON p.desafio_id = d.id AND p.usuario_id = a.usuario_id
-        JOIN membros_grupo m ON m.grupo_id = d.grupo_id AND m.usuario_id = p.usuario_id AND m.removed_at IS NULL
+        JOIN membros_grupo m ON m.grupo_id = d.grupo_id AND m.usuario_id = a.usuario_id AND m.removed_at IS NULL
         WHERE a.duracao_segundos >= d.duracao_minima_segundos
           AND (a.started_at AT TIME ZONE g.fuso_horario)::date >= d.data_inicio
           AND (a.started_at AT TIME ZONE g.fuso_horario)::date <= d.data_fim
+          AND d.data_inicio + {IndiceSemanaSql} * 7 >= (m.joined_at AT TIME ZONE g.fuso_horario)::date
         """;
 
     internal static string BuildAgregadoPorUsuarioESemana() => $"""

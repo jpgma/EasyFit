@@ -27,7 +27,7 @@ import {
   situacaoLabels,
   useCancelarDesafio,
   useDesafio,
-  useParticipar,
+  useEditarDesafio,
   useProgresso,
   type Desafio,
 } from "@/features/desafios";
@@ -82,7 +82,7 @@ function ProgressoSection({ desafio }: { desafio: Desafio }) {
           </p>
           {progresso.data.participantes.length === 0 ? (
             <p className="card p-4 text-sm text-muted">
-              Quem participar do desafio aparecerá aqui.
+              Os membros do grupo aparecerão aqui.
             </p>
           ) : (
             <div className="card p-3">
@@ -95,6 +95,7 @@ function ProgressoSection({ desafio }: { desafio: Desafio }) {
                   provisorias={p.sessoesProvisorias}
                   meta={progresso.data.sessoesPorSemana}
                   voce={p.usuarioId === usuario?.id}
+                  contaNestaSemana={p.contaNestaSemana}
                 />
               ))}
             </div>
@@ -196,6 +197,7 @@ function HistoricoSection({ desafioId }: { desafioId: string }) {
             rotulo: formatarDiaEMes(semana.inicio).replace(" de ", "/"),
             valor: semana.sessoesVerificadas,
             provisorio: semana.sessoesProvisorias,
+            naoParticipou: !semana.participou,
           }))}
         />
       )}
@@ -203,12 +205,77 @@ function HistoricoSection({ desafioId }: { desafioId: string }) {
   );
 }
 
+function EditarDesafioForm({
+  desafio,
+  onFechar,
+}: {
+  desafio: Desafio;
+  onFechar: () => void;
+}) {
+  const editar = useEditarDesafio(desafio.id, desafio.grupoId);
+  const [nome, setNome] = useState(desafio.nome);
+  const [descricao, setDescricao] = useState(desafio.descricao ?? "");
+
+  return (
+    <form
+      className="mt-4 space-y-3"
+      onSubmit={(event) => {
+        event.preventDefault();
+        editar.mutate(
+          { nome: nome.trim(), descricao: descricao.trim() },
+          { onSuccess: onFechar },
+        );
+      }}
+    >
+      <label className="block">
+        <span className="input-label">Nome</span>
+        <input
+          className="input-field"
+          maxLength={80}
+          value={nome}
+          onChange={(event) => setNome(event.target.value)}
+        />
+      </label>
+      <label className="block">
+        <span className="input-label">Descrição (opcional)</span>
+        <textarea
+          className="input-field h-auto min-h-20 resize-y py-3"
+          maxLength={500}
+          value={descricao}
+          onChange={(event) => setDescricao(event.target.value)}
+        />
+      </label>
+      <p className="text-xs text-muted">
+        A meta e as datas não mudam depois da criação.
+      </p>
+      {editar.isError && (
+        <p role="alert" className="form-error">
+          {getErrorMessage(editar.error)}
+        </p>
+      )}
+      <div className="grid grid-cols-2 gap-2">
+        <button type="button" className="btn-ghost" onClick={onFechar}>
+          Voltar
+        </button>
+        <button
+          type="submit"
+          className="btn-primary h-11"
+          disabled={editar.isPending || nome.trim().length === 0}
+        >
+          {editar.isPending ? "Salvando…" : "Salvar"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
 function DesafioConteudo({ desafio }: { desafio: Desafio }) {
-  const participar = useParticipar(desafio.id, desafio.grupoId);
   const cancelar = useCancelarDesafio(desafio.id, desafio.grupoId);
   const [cancelando, setCancelando] = useState(false);
+  const [editando, setEditando] = useState(false);
 
   const aberto = isDesafioAberto(desafio.situacao);
+  const podeGerenciar = aberto && canGerenciarDesafios(desafio.papel);
 
   const fecharDialogo = () => {
     cancelar.reset();
@@ -226,11 +293,31 @@ function DesafioConteudo({ desafio }: { desafio: Desafio }) {
           </p>
           <span className="chip">{situacaoLabels[desafio.situacao]}</span>
         </div>
-        <h2 className="mt-1 text-2xl font-bold break-words">{desafio.nome}</h2>
-        {desafio.descricao && (
-          <p className="mt-2 break-words whitespace-pre-line text-muted">
-            {desafio.descricao}
-          </p>
+        {editando ? (
+          <EditarDesafioForm
+            desafio={desafio}
+            onFechar={() => setEditando(false)}
+          />
+        ) : (
+          <>
+            <h2 className="mt-1 text-2xl font-bold break-words">
+              {desafio.nome}
+            </h2>
+            {desafio.descricao && (
+              <p className="mt-2 break-words whitespace-pre-line text-muted">
+                {desafio.descricao}
+              </p>
+            )}
+            {podeGerenciar && (
+              <button
+                type="button"
+                className="mt-2 text-sm font-semibold text-link"
+                onClick={() => setEditando(true)}
+              >
+                Editar nome e descrição
+              </button>
+            )}
+          </>
         )}
         <div className="mt-5 grid grid-cols-2 gap-3">
           <Dado
@@ -256,29 +343,11 @@ function DesafioConteudo({ desafio }: { desafio: Desafio }) {
         </div>
       </div>
 
-      {aberto && !desafio.participando && (
-        <div className="mt-4">
-          <button
-            type="button"
-            className="btn-primary w-full"
-            disabled={participar.isPending}
-            onClick={() => participar.mutate()}
-          >
-            {participar.isPending ? "Entrando…" : "Participar do desafio"}
-          </button>
-          {participar.isError && (
-            <p role="alert" className="form-error mt-3">
-              {getErrorMessage(participar.error)}
-            </p>
-          )}
-        </div>
-      )}
-
       <ProgressoSection desafio={desafio} />
       <ClassificacaoSection desafioId={desafio.id} />
       {desafio.participando && <HistoricoSection desafioId={desafio.id} />}
 
-      {aberto && canGerenciarDesafios(desafio.papel) && (
+      {podeGerenciar && (
         <button
           type="button"
           className="mt-6 flex h-12 w-full items-center justify-center rounded-xl text-sm font-semibold text-danger hover:bg-danger-soft"
@@ -291,7 +360,7 @@ function DesafioConteudo({ desafio }: { desafio: Desafio }) {
       <ConfirmDialog
         open={cancelando}
         title="Cancelar este desafio?"
-        message="Ninguém mais poderá participar, e isso não pode ser desfeito. O desafio continua visível no histórico do grupo."
+        message="O desafio deixa de valer para todo o grupo, e isso não pode ser desfeito. Ele continua visível no histórico."
         confirmLabel="Cancelar desafio"
         pending={cancelar.isPending}
         error={cancelar.isError ? getErrorMessage(cancelar.error) : undefined}

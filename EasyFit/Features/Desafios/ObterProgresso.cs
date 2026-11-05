@@ -1,3 +1,4 @@
+using EasyFit.Features.Desafios.Contracts;
 using EasyFit.Infrastructure.Authentication;
 using EasyFit.Infrastructure.Database;
 using Npgsql;
@@ -61,13 +62,14 @@ internal static class ObterProgresso
         }
 
         await using var participantes = new NpgsqlCommand("""
-            SELECT p.usuario_id, u.nome_exibicao
-            FROM participantes_desafio p
-            JOIN desafios d ON d.id = p.desafio_id
-            JOIN membros_grupo m ON m.grupo_id = d.grupo_id AND m.usuario_id = p.usuario_id AND m.removed_at IS NULL
-            JOIN usuarios u ON u.id = p.usuario_id
-            WHERE p.desafio_id = $1
-            ORDER BY u.nome_exibicao, p.usuario_id
+            SELECT m.usuario_id, u.nome_exibicao, (m.joined_at AT TIME ZONE g.fuso_horario)::date
+            FROM desafios d
+            JOIN grupos g ON g.id = d.grupo_id
+            JOIN membros_grupo m ON m.grupo_id = d.grupo_id AND m.removed_at IS NULL
+            JOIN usuarios u ON u.id = m.usuario_id
+            WHERE d.id = $1
+              AND (m.joined_at AT TIME ZONE g.fuso_horario)::date <= d.data_fim - 6
+            ORDER BY u.nome_exibicao, m.usuario_id
             """, connection);
         participantes.Parameters.AddWithValue(desafioId);
 
@@ -92,7 +94,9 @@ internal static class ObterProgresso
                     reader.GetString(1),
                     calculado.Verificadas,
                     calculado.Provisorias,
-                    calculado.MetaCumprida));
+                    calculado.MetaCumprida,
+                    semana is null
+                        || CalculoSemanaDesafio.ParticipaDaSemana(semana.Inicio, reader.GetFieldValue<DateOnly>(2))));
             }
         }
 

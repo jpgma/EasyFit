@@ -67,7 +67,7 @@ internal static class CriarDesafio
             : Results.Json(desafio, AppJsonContext.Default.DesafioResponse, statusCode: StatusCodes.Status201Created);
     }
 
-    /// <summary>Quem cria já entra como participante, na mesma transação.</summary>
+    /// <summary>A trava do grupo serializa a verificação de sobreposição entre criações simultâneas.</summary>
     private static async Task<(DesafioOperacaoStatus Status, Guid Id)> ExecutarAsync(
         NpgsqlDataSource dataSource,
         Guid grupoId,
@@ -107,6 +107,21 @@ internal static class CriarDesafio
             return (DesafioOperacaoStatus.DadosInvalidos, Guid.Empty);
         }
 
+        await using (var sobreposto = new NpgsqlCommand("""
+            SELECT 1 FROM desafios
+            WHERE grupo_id = $1 AND cancelled_at IS NULL AND data_inicio <= $3 AND data_fim >= $2
+            LIMIT 1
+            """, connection, transaction))
+        {
+            sobreposto.Parameters.AddWithValue(grupoId);
+            sobreposto.Parameters.AddWithValue(novo.DataInicio);
+            sobreposto.Parameters.AddWithValue(novo.DataFim);
+            if (await sobreposto.ExecuteScalarAsync(cancellationToken) is not null)
+            {
+                return (DesafioOperacaoStatus.DesafioSobreposto, Guid.Empty);
+            }
+        }
+
         Guid desafioId;
         await using (var insert = new NpgsqlCommand("""
             INSERT INTO desafios (
@@ -126,8 +141,6 @@ internal static class CriarDesafio
             insert.Parameters.AddWithValue(novo.SessoesPorSemana);
             desafioId = (Guid)(await insert.ExecuteScalarAsync(cancellationToken))!;
         }
-
-        await ParticipantesDesafio.InsertAsync(connection, transaction, desafioId, usuarioId, cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
         return (DesafioOperacaoStatus.Concluida, desafioId);

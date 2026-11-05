@@ -50,11 +50,12 @@ internal static class GrupoEntrada
             return GrupoEntradaStatus.GrupoCheio;
         }
 
+        // Voltar ao grupo mantém joined_at: as semanas que a pessoa já cumpriu continuam valendo.
         await using var insert = new NpgsqlCommand("""
             INSERT INTO membros_grupo (grupo_id, usuario_id, papel)
             VALUES ($1, $2, $3)
             ON CONFLICT (grupo_id, usuario_id) DO UPDATE
-            SET papel = EXCLUDED.papel, joined_at = now(), removed_at = NULL
+            SET papel = EXCLUDED.papel, removed_at = NULL
             """, connection, transaction);
         insert.Parameters.AddWithValue(grupoId);
         insert.Parameters.AddWithValue(usuarioId);

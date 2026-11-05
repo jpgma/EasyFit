@@ -26,6 +26,7 @@ export function LinhaParticipante({
   provisorias,
   meta,
   voce,
+  contaNestaSemana = true,
 }: {
   usuarioId: string;
   nomeExibicao: string;
@@ -33,6 +34,7 @@ export function LinhaParticipante({
   provisorias: number;
   meta: number;
   voce: boolean;
+  contaNestaSemana?: boolean;
 }) {
   const primeiroNome = nomeExibicao.trim().split(/\s+/)[0];
   return (
@@ -44,25 +46,35 @@ export function LinhaParticipante({
             {primeiroNome}
             {voce && <span className="font-normal text-muted"> (você)</span>}
           </p>
-          <span className="text-xs font-semibold tabular-nums">
-            {Math.min(verificadas, meta)}/{meta}
-          </span>
+          {contaNestaSemana && (
+            <span className="text-xs font-semibold tabular-nums">
+              {Math.min(verificadas, meta)}/{meta}
+            </span>
+          )}
         </div>
-        <Segments
-          label={`Progresso de ${nomeExibicao}`}
-          valor={verificadas}
-          provisorio={provisorias}
-          max={meta}
-        />
+        {contaNestaSemana ? (
+          <Segments
+            label={`Progresso de ${nomeExibicao}`}
+            valor={verificadas}
+            provisorio={provisorias}
+            max={meta}
+          />
+        ) : (
+          <p className="text-2xs text-muted">
+            Entrou nesta semana: conta a partir da próxima
+          </p>
+        )}
         {provisorias > verificadas && (
           <p className="mt-1 text-2xs text-muted">
             +{provisorias - verificadas} aguardando verificação
           </p>
         )}
       </div>
-      <div className="hidden w-24 justify-end sm:flex">
-        <SituacaoParticipante verificadas={verificadas} meta={meta} />
-      </div>
+      {contaNestaSemana && (
+        <div className="hidden w-24 justify-end sm:flex">
+          <SituacaoParticipante verificadas={verificadas} meta={meta} />
+        </div>
+      )}
     </div>
   );
 }

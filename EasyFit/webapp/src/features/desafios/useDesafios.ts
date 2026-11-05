@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { gruposKey, shouldRetry, type Papel } from "@/features/grupos";
-import { getJson, postEmpty, postJson } from "@/services/api";
+import { getJson, postEmpty, postJson, putJson } from "@/services/api";
 
 export type SituacaoDesafio = "Agendado" | "Ativo" | "Encerrado" | "Cancelado";
 
@@ -26,6 +26,7 @@ export type ProgressoParticipante = {
   sessoesVerificadas: number;
   sessoesProvisorias: number;
   metaCumprida: boolean;
+  contaNestaSemana: boolean;
 };
 
 export type Progresso = {
@@ -100,10 +101,11 @@ export function useCriarDesafio(grupoId: string) {
   });
 }
 
-export function useParticipar(desafioId: string, grupoId: string) {
+export function useEditarDesafio(desafioId: string, grupoId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => postEmpty(`/api/desafios/${desafioId}/participar`),
+    mutationFn: (data: { nome: string; descricao: string }) =>
+      putJson<Desafio>(`/api/desafios/${desafioId}`, data),
     onSuccess: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: desafioKey(desafioId) }),

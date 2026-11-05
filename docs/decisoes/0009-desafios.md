@@ -1,6 +1,6 @@
 # 0009 — Desafios, participação e semanas
 
-**Status:** DECIDIDA
+**Status:** DECIDIDA. Parcialmente substituída pela decisão 0016 (desafios simultâneos, adesão e edição).
 
 ## Contexto
 

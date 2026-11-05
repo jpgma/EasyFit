@@ -671,7 +671,7 @@ Meta individual:
 por semana.
 ```
 
-Todos os participantes seguem a mesma meta.
+Todos os participantes seguem a mesma meta. Todo membro ativo do grupo participa, sem adesão nem saída, e quem entra depois do início conta a partir da primeira semana inteira. Um grupo tem um desafio por vez, sem sobreposição de datas. Ver `decisoes/0016-um-desafio-por-vez.md`.
 
 Não implementar metas individuais diferentes na primeira versão.
 
@@ -873,7 +873,6 @@ membros_grupo
 convites_grupo
 
 desafios
-participantes_desafio
 
 atividades
 evidencias_atividade
@@ -887,7 +886,7 @@ historico_revisao
 - E-mail único por usuário.
 - Um vínculo por usuário e grupo.
 - Um convite por token.
-- Um participante por usuário e desafio.
+- Um desafio por período em cada grupo, sem sobreposição de datas (exceto os cancelados).
 - Uma reação por usuário e atividade.
 - Um revisor por usuário e atividade.
 - Duração de atividade positiva.
@@ -902,7 +901,6 @@ Utilizar UUID como identificador das entidades principais.
 - Atividades por usuário e data.
 - Atividades por status de verificação.
 - Reações por atividade.
-- Participantes por desafio.
 
 ### 9.3. Migrações
 
@@ -974,11 +972,11 @@ GET  /api/desafios/{id}
 GET  /api/desafios/{id}/progresso
 GET  /api/desafios/{id}/classificacao
 GET  /api/desafios/{id}/historico
-POST /api/desafios/{id}/participar
+PUT  /api/desafios/{id}
 POST /api/desafios/{id}/cancelar
 ```
 
-Permissões e regras em `docs/decisoes/0009-desafios.md`. Classificação, histórico e critérios de ranking em `docs/decisoes/0013-competicao-e-progresso.md`.
+Permissões e regras em `docs/decisoes/0009-desafios.md` e `docs/decisoes/0016-um-desafio-por-vez.md`. Classificação, histórico e critérios de ranking em `docs/decisoes/0013-competicao-e-progresso.md`.
 
 ### 10.4. Atividades
 

@@ -3,7 +3,7 @@ export {
   useCriarDesafio,
   useDesafio,
   useDesafios,
-  useParticipar,
+  useEditarDesafio,
   useProgresso,
 } from "./useDesafios";
 export type {

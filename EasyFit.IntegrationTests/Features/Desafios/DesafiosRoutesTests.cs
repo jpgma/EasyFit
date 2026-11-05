@@ -12,6 +12,7 @@ public sealed class DesafiosRoutesTests : IAsyncLifetime
     private const string SegundaDaSemana = $"date_trunc('week', {HojeNoGrupo})::date";
 
     private ApiTestHost _host = null!;
+    private int _desafiosCriados;
 
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
@@ -131,15 +132,126 @@ public sealed class DesafiosRoutesTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Create_AllowsConcurrentDesafios_InTheSameGrupo()
+    public async Task Create_RefusesOverlap_ButAllowsTheNextPeriod_AndOtherGrupos()
+    {
+        var ana = await _host.CreateUsuarioAsync();
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var outroGrupoId = await _host.CreateGrupoAsync(ana);
+        var inicio = ProximaSegunda;
+        var primeiro = Valid() with { DataInicio = inicio, DataFim = inicio.AddDays(13) };
+
+        Assert.Equal(HttpStatusCode.Created, (await PostDesafioAsync(ana, grupoId, primeiro)).StatusCode);
+
+        await ApiTestHost.AssertProblemAsync(
+            await PostDesafioAsync(ana, grupoId, primeiro with { DataInicio = inicio.AddDays(7), DataFim = inicio.AddDays(20) }),
+            HttpStatusCode.Conflict,
+            "DESAFIO_SOBREPOSTO");
+        Assert.Equal(
+            HttpStatusCode.Created,
+            (await PostDesafioAsync(ana, grupoId, primeiro with { DataInicio = inicio.AddDays(14), DataFim = inicio.AddDays(20) })).StatusCode);
+        Assert.Equal(HttpStatusCode.Created, (await PostDesafioAsync(ana, outroGrupoId, primeiro)).StatusCode);
+    }
+
+    [Fact]
+    public async Task Create_AllowsThePeriodOfACanceledDesafio()
+    {
+        var ana = await _host.CreateUsuarioAsync();
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var response = await PostDesafioAsync(ana, grupoId, Valid());
+        var desafio = await response.Content.ReadFromJsonAsync(AppJsonContext.Default.DesafioResponse, Token);
+        Assert.Equal(HttpStatusCode.NoContent, (await CancelarAsync(ana, desafio!.Id)).StatusCode);
+
+        Assert.Equal(HttpStatusCode.Created, (await PostDesafioAsync(ana, grupoId, Valid())).StatusCode);
+    }
+
+    [Fact]
+    public async Task Create_ConcurrentRequests_OnlyOneWins()
     {
         var ana = await _host.CreateUsuarioAsync();
         var grupoId = await _host.CreateGrupoAsync(ana);
 
-        await CreateDesafioAsync(ana, grupoId, "Um");
-        await CreateDesafioAsync(ana, grupoId, "Dois");
+        var respostas = await Task.WhenAll(
+            Enumerable.Range(0, 5).Select(_ => PostDesafioAsync(ana, grupoId, Valid())));
 
-        Assert.Equal(2, (await ListAsync(ana, grupoId)).Count);
+        Assert.Single(respostas, r => r.StatusCode == HttpStatusCode.Created);
+        Assert.Equal(4, respostas.Count(r => r.StatusCode == HttpStatusCode.Conflict));
+    }
+
+    [Fact]
+    public async Task Editar_ChangesOnlyNameAndDescription_ForManagers()
+    {
+        var ana = await _host.CreateUsuarioAsync();
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var membro = await _host.AddMembroAsync(grupoId);
+        var desafioId = await CreateDesafioAsync(ana, grupoId);
+        var antes = await GetAsync(ana, desafioId);
+
+        await ApiTestHost.AssertProblemAsync(
+            await EditarAsync(membro, desafioId, new EditarDesafioRequest("Outro", null)),
+            HttpStatusCode.Forbidden,
+            "ACESSO_NEGADO");
+        await ApiTestHost.AssertProblemAsync(
+            await EditarAsync(ana, desafioId, new EditarDesafioRequest(" ", null)),
+            HttpStatusCode.BadRequest,
+            "DADOS_INVALIDOS");
+
+        var response = await EditarAsync(ana, desafioId, new EditarDesafioRequest("  Novo  ", "  Texto  "));
+
+        response.EnsureSuccessStatusCode();
+        var depois = await response.Content.ReadFromJsonAsync(AppJsonContext.Default.DesafioResponse, Token);
+        Assert.Equal(antes with { Nome = "Novo", Descricao = "Texto" }, depois);
+    }
+
+    [Fact]
+    public async Task Editar_RejectsEncerrado_AndCancelado()
+    {
+        var ana = await _host.CreateUsuarioAsync();
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var encerrado = await CreateDesafioAsync(ana, grupoId);
+        var cancelado = await CreateDesafioAsync(ana, grupoId);
+        await EncerrarAsync(encerrado);
+        Assert.Equal(HttpStatusCode.NoContent, (await CancelarAsync(ana, cancelado)).StatusCode);
+
+        await ApiTestHost.AssertProblemAsync(
+            await EditarAsync(ana, encerrado, new EditarDesafioRequest("Outro", null)),
+            HttpStatusCode.Conflict,
+            "DESAFIO_ENCERRADO");
+        await ApiTestHost.AssertProblemAsync(
+            await EditarAsync(ana, cancelado, new EditarDesafioRequest("Outro", null)),
+            HttpStatusCode.Conflict,
+            "DESAFIO_CANCELADO");
+    }
+
+    [Fact]
+    public async Task NewMember_ParticipatesAutomatically()
+    {
+        var ana = await _host.CreateUsuarioAsync();
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var desafioId = await CreateDesafioAsync(ana, grupoId);
+        var bia = await _host.AddMembroAsync(grupoId);
+
+        var desafio = await GetAsync(bia, desafioId);
+        Assert.True(desafio.Participando);
+        Assert.Equal(2, desafio.TotalParticipantes);
+    }
+
+    [Fact]
+    public async Task MemberWhoJoinedDuringTheLastWeek_IsNotAParticipant()
+    {
+        var ana = await _host.CreateUsuarioAsync("Ana");
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var desafioId = await CreateDesafioAsync(ana, grupoId);
+        var bia = await _host.AddMembroAsync(grupoId, nome: "Bia");
+        await IniciarAsync(desafioId);
+        await _host.ExecuteAsync($"""
+            UPDATE membros_grupo
+            SET joined_at = (({SegundaDaSemana} + 22)::timestamp AT TIME ZONE 'America/Sao_Paulo')
+            WHERE usuario_id = '{bia.Id}'
+            """);
+
+        Assert.False((await GetAsync(bia, desafioId)).Participando);
+        Assert.Equal(1, (await GetAsync(ana, desafioId)).TotalParticipantes);
+        Assert.Equal(["Ana"], (await GetProgressoAsync(ana, desafioId)).Participantes.Select(p => p.NomeExibicao));
     }
 
     [Fact]
@@ -184,7 +296,7 @@ public sealed class DesafiosRoutesTests : IAsyncLifetime
                 HttpStatusCode.NotFound,
                 "DESAFIO_NAO_ENCONTRADO");
             await ApiTestHost.AssertProblemAsync(
-                await ParticiparAsync(usuario, desafioId),
+                await EditarAsync(usuario, desafioId, new EditarDesafioRequest("Outro", null)),
                 HttpStatusCode.NotFound,
                 "DESAFIO_NAO_ENCONTRADO");
             await ApiTestHost.AssertProblemAsync(
@@ -193,7 +305,6 @@ public sealed class DesafiosRoutesTests : IAsyncLifetime
                 "DESAFIO_NAO_ENCONTRADO");
         }
 
-        Assert.Equal(1L, await _host.CountAsync("SELECT count(*) FROM participantes_desafio"));
         Assert.Equal(0L, await _host.CountAsync("SELECT count(*) FROM desafios WHERE cancelled_at IS NOT NULL"));
     }
 
@@ -230,70 +341,17 @@ public sealed class DesafiosRoutesTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Participar_AddsTheMember_AndIsIdempotent()
-    {
-        var ana = await _host.CreateUsuarioAsync();
-        var grupoId = await _host.CreateGrupoAsync(ana);
-        var desafioId = await CreateDesafioAsync(ana, grupoId);
-        var bia = await _host.AddMembroAsync(grupoId);
-
-        Assert.False((await GetAsync(bia, desafioId)).Participando);
-
-        Assert.Equal(HttpStatusCode.NoContent, (await ParticiparAsync(bia, desafioId)).StatusCode);
-        Assert.Equal(HttpStatusCode.NoContent, (await ParticiparAsync(bia, desafioId)).StatusCode);
-
-        var desafio = await GetAsync(bia, desafioId);
-        Assert.True(desafio.Participando);
-        Assert.Equal(2, desafio.TotalParticipantes);
-    }
-
-    [Fact]
-    public async Task Participar_AcceptsAnActiveDesafio()
-    {
-        var ana = await _host.CreateUsuarioAsync();
-        var grupoId = await _host.CreateGrupoAsync(ana);
-        var desafioId = await CreateDesafioAsync(ana, grupoId);
-        var bia = await _host.AddMembroAsync(grupoId);
-        await IniciarAsync(desafioId);
-
-        Assert.Equal(HttpStatusCode.NoContent, (await ParticiparAsync(bia, desafioId)).StatusCode);
-    }
-
-    [Fact]
-    public async Task Participar_RejectsEncerrado_AndCancelado()
-    {
-        var ana = await _host.CreateUsuarioAsync();
-        var grupoId = await _host.CreateGrupoAsync(ana);
-        var bia = await _host.AddMembroAsync(grupoId);
-        var encerrado = await CreateDesafioAsync(ana, grupoId);
-        var cancelado = await CreateDesafioAsync(ana, grupoId);
-        await EncerrarAsync(encerrado);
-        Assert.Equal(HttpStatusCode.NoContent, (await CancelarAsync(ana, cancelado)).StatusCode);
-
-        await ApiTestHost.AssertProblemAsync(
-            await ParticiparAsync(bia, encerrado),
-            HttpStatusCode.Conflict,
-            "DESAFIO_ENCERRADO");
-        await ApiTestHost.AssertProblemAsync(
-            await ParticiparAsync(bia, cancelado),
-            HttpStatusCode.Conflict,
-            "DESAFIO_CANCELADO");
-    }
-
-    [Fact]
     public async Task LeavingTheGrupo_HidesTheParticipante_AndComingBackRestoresIt()
     {
         var ana = await _host.CreateUsuarioAsync("Ana");
         var grupoId = await _host.CreateGrupoAsync(ana);
         var desafioId = await CreateDesafioAsync(ana, grupoId);
         var bia = await _host.AddMembroAsync(grupoId, nome: "Bia");
-        Assert.Equal(HttpStatusCode.NoContent, (await ParticiparAsync(bia, desafioId)).StatusCode);
 
         await RemoverAsync(ana, grupoId, bia);
 
         Assert.Equal(1, (await GetAsync(ana, desafioId)).TotalParticipantes);
         Assert.Equal(["Ana"], (await GetProgressoAsync(ana, desafioId)).Participantes.Select(p => p.NomeExibicao));
-        Assert.Equal(2L, await _host.CountAsync("SELECT count(*) FROM participantes_desafio"));
 
         await _host.ExecuteAsync($"UPDATE membros_grupo SET removed_at = NULL WHERE usuario_id = '{bia.Id}'");
 
@@ -320,7 +378,7 @@ public sealed class DesafiosRoutesTests : IAsyncLifetime
 
         var desafio = await GetAsync(membro, desafioId);
         Assert.Equal(SituacaoDesafio.Cancelado, desafio.Situacao);
-        Assert.Equal(1, desafio.TotalParticipantes);
+        Assert.Equal(3, desafio.TotalParticipantes);
     }
 
     [Fact]
@@ -359,14 +417,13 @@ public sealed class DesafiosRoutesTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Progresso_ShowsTheCurrentWeek_AndOnlyParticipantes()
+    public async Task Progresso_ShowsTheCurrentWeek_AndEveryActiveMember()
     {
         var ana = await _host.CreateUsuarioAsync("Ana");
         var grupoId = await _host.CreateGrupoAsync(ana);
         var bia = await _host.AddMembroAsync(grupoId, nome: "Bia");
-        await _host.AddMembroAsync(grupoId, nome: "Fora do desafio");
+        await _host.AddMembroAsync(grupoId, nome: "Caio");
         var desafioId = await CreateDesafioAsync(ana, grupoId);
-        Assert.Equal(HttpStatusCode.NoContent, (await ParticiparAsync(bia, desafioId)).StatusCode);
         await IniciarAsync(desafioId);
 
         var progresso = await GetProgressoAsync(ana, desafioId);
@@ -376,9 +433,10 @@ public sealed class DesafiosRoutesTests : IAsyncLifetime
         Assert.Equal(1, progresso.SemanaAtual?.Numero);
         Assert.Equal(DayOfWeek.Monday, progresso.SemanaAtual?.Inicio.DayOfWeek);
         Assert.Equal(DayOfWeek.Sunday, progresso.SemanaAtual?.Fim.DayOfWeek);
-        Assert.Equal(["Ana", "Bia"], progresso.Participantes.Select(p => p.NomeExibicao));
+        Assert.Equal(["Ana", "Bia", "Caio"], progresso.Participantes.Select(p => p.NomeExibicao));
         Assert.All(progresso.Participantes, p =>
         {
+            Assert.True(p.ContaNestaSemana);
             Assert.Equal(0, p.SessoesVerificadas);
             Assert.Equal(0, p.SessoesProvisorias);
             Assert.False(p.MetaCumprida);
@@ -415,7 +473,7 @@ public sealed class DesafiosRoutesTests : IAsyncLifetime
         (HttpMethod.Post, $"/api/grupos/{grupoId}/desafios"),
         (HttpMethod.Get, $"/api/desafios/{desafioId}"),
         (HttpMethod.Get, $"/api/desafios/{desafioId}/progresso"),
-        (HttpMethod.Post, $"/api/desafios/{desafioId}/participar"),
+        (HttpMethod.Put, $"/api/desafios/{desafioId}"),
         (HttpMethod.Post, $"/api/desafios/{desafioId}/cancelar"),
     ];
 
@@ -426,16 +484,26 @@ public sealed class DesafiosRoutesTests : IAsyncLifetime
             AppJsonContext.Default.CriarDesafioRequest,
             Token);
 
-    private static async Task<Guid> CreateDesafioAsync(TestUsuario ator, Guid grupoId, string nome = "Desafio")
+    // Um grupo só tem um desafio por período: cada criação usa o período seguinte ao da anterior.
+    private async Task<Guid> CreateDesafioAsync(TestUsuario ator, Guid grupoId, string nome = "Desafio")
     {
-        var response = await PostDesafioAsync(ator, grupoId, Valid(nome));
+        var inicio = ProximaSegunda.AddDays(28 * _desafiosCriados++);
+        var response = await PostDesafioAsync(ator, grupoId, Valid(nome) with
+        {
+            DataInicio = inicio,
+            DataFim = inicio.AddDays(27),
+        });
         response.EnsureSuccessStatusCode();
         var desafio = await response.Content.ReadFromJsonAsync(AppJsonContext.Default.DesafioResponse, Token);
         return desafio!.Id;
     }
 
-    private static Task<HttpResponseMessage> ParticiparAsync(TestUsuario ator, Guid desafioId) =>
-        ator.Client.PostAsync($"/api/desafios/{desafioId}/participar", null, Token);
+    private static Task<HttpResponseMessage> EditarAsync(TestUsuario ator, Guid desafioId, EditarDesafioRequest request) =>
+        ator.Client.PutAsJsonAsync(
+            $"/api/desafios/{desafioId}",
+            request,
+            AppJsonContext.Default.EditarDesafioRequest,
+            Token);
 
     private static Task<HttpResponseMessage> CancelarAsync(TestUsuario ator, Guid desafioId) =>
         ator.Client.PostAsync($"/api/desafios/{desafioId}/cancelar", null, Token);
@@ -465,11 +533,20 @@ public sealed class DesafiosRoutesTests : IAsyncLifetime
     }
 
     // A API não aceita datas no passado: os testes movem o calendário direto no banco.
-    private Task IniciarAsync(Guid desafioId) => _host.ExecuteAsync($"""
-        UPDATE desafios
-        SET data_inicio = {SegundaDaSemana}, data_fim = {SegundaDaSemana} + 27
-        WHERE id = '{desafioId}'
-        """);
+    // Os membros também recuam: quem entra no meio da semana só começa a contar na seguinte.
+    private async Task IniciarAsync(Guid desafioId)
+    {
+        await _host.ExecuteAsync($"""
+            UPDATE desafios
+            SET data_inicio = {SegundaDaSemana}, data_fim = {SegundaDaSemana} + 27
+            WHERE id = '{desafioId}'
+            """);
+        await _host.ExecuteAsync($"""
+            UPDATE membros_grupo
+            SET joined_at = now() - interval '60 days'
+            WHERE grupo_id = (SELECT grupo_id FROM desafios WHERE id = '{desafioId}')
+            """);
+    }
 
     private Task EncerrarAsync(Guid desafioId) => _host.ExecuteAsync($"""
         UPDATE desafios

@@ -32,8 +32,7 @@ public sealed class ProgressoRoutesTests : IAsyncLifetime
             await PostAtividadeAsync(ana, grupoId, 3600);
         }
 
-        var bia = await _host.AddMembroAsync(grupoId, nome: "Bia");
-        await ParticiparAsync(bia, desafioId);
+        await _host.AddMembroAsync(grupoId, nome: "Bia");
 
         var progresso = await ana.Client.GetFromJsonAsync(
             $"/api/desafios/{desafioId}/progresso",
@@ -106,6 +105,38 @@ public sealed class ProgressoRoutesTests : IAsyncLifetime
             "DESAFIO_NAO_ENCONTRADO");
     }
 
+    [Fact]
+    public async Task AdesaoTardia_ContaSoAPartirDaPrimeiraSemanaInteira()
+    {
+        var ana = await _host.CreateUsuarioAsync("Ana");
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var bia = await _host.AddMembroAsync(grupoId, nome: "Bia");
+        var desafioId = await CreateDesafioAsync(ana, grupoId);
+        await IniciarAsync(desafioId);
+
+        // Bia entrou na terça: a semana atual não conta para ela, e a seguinte conta.
+        await _host.ExecuteAsync($"""
+            UPDATE membros_grupo
+            SET joined_at = (({SegundaDaSemana} + 1)::timestamp AT TIME ZONE 'America/Sao_Paulo')
+            WHERE usuario_id = '{bia.Id}'
+            """);
+        await PostAtividadeAsync(bia, grupoId, 3600);
+
+        var progresso = await bia.Client.GetFromJsonAsync(
+            $"/api/desafios/{desafioId}/progresso",
+            AppJsonContext.Default.ProgressoResponse,
+            Token);
+        var biaProgresso = Assert.Single(progresso!.Participantes, p => p.NomeExibicao == "Bia");
+        Assert.False(biaProgresso.ContaNestaSemana);
+        Assert.Equal(0, biaProgresso.SessoesProvisorias);
+
+        var historico = await GetHistoricoAsync(bia, desafioId);
+        Assert.Equal([false, true, true, true], historico.Semanas.Select(s => s.Participou));
+
+        var resumo = await GetResumoAsync(bia, grupoId);
+        Assert.False(resumo.MeuProgresso!.ContaNestaSemana);
+    }
+
     private static CriarAtividadeRequest Atividade(int duracao) => new(
         TipoAtividade.Corrida,
         duracao,
@@ -149,14 +180,19 @@ public sealed class ProgressoRoutesTests : IAsyncLifetime
         return desafio!.Id;
     }
 
-    private static Task<HttpResponseMessage> ParticiparAsync(TestUsuario ator, Guid desafioId) =>
-        ator.Client.PostAsync($"/api/desafios/{desafioId}/participar", null, Token);
-
-    private Task IniciarAsync(Guid desafioId) => _host.ExecuteAsync($"""
-        UPDATE desafios
-        SET data_inicio = {SegundaDaSemana}, data_fim = {SegundaDaSemana} + 27
-        WHERE id = '{desafioId}'
-        """);
+    private async Task IniciarAsync(Guid desafioId)
+    {
+        await _host.ExecuteAsync($"""
+            UPDATE desafios
+            SET data_inicio = {SegundaDaSemana}, data_fim = {SegundaDaSemana} + 27
+            WHERE id = '{desafioId}'
+            """);
+        await _host.ExecuteAsync($"""
+            UPDATE membros_grupo
+            SET joined_at = now() - interval '60 days'
+            WHERE grupo_id = (SELECT grupo_id FROM desafios WHERE id = '{desafioId}')
+            """);
+    }
 
     private static async Task<ClassificacaoResponse> GetClassificacaoAsync(TestUsuario leitor, Guid desafioId) =>
         (await leitor.Client.GetFromJsonAsync(
