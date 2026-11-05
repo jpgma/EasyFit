@@ -6,6 +6,7 @@ using EasyFit.Features.Convites;
 using EasyFit.Features.Desafios;
 using EasyFit.Features.Grupos;
 using EasyFit.Features.Health;
+using EasyFit.Features.Progresso;
 using EasyFit.Features.Reacoes;
 using EasyFit.Infrastructure.Errors;
 
@@ -33,7 +34,15 @@ namespace EasyFit.Infrastructure.Json;
 [JsonSerializable(typeof(HealthResponse))]
 [JsonSerializable(typeof(MembrosResponse))]
 [JsonSerializable(typeof(ProblemResponse))]
+[JsonSerializable(typeof(ClassificacaoParticipanteResponse))]
+[JsonSerializable(typeof(ClassificacaoResponse))]
+[JsonSerializable(typeof(ClassificacaoResumoItemResponse))]
+[JsonSerializable(typeof(DesafioDestaqueResponse))]
+[JsonSerializable(typeof(HistoricoSemanaResponse))]
+[JsonSerializable(typeof(HistoricoSemanalResponse))]
+[JsonSerializable(typeof(ProgressoResumoResponse))]
 [JsonSerializable(typeof(ProgressoResponse))]
+[JsonSerializable(typeof(ResumoGrupoResponse))]
 [JsonSerializable(typeof(ReacaoRequest))]
 [JsonSerializable(typeof(ReacaoItemResponse))]
 [JsonSerializable(typeof(ReacoesResponse))]

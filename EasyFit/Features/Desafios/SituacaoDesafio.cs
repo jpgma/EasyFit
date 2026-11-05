@@ -1,9 +1,11 @@
+using Contract = EasyFit.Features.Desafios.Contracts.SituacaoDesafio;
+
 namespace EasyFit.Features.Desafios;
 
 internal static class SituacaoDesafio
 {
-    public const string Agendado = "Agendado";
-    public const string Ativo = "Ativo";
-    public const string Encerrado = "Encerrado";
-    public const string Cancelado = "Cancelado";
+    public const string Agendado = Contract.Agendado;
+    public const string Ativo = Contract.Ativo;
+    public const string Encerrado = Contract.Encerrado;
+    public const string Cancelado = Contract.Cancelado;
 }

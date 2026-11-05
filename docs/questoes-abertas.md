@@ -708,7 +708,7 @@ Evitar introduzir páginas administrativas complexas.
 
 ## Q033 — Como apresentar o progresso?
 
-**Status:** ABERTA
+**Status:** PARCIALMENTE DECIDIDA — ver `decisoes/0013-competicao-e-progresso.md`
 
 Investigar formas simples de visualizar:
 
@@ -719,6 +719,8 @@ Investigar formas simples de visualizar:
 - Progresso do grupo.
 
 A interface deve distinguir progresso confirmado de progresso provisório.
+
+**Decidido para o MVP (Fase 7):** barras definitivo/provisório na Desafio e Início; classificação e sequência na tabela de ranking; histórico semanal por semana do desafio. Página Perfil permanece fora do escopo inicial.
 
 ---
 

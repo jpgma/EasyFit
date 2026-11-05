@@ -5,6 +5,7 @@ import {
   Clock,
   CloudOff,
   MapPin,
+  Medal,
   Target,
   Users,
   type LucideIcon,
@@ -31,6 +32,11 @@ import {
   type Desafio,
   type ProgressoParticipante,
 } from "@/features/desafios";
+import {
+  useClassificacao,
+  useHistoricoSemanal,
+  type ClassificacaoParticipante,
+} from "@/features/progresso";
 import { ApiError, getErrorMessage } from "@/services/api";
 
 function Dado({
@@ -154,6 +160,128 @@ function ProgressoSection({ desafio }: { desafio: Desafio }) {
   );
 }
 
+function ClassificacaoSection({ desafioId }: { desafioId: string }) {
+  const { data: usuario } = useSessao();
+  const classificacao = useClassificacao(desafioId);
+
+  return (
+    <section className="mt-8">
+      <h2 className="mb-3 text-base font-bold">Classificação</h2>
+
+      {classificacao.isPending && (
+        <p role="status" className="py-6 text-center text-sm text-muted">
+          Carregando…
+        </p>
+      )}
+
+      {classificacao.isError && (
+        <p role="alert" className="form-error">
+          {getErrorMessage(classificacao.error)}
+        </p>
+      )}
+
+      {classificacao.data &&
+        (classificacao.data.participantes.length === 0 ? (
+          <p className="card p-4 text-sm text-muted">
+            Ainda não há participantes neste desafio.
+          </p>
+        ) : (
+          <ol className="card divide-y divide-border">
+            {classificacao.data.participantes.map((item) => (
+              <ClassificacaoItem
+                key={item.usuarioId}
+                item={item}
+                voce={item.usuarioId === usuario?.id}
+              />
+            ))}
+          </ol>
+        ))}
+    </section>
+  );
+}
+
+function ClassificacaoItem({
+  item,
+  voce,
+}: {
+  item: ClassificacaoParticipante;
+  voce: boolean;
+}) {
+  return (
+    <li className="flex items-center gap-3 p-4">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-muted text-sm font-bold">
+        {item.posicao}
+      </span>
+      <Avatar nome={item.nomeExibicao} />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold">
+          {item.nomeExibicao}
+          {voce && <span className="font-normal text-muted"> (você)</span>}
+        </p>
+        <p className="text-2xs text-muted">
+          {item.semanasCumpridas}{" "}
+          {item.semanasCumpridas === 1 ? "semana" : "semanas"} cumpridas ·{" "}
+          {item.sessoesVerificadas} verificadas · sequência {item.sequenciaSemanas}
+        </p>
+      </div>
+      {item.posicao === 1 && (
+        <Medal aria-label="Primeiro lugar" className="h-5 w-5 shrink-0" />
+      )}
+    </li>
+  );
+}
+
+function HistoricoSection({ desafioId }: { desafioId: string }) {
+  const historico = useHistoricoSemanal(desafioId);
+
+  return (
+    <section className="mt-8">
+      <h2 className="mb-3 text-base font-bold">Seu histórico semanal</h2>
+
+      {historico.isPending && (
+        <p role="status" className="py-6 text-center text-sm text-muted">
+          Carregando…
+        </p>
+      )}
+
+      {historico.isError && (
+        <p role="alert" className="form-error">
+          {getErrorMessage(historico.error)}
+        </p>
+      )}
+
+      {historico.data && (
+        <ul className="card space-y-4 p-4">
+          {historico.data.semanas.map((semana) => (
+            <li key={semana.numero}>
+              <div className="mb-1 flex items-center justify-between gap-2 text-sm">
+                <span className="font-semibold">
+                  Semana {semana.numero}
+                  {semana.metaCumprida && (
+                    <Check
+                      aria-label="Meta cumprida"
+                      className="ml-1.5 inline h-4 w-4"
+                    />
+                  )}
+                </span>
+                <span className="text-muted">
+                  {formatarDiaEMes(semana.inicio)} – {formatarDiaEMes(semana.fim)}
+                </span>
+              </div>
+              <ProgressBar
+                label={`Semana ${semana.numero}`}
+                valor={semana.sessoesVerificadas}
+                provisorio={semana.sessoesProvisorias}
+                max={historico.data.sessoesPorSemana}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 function DesafioConteudo({ desafio }: { desafio: Desafio }) {
   const participar = useParticipar(desafio.id, desafio.grupoId);
   const cancelar = useCancelarDesafio(desafio.id, desafio.grupoId);
@@ -235,6 +363,8 @@ function DesafioConteudo({ desafio }: { desafio: Desafio }) {
       )}
 
       <ProgressoSection desafio={desafio} />
+      <ClassificacaoSection desafioId={desafio.id} />
+      {desafio.participando && <HistoricoSection desafioId={desafio.id} />}
 
       {aberto && canGerenciarDesafios(desafio.papel) && (
         <section className="mt-6">

@@ -947,6 +947,7 @@ POST /api/autenticacao/registrar
 GET  /api/grupos
 POST /api/grupos
 GET  /api/grupos/{id}
+GET  /api/grupos/{id}/resumo
 GET  /api/grupos/{id}/membros
 PUT  /api/grupos/{id}/membros/{usuarioId}/papel
 DELETE /api/grupos/{id}/membros/{usuarioId}
@@ -970,11 +971,12 @@ POST /api/grupos/{id}/desafios
 GET  /api/desafios/{id}
 GET  /api/desafios/{id}/progresso
 GET  /api/desafios/{id}/classificacao
+GET  /api/desafios/{id}/historico
 POST /api/desafios/{id}/participar
 POST /api/desafios/{id}/cancelar
 ```
 
-Permissões e regras em `docs/decisoes/0009-desafios.md`.
+Permissões e regras em `docs/decisoes/0009-desafios.md`. Classificação, histórico e critérios de ranking em `docs/decisoes/0013-competicao-e-progresso.md`.
 
 ### 10.4. Atividades
 

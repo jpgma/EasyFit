@@ -6,6 +6,7 @@ using EasyFit.Features.Convites;
 using EasyFit.Features.Desafios;
 using EasyFit.Features.Grupos;
 using EasyFit.Features.Health;
+using EasyFit.Features.Progresso;
 using EasyFit.Features.Reacoes;
 using EasyFit.Infrastructure.Authentication;
 using EasyFit.Infrastructure.Database;
@@ -68,6 +69,7 @@ app.MapAutenticacaoRoutes();
 app.MapGruposRoutes();
 app.MapConvitesRoutes();
 app.MapDesafiosRoutes();
+app.MapProgressoRoutes();
 app.MapAtividadesRoutes();
 app.MapReacoesRoutes();
 

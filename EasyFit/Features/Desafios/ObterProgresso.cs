@@ -1,4 +1,5 @@
 using EasyFit.Infrastructure.Authentication;
+using EasyFit.Infrastructure.Database;
 using Npgsql;
 
 namespace EasyFit.Features.Desafios;
@@ -109,22 +110,9 @@ internal static class ObterProgresso
         DateOnly fimSemana,
         CancellationToken cancellationToken)
     {
-        await using var command = new NpgsqlCommand("""
-            SELECT a.usuario_id,
-                count(*) FILTER (WHERE a.situacao_verificacao = 'Verificada')::int,
-                count(*) FILTER (WHERE a.situacao_verificacao IN (
-                    'AguardandoFeedback', 'EmRevisao', 'Contestada'))::int
-            FROM atividades a
-            JOIN desafios d ON d.id = $1 AND d.grupo_id = a.grupo_id
-            JOIN grupos g ON g.id = d.grupo_id
-            JOIN participantes_desafio p ON p.desafio_id = d.id AND p.usuario_id = a.usuario_id
-            WHERE a.duracao_segundos >= d.duracao_minima_segundos
-              AND (a.started_at AT TIME ZONE g.fuso_horario)::date >= $2
-              AND (a.started_at AT TIME ZONE g.fuso_horario)::date <= $3
-              AND (a.started_at AT TIME ZONE g.fuso_horario)::date >= d.data_inicio
-              AND (a.started_at AT TIME ZONE g.fuso_horario)::date <= d.data_fim
-            GROUP BY a.usuario_id
-            """, connection);
+        await using var command = new NpgsqlCommand(
+            ContagensAtividadeDesafio.BuildAgregadoPorUsuarioSemanaAtual(),
+            connection);
         command.Parameters.AddWithValue(desafioId);
         command.Parameters.AddWithValue(inicioSemana);
         command.Parameters.AddWithValue(fimSemana);

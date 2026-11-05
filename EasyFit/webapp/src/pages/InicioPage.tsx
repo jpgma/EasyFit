@@ -1,8 +1,10 @@
 import {
+  Check,
   ChevronRight,
   CloudOff,
   LogOut,
   Plus,
+  Target,
   Ticket,
   Users,
 } from "lucide-react";
@@ -15,8 +17,118 @@ import { useSair, useSessao } from "@/features/autenticacao";
 import { extractConviteToken } from "@/features/convites";
 import { useAtividadesRecentes } from "@/features/atividades";
 import { FeedAtividade } from "@/features/feed";
-import { papelLabels, useGrupos } from "@/features/grupos";
+import { situacaoLabels } from "@/features/desafios";
+import { papelLabels, useGrupos, type GrupoResumo } from "@/features/grupos";
+import { useResumoGrupo } from "@/features/progresso";
+import { ProgressBar } from "@/components/ProgressBar";
 import { getErrorMessage } from "@/services/api";
+
+function GrupoCard({ grupo }: { grupo: GrupoResumo }) {
+  const resumo = useResumoGrupo(grupo.id);
+
+  return (
+    <li>
+      <Link
+        to={
+          resumo.data?.desafio
+            ? `/desafios/${resumo.data.desafio.id}`
+            : `/grupos/${grupo.id}`
+        }
+        className="card block p-4 transition-colors hover:bg-surface-muted"
+      >
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-bold">{grupo.nome}</p>
+            <p className="text-sm text-muted">
+              {grupo.totalMembros}{" "}
+              {grupo.totalMembros === 1 ? "membro" : "membros"} ·{" "}
+              {papelLabels[grupo.papel]}
+            </p>
+          </div>
+          <ChevronRight
+            aria-hidden="true"
+            className="h-5 w-5 shrink-0 text-muted"
+          />
+        </div>
+
+        {resumo.isPending && (
+          <p role="status" className="mt-3 text-2xs text-muted">
+            Carregando desafio…
+          </p>
+        )}
+
+        {resumo.isError && (
+          <p role="alert" className="form-error mt-3 text-sm">
+            {getErrorMessage(resumo.error)}
+          </p>
+        )}
+
+        {resumo.data && !resumo.data.desafio && (
+          <p className="mt-3 text-sm text-muted">
+            Nenhum desafio neste grupo ainda.
+          </p>
+        )}
+
+        {resumo.data?.desafio && (
+          <div className="mt-4 border-t border-border pt-4">
+            <div className="flex items-start gap-2">
+              <Target
+                aria-hidden="true"
+                className="mt-0.5 h-4 w-4 shrink-0 text-muted"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold">
+                  {resumo.data.desafio.nome}
+                </p>
+                <p className="text-2xs text-muted">
+                  {situacaoLabels[
+                    resumo.data.desafio.situacao as keyof typeof situacaoLabels
+                  ] ?? resumo.data.desafio.situacao}
+                </p>
+              </div>
+            </div>
+
+            {resumo.data.meuProgresso && resumo.data.sessoesPorSemana && (
+              <div className="mt-3">
+                <div className="mb-1 flex items-center justify-between text-sm">
+                  <span>
+                    {resumo.data.meuProgresso.semanaNumero
+                      ? `Semana ${resumo.data.meuProgresso.semanaNumero}`
+                      : "Esta semana"}
+                  </span>
+                  <span className="flex items-center gap-1 font-semibold">
+                    {resumo.data.meuProgresso.metaCumprida && (
+                      <Check aria-label="Meta cumprida" className="h-4 w-4" />
+                    )}
+                    {resumo.data.meuProgresso.sessoesVerificadas}/
+                    {resumo.data.sessoesPorSemana}
+                  </span>
+                </div>
+                <ProgressBar
+                  label="Seu progresso neste desafio"
+                  valor={resumo.data.meuProgresso.sessoesVerificadas}
+                  provisorio={resumo.data.meuProgresso.sessoesProvisorias}
+                  max={resumo.data.sessoesPorSemana}
+                />
+              </div>
+            )}
+
+            {resumo.data.classificacao.length > 0 && (
+              <ol className="mt-3 space-y-1 text-2xs text-muted">
+                {resumo.data.classificacao.map((item) => (
+                  <li key={item.posicao}>
+                    {item.posicao}. {item.nomeExibicao} · {item.semanasCumpridas}{" "}
+                    {item.semanasCumpridas === 1 ? "semana" : "semanas"}
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+        )}
+      </Link>
+    </li>
+  );
+}
 
 export function InicioPage() {
   const { data: usuario } = useSessao();
@@ -82,25 +194,7 @@ export function InicioPage() {
         {grupos.data && grupos.data.length > 0 && (
           <ul className="space-y-3">
             {grupos.data.map((grupo) => (
-              <li key={grupo.id}>
-                <Link
-                  to={`/grupos/${grupo.id}`}
-                  className="card flex items-center gap-3 p-4 transition-colors hover:bg-surface-muted"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-bold">{grupo.nome}</p>
-                    <p className="text-sm text-muted">
-                      {grupo.totalMembros}{" "}
-                      {grupo.totalMembros === 1 ? "membro" : "membros"} ·{" "}
-                      {papelLabels[grupo.papel]}
-                    </p>
-                  </div>
-                  <ChevronRight
-                    aria-hidden="true"
-                    className="h-5 w-5 shrink-0 text-muted"
-                  />
-                </Link>
-              </li>
+              <GrupoCard key={grupo.id} grupo={grupo} />
             ))}
           </ul>
         )}
