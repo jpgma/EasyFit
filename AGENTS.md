@@ -1,6 +1,6 @@
 # Regras do repositório — EasyFit
 
-Aplicação web privada para pequenos grupos manterem a rotina de exercícios por meio de desafios e validação comunitária. Arquitetura completa em `docs/arquitetura.md`; decisões pendentes em `docs/questoes-abertas.md`; decisões tomadas em `docs/decisoes/`.
+Aplicação web privada para pequenos grupos manterem a rotina de exercícios por meio de desafios e validação comunitária. Arquitetura completa em `docs/arquitetura.md`; resumo de todas as funcionalidades em `docs/funcionalidades.md`; decisões pendentes em `docs/questoes-abertas.md`; decisões tomadas em `docs/decisoes/`.
 
 Regras específicas de cada stack: `EasyFit/AGENTS.md` e `EasyFit/webapp/AGENTS.md`.
 
@@ -20,6 +20,7 @@ Rode `--full` ao mexer em SQL, migrações, `Program.cs`, `deploy/` ou dependên
 ## Idioma
 
 - **pt-BR com acentos:** documentação, textos da interface, comentários, mensagens de erro e de commit.
+- **Exceção:** `docs/funcionalidades.md` fica em inglês, no padrão ASD-STE100 (Simplified Technical English), para servir de contexto a agentes.
 - **Código:** use o teste abaixo.
 
 ### Regra de nomes
@@ -103,6 +104,7 @@ Toda dependência nova precisa de justificativa na descrição da alteração: o
 - Decisões em `docs/arquitetura.md` não são reabertas sem justificativa técnica concreta.
 - Decisão que muda a arquitetura ou fecha uma questão de `docs/questoes-abertas.md` gera um ADR numerado em `docs/decisoes/` (contexto, alternativas, decisão, impacto) e atualiza o status da questão.
 - Se uma alteração contradiz a documentação, atualize a documentação na mesma alteração.
+- Toda alteração que acrescenta, remove ou muda uma funcionalidade, regra, limite, permissão, tela ou texto relevante da interface atualiza `docs/funcionalidades.md` na mesma alteração, mantendo o padrão ASD-STE100: frases curtas, voz ativa, vocabulário simples e nomes do código entre crases.
 
 ## Commits
 
