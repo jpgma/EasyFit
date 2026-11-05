@@ -18,6 +18,7 @@ export {
   formatarData,
   formatarDiaEMes,
   formatarDuracao,
+  formatarSemanaCurta,
   formatarTempoAteFim,
   getDataFim,
   getHojeNoFuso,

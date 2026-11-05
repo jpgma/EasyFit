@@ -23,6 +23,7 @@ import {
   formatarData,
   formatarDiaEMes,
   formatarDuracao,
+  formatarSemanaCurta,
   isDesafioAberto,
   situacaoLabels,
   useCancelarDesafio,
@@ -195,7 +196,7 @@ function HistoricoSection({ desafioId }: { desafioId: string }) {
           meta={historico.data.sessoesPorSemana}
           colunas={historico.data.semanas.map((semana) => ({
             chave: semana.numero,
-            rotulo: formatarDiaEMes(semana.inicio).replace(" de ", "/"),
+            rotulo: formatarSemanaCurta(semana.inicio),
             valor: semana.sessoesVerificadas,
             provisorio: semana.sessoesProvisorias,
             naoParticipou: !semana.participou,

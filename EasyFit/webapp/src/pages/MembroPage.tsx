@@ -10,7 +10,7 @@ import { ProgressRing } from "@/components/ProgressRing";
 import { SplashScreen } from "@/components/SplashScreen";
 import { useAtividadesFeed } from "@/features/atividades";
 import { useSessao } from "@/features/autenticacao";
-import { formatarDiaEMes } from "@/features/desafios";
+import { formatarSemanaCurta } from "@/features/desafios";
 import { FeedAtividade } from "@/features/feed";
 import {
   canAlterarPapel,
@@ -202,7 +202,11 @@ export function MembroPage() {
                   <p className="mt-2 font-display text-2xl font-bold">
                     {desafio.sequenciaSemanas}
                   </p>
-                  <p className="text-xs text-muted">semanas seguidas</p>
+                  <p className="text-xs text-muted">
+                    {desafio.sequenciaSemanas === 1
+                      ? "semana seguida"
+                      : "semanas seguidas"}
+                  </p>
                 </div>
                 <div className="card p-4">
                   <Trophy aria-hidden="true" className="size-5 text-primary" />
@@ -217,7 +221,7 @@ export function MembroPage() {
                 meta={desafio.sessoesPorSemana}
                 colunas={desafio.semanas.map((semana) => ({
                   chave: semana.numero,
-                  rotulo: formatarDiaEMes(semana.inicio).replace(" de ", "/"),
+                  rotulo: formatarSemanaCurta(semana.inicio),
                   valor: semana.sessoesVerificadas,
                   provisorio: semana.sessoesProvisorias,
                   naoParticipou: !semana.participou,

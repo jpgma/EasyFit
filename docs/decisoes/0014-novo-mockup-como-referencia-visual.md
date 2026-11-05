@@ -43,7 +43,7 @@ Divergências conhecidas, em que o mockup não deve ser seguido:
 | Mockup | O que vale |
 |---|---|
 | Google Fonts | Fontes no bundle |
-| "Esqueci minha senha" na entrada | Fora do MVP (decisão 0006) |
+| "Esqueci minha senha" na entrada | Sem link na entrada: o operador gera um link de uso único (decisão 0019) |
 | Grupos de 2 a 10 amigos | Até 10; um grupo pode ter só uma pessoa (decisão 0012) |
 | Situações `pendente`, `verificada`, `revisao`, `rejeitada` | `AguardandoFeedback`, `Verificada`, `EmRevisao`, `Contestada`, `Rejeitada` |
 | Limites fixos de 2 Kudos e 2 rejeições | Regra de consenso de `arquitetura.md` §8.3 e §8.4 |
@@ -51,6 +51,8 @@ Divergências conhecidas, em que o mockup não deve ser seguido:
 | Seis tipos de atividade | Nove tipos de `arquitetura.md` §7.5 |
 | Um único grupo por pessoa | Vários grupos, escolhidos pela URL (decisão 0008) |
 | E-mail dos membros visível | Só o próprio; colegas veem nome e papel (decisão 0008) |
+| Preferências de notificação, lembretes e resumo semanal | Lista dentro do aplicativo, sem preferências nem agendamentos (decisão 0020) |
+| Conquista "100 km pedalados" | Atividades não registram distância: sequências, treinos e Madrugador (decisão 0018) |
 | Tela `/estados` | Página de demonstração, não portada |
 | Imagens do Unsplash | Só evidências enviadas pelos membros |
 

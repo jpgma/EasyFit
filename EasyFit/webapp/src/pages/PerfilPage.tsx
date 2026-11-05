@@ -14,7 +14,7 @@ import { HistoryChart } from "@/components/HistoryChart";
 import { PageHeader, SectionTitle } from "@/components/PageHeader";
 import { useSessao } from "@/features/autenticacao";
 import { ConviteForm } from "@/features/convites";
-import { formatarDiaEMes } from "@/features/desafios";
+import { formatarSemanaCurta } from "@/features/desafios";
 import { papelLabels, useGrupos } from "@/features/grupos";
 import { SinoNotificacoes } from "@/features/notificacoes";
 import { useMeuPerfil } from "@/features/usuarios";
@@ -72,6 +72,18 @@ export function PerfilPage() {
                 {usuario.nomeExibicao}
               </p>
               <p className="truncate text-sm text-muted">{usuario.email}</p>
+              {perfil.data && (
+                <p className="mt-1 text-xs text-muted">
+                  No EasyFit desde{" "}
+                  {new Date(perfil.data.membroDesde).toLocaleDateString(
+                    "pt-BR",
+                    {
+                      month: "short",
+                      year: "numeric",
+                    },
+                  )}
+                </p>
+              )}
             </div>
           </div>
 
@@ -104,7 +116,7 @@ export function PerfilPage() {
                   titulo="Consistência semanal"
                   colunas={perfil.data.semanas.map((semana) => ({
                     chave: semana.inicio,
-                    rotulo: formatarDiaEMes(semana.inicio).replace(" de ", "/"),
+                    rotulo: formatarSemanaCurta(semana.inicio),
                     valor: semana.sessoesVerificadas,
                     provisorio: semana.sessoesProvisorias,
                   }))}

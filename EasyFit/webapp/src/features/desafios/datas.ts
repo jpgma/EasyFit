@@ -79,6 +79,11 @@ export function formatarDiaEMes(data: string): string {
   });
 }
 
+/** "14/09": cabe nas colunas estreitas dos gráficos. */
+export function formatarSemanaCurta(data: string): string {
+  return `${data.slice(8)}/${data.slice(5, 7)}`;
+}
+
 export function formatarDuracao(segundos: number): string {
   return `${Math.round(segundos / 60)} min`;
 }

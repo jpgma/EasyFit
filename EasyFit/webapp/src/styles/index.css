@@ -201,6 +201,14 @@
     word-spacing: 0.08em;
   }
 
+  /* Os navegadores não herdam word-spacing nos controles de formulário. */
+  button,
+  input,
+  select,
+  textarea {
+    word-spacing: inherit;
+  }
+
   h1,
   h2,
   h3 {
