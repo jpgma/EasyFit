@@ -66,7 +66,11 @@ export function AtividadePage() {
 
       <div className="grid gap-5 lg:grid-cols-[1.2fr_1fr]">
         <div className="card overflow-hidden">
-          <EvidenciasAtividade evidencias={evidencias} />
+          <EvidenciasAtividade
+            atividadeId={id}
+            evidencias={evidencias}
+            legenda={atividade.data}
+          />
 
           <div className="p-5">
             <div className="flex items-center gap-3">

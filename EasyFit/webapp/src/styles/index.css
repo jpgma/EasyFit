@@ -92,6 +92,9 @@
   --color-danger-soft-border: var(--danger-soft-border);
   --color-on-danger-soft: var(--on-danger-soft);
   --color-scrim: var(--scrim);
+  /* A galeria em tela cheia é escura nos dois temas, para não competir com a foto. */
+  --color-lightbox: oklch(0.12 0.006 160);
+  --color-on-lightbox: oklch(0.97 0.004 95);
   --shadow-card: var(--card-shadow);
   --shadow-float: var(--float-shadow);
 }

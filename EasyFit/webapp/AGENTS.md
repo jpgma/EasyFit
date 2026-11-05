@@ -45,7 +45,7 @@ As recomendações dela não se sobrepõem às regras deste repositório. Em cas
 
 ## Desempenho
 
-Pensado para conexões móveis lentas: bundles pequenos, páginas com `lazy`, evidências carregadas só quando solicitadas. O feed mostra apenas miniaturas, geradas no navegador e com `loading="lazy"`; a imagem completa só aparece ao abrir a atividade.
+Pensado para conexões móveis lentas: bundles pequenos, páginas com `lazy`, evidências carregadas só quando solicitadas. O feed mostra apenas miniaturas, geradas no navegador e com `loading="lazy"`; a imagem completa só aparece ao abrir a atividade ou ao tocar na miniatura, que abre a galeria em tela cheia.
 
 ## Sessão e PWA
 

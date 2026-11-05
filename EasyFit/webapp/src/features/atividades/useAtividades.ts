@@ -90,11 +90,12 @@ export function useAtividadesRecentes(enabled: boolean) {
   });
 }
 
-export function useAtividade(id: string) {
+export function useAtividade(id: string, enabled = true) {
   return useQuery({
     queryKey: atividadeKey(id),
     queryFn: ({ signal }) =>
       getJson<Atividade>(`/api/atividades/${id}`, signal),
+    enabled,
     retry: shouldRetry,
   });
 }

@@ -9,6 +9,8 @@ export {
 } from "./labels";
 export { prepararEvidencia } from "./comprimirImagem";
 export { EvidenciasAtividade } from "./EvidenciasAtividade";
+export { GaleriaEvidencias } from "./GaleriaEvidencias";
+export { useGaleria } from "./useGaleria";
 export { SituacaoBadge } from "./SituacaoBadge";
 export { TipoAtividadeIcone, tipoAtividadeIcones } from "./TipoAtividadeIcone";
 export {

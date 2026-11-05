@@ -4,11 +4,15 @@ import { Avatar } from "@/components/Avatar";
 import {
   formatarDataRelativa,
   formatarDuracao,
+  GaleriaEvidencias,
   SituacaoBadge,
   tipoAtividadeLabels,
+  useAtividade,
+  useGaleria,
   type AtividadeResumo,
 } from "@/features/atividades";
 import { tipoReacaoEmojis, tipoReacaoLabels } from "@/features/reacoes";
+import { getErrorMessage } from "@/services/api";
 
 function Contagem({
   tipo,
@@ -49,61 +53,90 @@ export function FeedAtividade({
     rejeitar,
     miniaturaUrl,
   } = atividade;
+  const galeria = useGaleria(id);
+  // As evidências completas só são buscadas quando a galeria é aberta.
+  const detalhe = useAtividade(id, galeria.aberta);
   const abaixoDoMinimo =
     duracaoMinimaSegundos !== undefined &&
     duracaoSegundos < duracaoMinimaSegundos;
 
   return (
-    <Link to={`/atividades/${id}`} className="card block p-4 tap">
-      <div className="flex items-start gap-3">
-        <Avatar nome={nomeExibicao} id={usuarioId} />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
-            <p className="truncate text-sm font-semibold">{nomeExibicao}</p>
-            <span className="shrink-0 text-xs text-muted">
-              {formatarDataRelativa(startedAt)}
-            </span>
-          </div>
-          <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-sm text-muted">
-            {tipoAtividadeLabels[tipo]} ·
-            <Clock aria-hidden="true" className="size-3.5" />
-            {formatarDuracao(duracaoSegundos)}
-            {abaixoDoMinimo && (
-              <span className="font-medium text-on-warning-soft">
-                · abaixo do mínimo
+    // A miniatura abre a galeria; o resto do cartão leva à atividade. Um botão
+    // não pode ficar dentro do link, então ela é posicionada por cima dele.
+    <div className="card relative transition-transform duration-120 has-[>a:active]:scale-[0.98]">
+      <Link to={`/atividades/${id}`} className="block rounded-2xl p-4">
+        <div className="flex items-start gap-3">
+          <Avatar nome={nomeExibicao} id={usuarioId} />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-2">
+              <p className="truncate text-sm font-semibold">{nomeExibicao}</p>
+              <span className="shrink-0 text-xs text-muted">
+                {formatarDataRelativa(startedAt)}
               </span>
-            )}
-          </p>
-          {descricao && (
-            <p className="mt-2 line-clamp-2 text-sm break-words">{descricao}</p>
-          )}
-          <div className="mt-3 flex items-center justify-between gap-2">
-            <SituacaoBadge situacao={situacaoVerificacao} />
-            <div className="flex items-center gap-3">
-              <Contagem tipo="Kudos" total={kudos} />
-              {suspeito > 0 && <Contagem tipo="Suspeito" total={suspeito} />}
-              {rejeitar > 0 && <Contagem tipo="Rejeitar" total={rejeitar} />}
-              {totalEvidencias > (miniaturaUrl ? 1 : 0) && (
-                <span className="flex items-center gap-1 text-xs text-muted">
-                  <Camera aria-hidden="true" className="size-3.5" />
-                  {totalEvidencias}
-                  <span className="sr-only">
-                    {totalEvidencias === 1 ? "comprovante" : "comprovantes"}
-                  </span>
+            </div>
+            <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-sm text-muted">
+              {tipoAtividadeLabels[tipo]} ·
+              <Clock aria-hidden="true" className="size-3.5" />
+              {formatarDuracao(duracaoSegundos)}
+              {abaixoDoMinimo && (
+                <span className="font-medium text-on-warning-soft">
+                  · abaixo do mínimo
                 </span>
               )}
+            </p>
+            {descricao && (
+              <p className="mt-2 line-clamp-2 text-sm break-words">
+                {descricao}
+              </p>
+            )}
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <SituacaoBadge situacao={situacaoVerificacao} />
+              <div className="flex items-center gap-3">
+                <Contagem tipo="Kudos" total={kudos} />
+                {suspeito > 0 && <Contagem tipo="Suspeito" total={suspeito} />}
+                {rejeitar > 0 && <Contagem tipo="Rejeitar" total={rejeitar} />}
+                {totalEvidencias > (miniaturaUrl ? 1 : 0) && (
+                  <span className="flex items-center gap-1 text-xs text-muted">
+                    <Camera aria-hidden="true" className="size-3.5" />
+                    {totalEvidencias}
+                    <span className="sr-only">
+                      {totalEvidencias === 1 ? "comprovante" : "comprovantes"}
+                    </span>
+                  </span>
+                )}
+              </div>
             </div>
           </div>
+          {miniaturaUrl && (
+            <div aria-hidden="true" className="size-16 shrink-0" />
+          )}
         </div>
-        {miniaturaUrl && (
-          <img
-            src={miniaturaUrl}
-            alt="Comprovante"
-            loading="lazy"
-            className="size-16 shrink-0 rounded-xl object-cover"
+      </Link>
+      {miniaturaUrl && (
+        <>
+          <button
+            type="button"
+            onClick={() => galeria.abrir(0)}
+            aria-label="Ver comprovantes em tela cheia"
+            className="absolute top-4 right-4 size-16 cursor-zoom-in overflow-hidden rounded-xl tap"
+          >
+            <img
+              src={miniaturaUrl}
+              alt=""
+              loading="lazy"
+              className="size-full object-cover"
+            />
+          </button>
+          <GaleriaEvidencias
+            aberta={galeria.aberta}
+            indiceInicial={galeria.indiceInicial}
+            evidencias={detalhe.data?.evidencias}
+            erro={detalhe.isError ? getErrorMessage(detalhe.error) : undefined}
+            legenda={atividade}
+            onFechar={galeria.fechar}
           />
-        )}
-      </div>
-    </Link>
+        </>
+      )}
+    </div>
   );
 }

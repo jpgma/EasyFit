@@ -107,7 +107,11 @@ export function RevisarPage() {
       </p>
 
       <div className="card overflow-hidden">
-        <EvidenciasAtividade evidencias={evidencias} />
+        <EvidenciasAtividade
+          atividadeId={atividadeId}
+          evidencias={evidencias}
+          legenda={atividade.data}
+        />
         <div className="p-5">
           <div className="flex items-center gap-3">
             <TipoAtividadeIcone tipo={tipo} className="size-11" />
