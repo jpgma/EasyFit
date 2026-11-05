@@ -47,6 +47,7 @@ export function FeedAtividade({
     kudos,
     suspeito,
     rejeitar,
+    miniaturaUrl,
   } = atividade;
   const abaixoDoMinimo =
     duracaoMinimaSegundos !== undefined &&
@@ -82,7 +83,7 @@ export function FeedAtividade({
               <Contagem tipo="Kudos" total={kudos} />
               {suspeito > 0 && <Contagem tipo="Suspeito" total={suspeito} />}
               {rejeitar > 0 && <Contagem tipo="Rejeitar" total={rejeitar} />}
-              {totalEvidencias > 0 && (
+              {totalEvidencias > (miniaturaUrl ? 1 : 0) && (
                 <span className="flex items-center gap-1 text-xs text-muted">
                   <Camera aria-hidden="true" className="size-3.5" />
                   {totalEvidencias}
@@ -94,6 +95,14 @@ export function FeedAtividade({
             </div>
           </div>
         </div>
+        {miniaturaUrl && (
+          <img
+            src={miniaturaUrl}
+            alt="Comprovante"
+            loading="lazy"
+            className="size-16 shrink-0 rounded-xl object-cover"
+          />
+        )}
       </div>
     </Link>
   );

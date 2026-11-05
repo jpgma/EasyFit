@@ -7,7 +7,7 @@ export {
   tipoComprovacaoLabels,
   tiposAtividade,
 } from "./labels";
-export { comprimirImagem } from "./comprimirImagem";
+export { prepararEvidencia } from "./comprimirImagem";
 export { EvidenciasAtividade } from "./EvidenciasAtividade";
 export { SituacaoBadge } from "./SituacaoBadge";
 export { TipoAtividadeIcone, tipoAtividadeIcones } from "./TipoAtividadeIcone";

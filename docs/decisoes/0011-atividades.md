@@ -1,6 +1,6 @@
 # 0011 — Atividades, evidências e feed
 
-**Status:** DECIDIDA
+**Status:** DECIDIDA. Complementada pelas decisões 0014 (formulário) e pela seção Miniaturas abaixo.
 
 ## Contexto
 
@@ -59,6 +59,20 @@ Quem não é membro recebe 404 `GRUPO_NAO_ENCONTRADO` nas rotas do grupo e 404 `
 **Paginação**
 
 - Feed e recentes: cursor opaco (`started_at` + `id`), limite padrão 20, máximo 50.
+
+## Miniaturas e formulário (acréscimo)
+
+O novo mockup mostra uma imagem em cada cartão do feed, e baixar a evidência inteira em cada cartão custaria caro em conexões móveis.
+
+- **Formulário:** uma área de envio, até 3 evidências, sem escolher o tipo. Sem arquivo é `RegistroManual`; com arquivo, `Fotografia`.
+- **Geração no navegador:** um JPEG de 240 px, com qualidade 0,6, gerado com a foto reduzida. O servidor continua sem bibliotecas de imagem, e o canvas descarta metadados, inclusive a localização (Q030).
+- **Envio:** parte opcional `miniatura` em `POST /api/atividades/{id}/evidencias`, na mesma requisição. Até 100 KB, somente JPEG. Uma miniatura inválida recusa o envio inteiro.
+- **Leitura:** `GET /api/atividades/{id}/evidencias/{evidenciaId}/miniatura`, com a mesma verificação de grupo da evidência e `Cache-Control: private, max-age=604800, immutable`. Evidências não podem ser trocadas, então a miniatura não muda.
+- **Sem miniatura:** o cartão mostra o ícone de câmera.
+- **Grupo sem revisores:** a primeira evidência verifica a atividade, e as seguintes continuam sendo aceitas.
+- **Compromisso aceito:** a miniatura vem do aparelho do autor, então um cliente alterado poderia enviar uma que não corresponde à foto. Quem avalia sempre vê a evidência completa, por isso a verificação não é afetada.
+- **Compromisso aceito:** quem sai do grupo pode continuar vendo por até 7 dias uma miniatura que já esteja no cache do próprio navegador.
+- **Service Worker:** quando existir (Fase 8), não pode guardar esta rota (§6.3).
 
 ## Impacto
 

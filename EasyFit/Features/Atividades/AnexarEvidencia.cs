@@ -2,6 +2,7 @@ using EasyFit.Infrastructure.Authentication;
 using EasyFit.Infrastructure.Files;
 using EasyFit.Infrastructure.Json;
 using Npgsql;
+using NpgsqlTypes;
 
 namespace EasyFit.Features.Atividades;
 
@@ -26,15 +27,42 @@ internal static class AnexarEvidencia
             return OperacaoAtividade.ToResult(AtividadeOperacaoStatus.EvidenciaInvalida);
         }
 
+        var miniatura = form.Files.GetFile("miniatura");
         var usuarioId = context.GetSessaoAtual().UsuarioId;
-        string? caminhoSalvo = null;
+        var caminhosSalvos = new List<string>();
+
+        void ExcluirSalvos()
+        {
+            foreach (var caminho in caminhosSalvos)
+            {
+                armazenamento.ExcluirSeExistir(caminho);
+            }
+        }
 
         try
         {
             await using var stream = arquivo.OpenReadStream();
             var (caminhoRelativo, tipoMime, tamanho, sha256) =
-                await armazenamento.SalvarAsync(stream, cancellationToken);
-            caminhoSalvo = caminhoRelativo;
+                await armazenamento.SalvarAsync(stream, ValidacaoImagemEvidencia.MaxBytes, cancellationToken);
+            caminhosSalvos.Add(caminhoRelativo);
+
+            string? caminhoMiniatura = null;
+            if (miniatura is not null)
+            {
+                await using var streamMiniatura = miniatura.OpenReadStream();
+                var salva = await armazenamento.SalvarAsync(
+                    streamMiniatura,
+                    ValidacaoImagemEvidencia.MaxBytesMiniatura,
+                    cancellationToken);
+                caminhosSalvos.Add(salva.CaminhoRelativo);
+                caminhoMiniatura = salva.CaminhoRelativo;
+
+                // Sempre JPEG: é o que o navegador gera, e a leitura não precisa guardar outro tipo.
+                if (salva.TipoMime != ValidacaoImagemEvidencia.TipoMimeMiniatura)
+                {
+                    throw new EvidenciaInvalidaException("Miniatura precisa ser JPEG.");
+                }
+            }
 
             var (status, evidencia) = await PersistirAsync(
                 dataSource,
@@ -44,11 +72,12 @@ internal static class AnexarEvidencia
                 tipoMime,
                 tamanho,
                 sha256,
+                caminhoMiniatura,
                 cancellationToken);
 
             if (status != AtividadeOperacaoStatus.Concluida)
             {
-                armazenamento.ExcluirSeExistir(caminhoRelativo);
+                ExcluirSalvos();
                 return OperacaoAtividade.ToResult(status);
             }
 
@@ -59,11 +88,7 @@ internal static class AnexarEvidencia
         }
         catch (EvidenciaInvalidaException)
         {
-            if (caminhoSalvo is not null)
-            {
-                armazenamento.ExcluirSeExistir(caminhoSalvo);
-            }
-
+            ExcluirSalvos();
             return OperacaoAtividade.ToResult(AtividadeOperacaoStatus.EvidenciaInvalida);
         }
     }
@@ -76,6 +101,7 @@ internal static class AnexarEvidencia
         string tipoMime,
         int tamanho,
         string sha256,
+        string? caminhoMiniatura,
         CancellationToken cancellationToken)
     {
         await using var connection = await dataSource.OpenConnectionAsync(cancellationToken);
@@ -114,9 +140,19 @@ internal static class AnexarEvidencia
             return (AtividadeOperacaoStatus.ComprovacaoNaoAplicavel, null);
         }
 
-        if (situacao != SituacaoVerificacao.AguardandoFeedback)
+        // Sem revisores, a primeira evidência já verifica a atividade: as seguintes ainda precisam entrar.
+        await using (var revisores = new NpgsqlCommand(
+            "SELECT EXISTS (SELECT 1 FROM revisores_atividade WHERE atividade_id = $1)",
+            connection,
+            transaction))
         {
-            return (AtividadeOperacaoStatus.AtividadeEncerrada, null);
+            revisores.Parameters.AddWithValue(atividadeId);
+            var temRevisores = (bool)(await revisores.ExecuteScalarAsync(cancellationToken))!;
+            if (situacao != SituacaoVerificacao.AguardandoFeedback
+                && (temRevisores || situacao != SituacaoVerificacao.Verificada))
+            {
+                return (AtividadeOperacaoStatus.AtividadeEncerrada, null);
+            }
         }
 
         int proximaOrdem;
@@ -138,8 +174,8 @@ internal static class AnexarEvidencia
         Guid evidenciaId;
         await using (var insert = new NpgsqlCommand("""
             INSERT INTO evidencias_atividade (
-                atividade_id, caminho_relativo, tipo_mime, tamanho_bytes, sha256, ordem)
-            VALUES ($1, $2, $3, $4, $5, $6)
+                atividade_id, caminho_relativo, tipo_mime, tamanho_bytes, sha256, ordem, caminho_miniatura)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id
             """, connection, transaction))
         {
@@ -149,6 +185,7 @@ internal static class AnexarEvidencia
             insert.Parameters.AddWithValue(tamanho);
             insert.Parameters.AddWithValue(sha256);
             insert.Parameters.AddWithValue((short)proximaOrdem);
+            insert.Parameters.AddWithValue(NpgsqlDbType.Text, (object?)caminhoMiniatura ?? DBNull.Value);
             evidenciaId = (Guid)(await insert.ExecuteScalarAsync(cancellationToken))!;
         }
 

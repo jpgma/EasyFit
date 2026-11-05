@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http.Features;
 
 namespace EasyFit.Features.Atividades;
 
-/// <summary>Permite corpo de até 5 MB só nas rotas de upload, mantendo 1 MB no restante da API.</summary>
+/// <summary>Permite corpo maior só nas rotas de upload: até 5 MB de foto mais a miniatura, mantendo 1 MB no restante da API.</summary>
 internal sealed class LimiteUploadFilter : IEndpointFilter
 {
     public async ValueTask<object?> InvokeAsync(
@@ -13,7 +13,8 @@ internal sealed class LimiteUploadFilter : IEndpointFilter
         var feature = context.HttpContext.Features.Get<IHttpMaxRequestBodySizeFeature>();
         if (feature is not null && !feature.IsReadOnly)
         {
-            feature.MaxRequestBodySize = ValidacaoImagemEvidencia.MaxBytes;
+            // Folga para os cabeçalhos do multipart: a foto e a miniatura têm limites próprios.
+            feature.MaxRequestBodySize = ValidacaoImagemEvidencia.MaxBytes + ValidacaoImagemEvidencia.MaxBytesMiniatura + (16 * 1024);
         }
 
         return await next(context);

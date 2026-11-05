@@ -524,7 +524,7 @@ Diretrizes:
 - Evitar bibliotecas de interface pesadas.
 - Evitar imagens decorativas grandes.
 - Utilizar imagens WebP ou JPEG comprimidas.
-- Carregar evidências somente quando solicitadas.
+- Carregar evidências somente quando solicitadas. O feed carrega apenas miniaturas geradas no navegador, sob demanda.
 - Utilizar paginação.
 - Utilizar skeletons discretos durante carregamento.
 - Evitar atualizações completas de página.
@@ -592,7 +592,7 @@ O Service Worker poderá armazenar:
 - Ícones.
 - Recursos estáticos.
 
-Não deverá armazenar respostas autenticadas da API ou imagens privadas no cache compartilhado do navegador.
+Não deverá armazenar respostas autenticadas da API ou imagens privadas no cache compartilhado do navegador, inclusive as miniaturas de evidências.
 
 As operações de escrita não serão enfileiradas offline na primeira versão.
 
@@ -988,6 +988,7 @@ GET  /api/atividades/recentes
 GET  /api/atividades/{id}
 POST /api/atividades/{id}/evidencias
 GET  /api/atividades/{id}/evidencias/{evidenciaId}
+GET  /api/atividades/{id}/evidencias/{evidenciaId}/miniatura
 ```
 
 A lista do grupo aceita `?filtro=Minhas|Pendentes|Verificadas|EmRevisao`, aplicado no servidor para não quebrar a paginação por cursor. `para-avaliar` devolve o que ainda espera a reação de quem consulta, dentro da janela de 48 horas. A criação usa somente JSON; o upload de evidências usa `multipart/form-data` em rota separada. Permissões e regras em `docs/decisoes/0011-atividades.md`.

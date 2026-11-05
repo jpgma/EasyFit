@@ -41,6 +41,7 @@ export type AtividadeResumo = {
   kudos: number;
   suspeito: number;
   rejeitar: number;
+  miniaturaUrl: string | null;
 };
 
 export type FiltroAtividades =
@@ -48,7 +49,7 @@ export type FiltroAtividades =
 
 export type Atividade = Omit<
   AtividadeResumo,
-  "kudos" | "suspeito" | "rejeitar" | "totalEvidencias"
+  "kudos" | "suspeito" | "rejeitar" | "totalEvidencias" | "miniaturaUrl"
 > & {
   voce: boolean;
   evidencias: Evidencia[];

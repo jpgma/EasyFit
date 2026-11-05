@@ -10,6 +10,7 @@ internal sealed class ArmazenamentoEvidencias(IOptions<EvidenciasOptions> option
 
     public async Task<(string CaminhoRelativo, string TipoMime, int TamanhoBytes, string Sha256)> SalvarAsync(
         Stream origem,
+        int maxBytes,
         CancellationToken cancellationToken)
     {
         Directory.CreateDirectory(_diretorioRaiz);
@@ -54,9 +55,9 @@ internal sealed class ArmazenamentoEvidencias(IOptions<EvidenciasOptions> option
                 }
 
                 total += lidos;
-                if (total > ValidacaoImagemEvidencia.MaxBytes)
+                if (total > maxBytes)
                 {
-                    throw new EvidenciaInvalidaException("Arquivo excede o limite de 5 MB.");
+                    throw new EvidenciaInvalidaException("Arquivo excede o limite permitido.");
                 }
 
                 hasher.AppendData(buffer, 0, lidos);

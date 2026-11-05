@@ -108,6 +108,7 @@ Ver `decisoes/0011-atividades.md` e migração `006-create-atividades.sql`.
 | `tamanho_bytes` | `integer` | Positivo |
 | `sha256` | `text` | Hash do arquivo |
 | `ordem` | `smallint` | 1–3 por atividade |
+| `caminho_miniatura` | `text` | Opcional. JPEG gerado no navegador, sob o mesmo volume |
 | `created_at` | `timestamptz` | Padrão `now()` |
 
 ## `revisores_atividade`

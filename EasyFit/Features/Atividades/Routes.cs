@@ -37,5 +37,6 @@ internal static class AtividadesRoutes
             .RequireRateLimiting(UploadPolicy)
             .AddEndpointFilter<LimiteUploadFilter>();
         upload.MapGet("/evidencias/{evidenciaId:guid}", ObterEvidencia.HandleAsync);
+        upload.MapGet("/evidencias/{evidenciaId:guid}/miniatura", ObterMiniatura.HandleAsync);
     }
 }

@@ -110,9 +110,14 @@ export function useCriarAtividade(grupoId: string) {
 }
 
 /** Fora de um hook: a atividade só existe depois de criada, no meio do envio do formulário. */
-export function anexarEvidencia(atividadeId: string, arquivo: File) {
+export function anexarEvidencia(
+  atividadeId: string,
+  arquivo: File,
+  miniatura: Blob | null,
+) {
   const form = new FormData();
   form.append("arquivo", arquivo);
+  if (miniatura) form.append("miniatura", miniatura, "miniatura.jpg");
   return postFormData<Evidencia>(
     `/api/atividades/${atividadeId}/evidencias`,
     form,

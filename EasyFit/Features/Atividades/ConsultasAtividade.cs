@@ -11,7 +11,9 @@ internal static class ConsultasAtividade
             a.submitted_at, a.descricao,
             (SELECT count(*)::int FROM reacoes_atividade r WHERE r.atividade_id = a.id AND r.tipo = 'Kudos'),
             (SELECT count(*)::int FROM reacoes_atividade r WHERE r.atividade_id = a.id AND r.tipo = 'Suspeito'),
-            (SELECT count(*)::int FROM reacoes_atividade r WHERE r.atividade_id = a.id AND r.tipo = 'Rejeitar')
+            (SELECT count(*)::int FROM reacoes_atividade r WHERE r.atividade_id = a.id AND r.tipo = 'Rejeitar'),
+            (SELECT e.id FROM evidencias_atividade e
+             WHERE e.atividade_id = a.id AND e.ordem = 1 AND e.caminho_miniatura IS NOT NULL)
         FROM atividades a
         JOIN grupos g ON g.id = a.grupo_id
         JOIN usuarios u ON u.id = a.usuario_id
@@ -35,10 +37,14 @@ internal static class ConsultasAtividade
             reader.IsDBNull(12) ? null : reader.GetString(12),
             reader.GetInt32(13),
             reader.GetInt32(14),
-            reader.GetInt32(15));
+            reader.GetInt32(15),
+            reader.IsDBNull(16) ? null : BuildMiniaturaUrl(reader.GetGuid(0), reader.GetGuid(16)));
 
     public static string BuildEvidenciaUrl(Guid atividadeId, Guid evidenciaId) =>
         $"/api/atividades/{atividadeId:D}/evidencias/{evidenciaId:D}";
+
+    public static string BuildMiniaturaUrl(Guid atividadeId, Guid evidenciaId) =>
+        $"{BuildEvidenciaUrl(atividadeId, evidenciaId)}/miniatura";
 
     public static async Task<AtividadeResponse?> GetDetalheAsync(
         NpgsqlDataSource dataSource,

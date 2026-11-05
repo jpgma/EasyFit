@@ -235,6 +235,119 @@ public sealed class AtividadesRoutesTests : IAsyncLifetime
             "GRUPO_NAO_ENCONTRADO");
     }
 
+    [Fact]
+    public async Task Miniatura_ServidaSoParaMembros_ComCachePrivado()
+    {
+        var ana = await _host.CreateUsuarioAsync("Ana");
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var estranha = await _host.CreateUsuarioAsync("Estranha");
+        var id = await CriarComFotoAsync(ana, grupoId);
+
+        var response = await PostEvidenciaComMiniaturaAsync(ana, id, JpegMinimo);
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        var atividade = Assert.Single(await ListarAsync(ana, grupoId));
+        Assert.NotNull(atividade.MiniaturaUrl);
+
+        var miniatura = await ana.Client.GetAsync(atividade.MiniaturaUrl, Token);
+        Assert.Equal(HttpStatusCode.OK, miniatura.StatusCode);
+        Assert.Equal("image/jpeg", miniatura.Content.Headers.ContentType?.MediaType);
+        Assert.Equal(JpegMinimo, await miniatura.Content.ReadAsByteArrayAsync(Token));
+        var cache = miniatura.Headers.CacheControl!;
+        Assert.True(cache.Private);
+        Assert.Equal(TimeSpan.FromDays(7), cache.MaxAge);
+        Assert.Contains(cache.Extensions, e => e.Name == "immutable");
+
+        await ApiTestHost.AssertProblemAsync(
+            await estranha.Client.GetAsync(atividade.MiniaturaUrl, Token),
+            HttpStatusCode.NotFound,
+            "EVIDENCIA_NAO_ENCONTRADA");
+    }
+
+    [Fact]
+    public async Task Miniatura_Ausente_ListaSemUrl()
+    {
+        var ana = await _host.CreateUsuarioAsync("Ana");
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var id = await CriarComFotoAsync(ana, grupoId);
+
+        var evidencia = await (await PostEvidenciaAsync(ana, id))
+            .Content.ReadFromJsonAsync(AppJsonContext.Default.EvidenciaCriadaResponse, Token);
+
+        var atividade = Assert.Single(await ListarAsync(ana, grupoId));
+        Assert.Null(atividade.MiniaturaUrl);
+        Assert.Equal(1, atividade.TotalEvidencias);
+        await ApiTestHost.AssertProblemAsync(
+            await ana.Client.GetAsync($"{evidencia!.Url}/miniatura", Token),
+            HttpStatusCode.NotFound,
+            "EVIDENCIA_NAO_ENCONTRADA");
+    }
+
+    [Fact]
+    public async Task Miniatura_GrandeDemais_RecusaOEnvioInteiro()
+    {
+        var ana = await _host.CreateUsuarioAsync("Ana");
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var id = await CriarComFotoAsync(ana, grupoId);
+        var grande = new byte[(100 * 1024) + 1];
+        JpegMinimo.CopyTo(grande, 0);
+
+        var response = await PostEvidenciaComMiniaturaAsync(ana, id, grande);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(0L, await _host.CountAsync("SELECT count(*) FROM evidencias_atividade"));
+    }
+
+    [Fact]
+    public async Task Miniatura_NaoJpeg_RecusaOEnvioInteiro()
+    {
+        var ana = await _host.CreateUsuarioAsync("Ana");
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var id = await CriarComFotoAsync(ana, grupoId);
+        byte[] png = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 0];
+
+        var response = await PostEvidenciaComMiniaturaAsync(ana, id, png);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(0L, await _host.CountAsync("SELECT count(*) FROM evidencias_atividade"));
+    }
+
+    [Fact]
+    public async Task SemRevisores_AceitaAsTresEvidencias()
+    {
+        var ana = await _host.CreateUsuarioAsync("Ana");
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        var id = await CriarComFotoAsync(ana, grupoId);
+
+        for (var i = 0; i < 3; i++)
+        {
+            Assert.Equal(HttpStatusCode.Created, (await PostEvidenciaAsync(ana, id)).StatusCode);
+        }
+    }
+
+    private static async Task<Guid> CriarComFotoAsync(TestUsuario usuario, Guid grupoId)
+    {
+        var response = await PostAtividadeAsync(usuario, grupoId, Valid());
+        response.EnsureSuccessStatusCode();
+        var atividade = await response.Content.ReadFromJsonAsync(AppJsonContext.Default.AtividadeResponse, Token);
+        return atividade!.Id;
+    }
+
+    private static Task<HttpResponseMessage> PostEvidenciaComMiniaturaAsync(
+        TestUsuario usuario,
+        Guid atividadeId,
+        byte[] miniatura)
+    {
+        var content = new MultipartFormDataContent();
+        var bytes = new ByteArrayContent(JpegMinimo);
+        bytes.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+        content.Add(bytes, "arquivo", "foto.jpg");
+        var bytesMiniatura = new ByteArrayContent(miniatura);
+        bytesMiniatura.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+        content.Add(bytesMiniatura, "miniatura", "miniatura.jpg");
+        return usuario.Client.PostAsync($"/api/atividades/{atividadeId}/evidencias", content, Token);
+    }
+
     private static async Task<Guid> CriarManualAsync(TestUsuario usuario, Guid grupoId)
     {
         var response = await PostAtividadeAsync(

@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { SplashScreen } from "@/components/SplashScreen";
 import {
   anexarEvidencia,
-  comprimirImagem,
+  prepararEvidencia,
   tipoAtividadeIcones,
   tipoAtividadeLabels,
   tiposAtividade,
@@ -196,7 +196,12 @@ export function RegistrarAtividadePage() {
     for (const [indice, { arquivo }] of anexos.entries()) {
       setEnviando(`Enviando ${indice + 1} de ${anexos.length}…`);
       try {
-        await anexarEvidencia(atividade.id, await comprimirImagem(arquivo));
+        const preparada = await prepararEvidencia(arquivo);
+        await anexarEvidencia(
+          atividade.id,
+          preparada.arquivo,
+          preparada.miniatura,
+        );
         enviadas += 1;
       } catch {
         // O resumo final mostra quantas faltaram.
