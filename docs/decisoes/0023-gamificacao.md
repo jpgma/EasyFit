@@ -1,6 +1,6 @@
 # 0023 — Gamificação opcional (modo Jogo)
 
-**Status:** DECIDIDA (direção geral). Detalhes e fases em `../gamificacao.md`.
+**Status:** DECIDIDA (direção geral), parcialmente substituída por `0024-cartas-e-avatar-importado.md` (destino da Energia, consumíveis, apostas, interações e avatar). Detalhes e fases em `../gamificacao.md`.
 
 ## Contexto
 

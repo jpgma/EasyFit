@@ -1388,7 +1388,7 @@ Situação: PWA em `decisoes/0021-pwa-e-service-worker.md`; backups em `decisoes
 
 ### Fase 9 — Gamificação (opcional)
 
-Modo Jogo como tela inicial alternativa, com avatar, Energia, loja, missões semanais e interações amistosas, sem alterar a competição oficial. Fases G1 a G6 em `gamificacao.md`; direção em `decisoes/0023-gamificacao.md`.
+Modo Jogo como tela inicial alternativa, com avatar em folha de sprites, Energia, cartas de provocação entre colegas, missões semanais e Rival da semana, sem alterar a competição oficial. Fases G1 a G7 em `gamificacao.md`; direção em `decisoes/0023-gamificacao.md` e `decisoes/0024-cartas-e-avatar-importado.md`.
 
 ---
 

@@ -1,27 +1,28 @@
 # Gamificação — EasyFit
 
-> **Status:** proposta refinada, ainda sem código. A direção geral está em `decisoes/0023-gamificacao.md`. Cada fase atualiza `funcionalidades.md` quando for entregue.
+> **Status:** proposta refinada, ainda sem código. A direção geral está em `decisoes/0023-gamificacao.md`, com as mudanças de `decisoes/0024-cartas-e-avatar-importado.md`. O formato da folha de sprites está em `avatar-formato.md`. Cada fase atualiza `funcionalidades.md` quando for entregue.
 
 ## 1. Visão
 
 O modo **Jogo** é uma tela inicial alternativa, leve e bem-humorada, para quem gosta de um toque de jogo. Cada pessoa escolhe entre **App** (a tela inicial de hoje) e **Jogo**. Nada muda para quem continua no App.
 
-No Jogo, os membros do grupo aparecem como avatares em pixel-art numa cena. Os treinos verificados rendem **Energia**, que compra roupas e acessórios para o avatar. Missões semanais e interações amistosas completam a experiência.
+No Jogo, os membros do grupo aparecem como avatares em pixel-art, num círculo. Os treinos verificados rendem **Energia**. A Energia compra **cartas**, que viram provocações amistosas entre colegas: objetivos extras e opcionais que, quando cumpridos, rendem Energia para os dois. Missões semanais e o Rival da semana completam a experiência.
 
 ### 1.1. Princípios
 
 1. **A meta oficial vem primeiro.** O Jogo nunca altera a verificação, as metas, a classificação nem as sequências.
-2. **Recompensa constância, não desempenho.** Nada depende de duração, intensidade ou calorias além do que a meta já exige.
-3. **Ninguém prejudica ninguém.** Nenhuma interação remove Energia, invalida atividades ou dificulta a meta de outra pessoa.
-4. **Simples e discreto.** Nada de missões diárias, apostas ou lembretes: o Jogo não pede atenção fora dos treinos.
-5. **Tudo calculado no servidor**, a partir dos dados que já existem sempre que possível.
-6. **A classificação continua igual.** A Energia não aparece no ranking e não existe ranking de Energia.
+2. **Recompensa constância.** O único critério de desempenho é a duração relativa à meta do grupo, e só em cartas opcionais (+10 MIN e +20 MIN).
+3. **Ninguém prejudica ninguém.** Nenhuma interação remove Energia de outra pessoa, invalida atividades ou dificulta a meta de outra pessoa.
+4. **Simples e discreto.** Nada de missões diárias nem lembretes. A única aposta é a carta APOSTA, que só arrisca a Energia de quem a joga.
+5. **Toda carta faz algo que não dá para fazer de graça.** Recusar uma carta é sempre grátis e não tem consequência.
+6. **Tudo calculado no servidor**, a partir dos dados que já existem sempre que possível.
+7. **A classificação continua igual.** A Energia não aparece no ranking e não existe ranking de Energia.
 
 ### 1.2. Direção criativa
 
-Pixel-art contemporâneo com estilo de vida urbano: streetwear, tênis, roupa de academia, fones de ouvido, café, apartamento, academia, praça.
+Pixel-art contemporâneo com estilo de vida urbano: streetwear, tênis, roupa de academia, fones de ouvido, café, academia, praça.
 
-Evitar fantasia, medieval, monstros, magia, armas, combate, classes e atributos de RPG.
+Evitar fantasia, medieval, monstros, magia, armas, combate, classes e atributos de RPG. As cartas são bilhetes de provocação entre amigos, não feitiços.
 
 O avatar é uma versão estilizada de uma pessoa real.
 
@@ -36,7 +37,8 @@ O avatar é uma versão estilizada de uma pessoa real.
 - O padrão é `App`, inclusive para contas novas.
 - No modo App, a tela inicial mostra **uma vez** um cartão convidando para experimentar o Jogo. A pessoa pode ativar ou fechar o cartão. A dispensa fica num cookie comum, como a do aviso de instalação.
 - A troca de modo fica em Configurações.
-- O modo muda só a tela. Todos acumulam Energia e têm avatar, mesmo no modo App.
+- Todos acumulam Energia e têm avatar, mesmo no modo App.
+- **Cartas só circulam entre pessoas no modo Jogo.** Ninguém envia uma carta para quem está no modo App. Se o destinatário passar para o modo App, as Jogadas abertas seguem o curso normal e expiram.
 
 ## 3. Cena do grupo
 
@@ -44,62 +46,150 @@ A tela Jogo mostra:
 
 - a cena com o avatar de cada membro ativo do grupo;
 - o seu progresso na semana (o mesmo anel da tela App, em versão compacta);
-- o saldo de Energia (a partir da fase G3);
+- o saldo de Energia e a sua Mão de cartas (a partir das fases G2 e G3);
 - o botão "Registrar atividade";
 - o aviso de atividades para avaliar, como hoje.
 
-A pose de cada avatar vem do status semanal no desafio em destaque, com os dados que `useProgresso` já entrega:
+### 3.1. Layout
 
-| Situação na semana | Pose |
+- Vista 2,5D, de cima e de lado: o chão é uma praça vista de cima, e os avatares são desenhados de lado.
+- Os avatares ficam num **círculo**, virados para o centro. Quem está à esquerda do centro olha para a direita, e quem está à direita aparece espelhado (`scaleX(-1)`).
+- A ordem de desenho segue o y dos pés: quem está mais abaixo na tela fica na frente.
+- Escala inteira, com `image-rendering: pixelated`. O quadro de 32 px aparece em 2× (64 px). Num celular de 360 px, o círculo tem raio de cerca de 130 px e cabem 10 avatares a cerca de 80 px de distância. Grupos de até 5 pessoas usam 3×.
+- Um Enfeite (§9) pode aparecer ao lado de cada avatar.
+- Tocar num avatar abre a página do membro. No modo Jogo, também permite jogar uma carta da Mão para esse colega.
+
+### 3.2. Poses
+
+A pose de cada avatar vem do status semanal no desafio em destaque, com os dados que `useProgresso` já entrega, e das atividades da semana:
+
+| Situação | Pose |
 |---|---|
-| Meta cumprida (`metaCumprida`) | Comemorando |
-| Tem sessões provisórias | Alongando |
-| Demais casos | Parado |
-| Não conta nesta semana, ou sem desafio | Parado |
+| Tem atividade `AguardandoFeedback` ou `EmRevisao` | `treinando` |
+| Meta cumprida (`metaCumprida`) | `comemorando` |
+| Demais casos, sem desafio ou a semana não conta | `parado`, com uma variação de vez em quando (`alongar`, `olhar`) |
 
-Tocar num avatar abre a página do membro. A partir da fase G5, também permite dar um "Toca aqui".
+As variações de `parado` tocam em momentos pseudoaleatórios, com semente no identificador do usuário, para que os avatares não se mexam todos juntos.
+
+### 3.3. Encenações
+
+As interações acontecem no centro do círculo. Como tudo é assíncrono, cada pessoa vê as encenações que ainda não viu na próxima vez que abre a cena.
+
+| Evento | Encenação |
+|---|---|
+| Carta recebida | O remetente anda até o centro (`andar`), vira para o destinatário e arremessa (`arremessar`). A carta voa em CSS, o destinatário a pega (`receber`) e o remetente volta ao lugar. |
+| Carta aceita (vista pelo remetente) | O destinatário faz `aceitar`. A carta se dobra num objetivo ativo. |
+| Carta recusada (vista pelo remetente) | O destinatário faz `recusar` e a carta desliza para fora. |
+| DESAFIO DUPLO | Igual a "carta recebida", com os papéis trocados. |
+| Jogada concluída | O destinatário faz `comemorando` e a carta vira com o carimbo CONCLUÍDA. |
+| Jogada expirada | A carta some com o carimbo EXPIRADA. Nenhum avatar reage. |
+| Rivais da semana | Na primeira visita da semana, os dois avançam um passo e fazem `provocar`. Ao fim da semana, o vencedor faz `comemorando`. |
+| Missão concluída | `comemorando` com um brilho em CSS. |
+
+- O movimento vertical usa o mesmo `andar` de lado, com um balanço de 1 a 2 px. O deslizamento na vertical é aceito como estilo.
+- No máximo uma encenação de cada vez, e no máximo 3 em sequência por visita. As demais aparecem só como estado final.
+- Tocar na tela pula a encenação. Ela nunca bloqueia a navegação nem o registro de atividade.
+- Com `prefers-reduced-motion`, as poses ficam estáticas e as cartas aparecem no lugar final, sem voo.
+- As animações só rodam com a página visível.
+- A cena sabe o que já foi visto pelas colunas `vista_em` (destinatário) e `resultado_visto_em` (remetente) da Jogada.
 
 ## 4. Avatar
 
 - Cada usuário tem um único avatar, igual em todos os grupos.
-- Quem nunca configurou o avatar recebe um avatar padrão, escolhido de forma estável pelo identificador do usuário.
-- Camadas: corpo, cabelo, parte de cima, parte de baixo, calçado e um acessório.
-- Animações iniciais: parado, alongando e comemorando. Leves, com poucos quadros e reprodução determinística.
-- Os sprites vêm de um pacote **CC0**, ficam no repositório com o arquivo de licença e são compostos no navegador. Nada carregado de servidores externos.
-- Fora da cena, o componente `Avatar` mostra a **cabeça do avatar** no lugar das iniciais para quem já configurou o seu. Isso vale para todos, inclusive para quem está no modo App.
+- Quem nunca configurou o avatar recebe uma das folhas padrão do bundle, escolhida de forma estável pelo identificador do usuário.
+- A pessoa pode **importar a própria folha de sprites**, num formato documentado publicamente (§4.3).
+- Fora da cena, o componente `Avatar` mostra a célula `retrato` da folha no lugar das iniciais. Isso vale para todos, inclusive para quem está no modo App.
+- O avatar é só visual: nenhuma folha dá vantagem no Jogo.
+
+### 4.1. Formato
+
+Resumo de `avatar-formato.md`:
+
+- PNG RGBA de 8 bits, exatamente **256×384 px**: 8 colunas × 12 linhas de células de **32×32**.
+- Uma linha por animação, sempre virada para a direita. Pés ancorados em (16, 31).
+- As linhas, a quantidade de quadros e os tempos são fixos, o que deixa a reprodução determinística.
+- Só `retrato`, `parado` e `andar` são obrigatórias. Uma linha vazia cai para `parado`.
+
+### 4.2. Animações
+
+A arte padrão deriva do template CC0 *2D Platformer Character Template*, cujos quadros têm 16×16. A arte é redesenhada em 32×32, mantendo as proporções e o ritmo.
+
+| Linha | Quadros | Repetição | Uso | Base no template |
+|---|---:|---|---|---|
+| `retrato` | 1 | estático | `Avatar` fora da cena | cabeça do Idle1, ampliada |
+| `parado` | 4 | sim, 200 ms | pose padrão, respirando | Idle1 + 3 quadros novos |
+| `andar` | 8 | sim, 100 ms | ir ao centro e voltar | Walk1–8 |
+| `treinando` | 6 | sim, 90 ms | atividade aguardando verificação | Jog1–8, sem deslocamento |
+| `comemorando` | 6 | sim, 120 ms | meta cumprida, Jogada e missão concluídas, rival vencido | Jump1–5, como pulo no lugar |
+| `alongar` | 4 | uma vez | variação de `parado` | nova |
+| `olhar` | 4 | uma vez | variação de `parado` | nova |
+| `arremessar` | 5 | uma vez; a carta sai no terceiro quadro | jogar uma carta, DESAFIO DUPLO | Crouch1 (preparo), Dash (seguimento) |
+| `receber` | 4 | uma vez | pegar a carta | Crouch2 + quadros novos |
+| `aceitar` | 4 | uma vez | aceitar a carta (soco no ar) | nova |
+| `recusar` | 3 | uma vez | recusar a carta (dar de ombros) | nova |
+| `provocar` | 4 | uma vez | encontro dos rivais | nova |
+
+- São 53 quadros por folha. Com paleta pequena, um PNG fica entre 5 e 15 KB.
+- Não precisam de animação própria: virar (espelho instantâneo), o voo e os carimbos da carta (CSS) e o brilho da missão (CSS).
+
+### 4.3. Importação
+
+- O editor em `/perfil/avatar` mostra uma prévia de todas as linhas antes de salvar.
+- O navegador confere o tamanho e re-codifica a folha num canvas antes de enviar, o que remove metadados.
+- O servidor confere de novo: assinatura PNG, cabeçalho `IHDR` com 256×384 e RGBA de 8 bits, sem `acTL` (APNG) e no máximo 64 KB. O arquivo é recusado se algo falhar.
+- O arquivo fica no disco, em `/dados/avatares/`, com nome aleatório, no mesmo padrão das evidências (`arquitetura.md` §11). Nada de nomes vindos do cliente.
+- Só membros de um grupo em comum podem baixar a folha. A resposta usa `Content-Type: image/png` e `X-Content-Type-Options: nosniff`.
+- A pessoa pode voltar ao avatar padrão a qualquer momento.
+- O `Proprietario` e os `Administrador` de um grupo podem redefinir para o padrão o avatar de um membro desse grupo, como medida contra imagens impróprias.
+- Ao trocar ou redefinir, o arquivo antigo é apagado.
+
+### 4.4. Arte do bundle
+
+Todo o bundle é CC0, com o arquivo `LICENSE` junto dos sprites. Nada é carregado de servidores externos.
+
+| Peça | Tamanho | Quantidade |
+|---|---|---:|
+| Folhas padrão de avatar | 256×384 | 3 a 4 |
+| Chão da praça (vista de cima) | cerca de 180×150, em 2× | 1 |
+| Moldura de carta | 24×32 | 2 (Provocação, Resposta) |
+| Ícone de carta | 16×16 | 9 |
+| Enfeite | 16×16 ou 32×32 | 6 |
 
 ## 5. Energia
 
-Energia (EN) é a moeda do Jogo. É única por usuário, somando todos os grupos.
+Energia (EN) é a moeda do Jogo. É única por usuário, somando todos os grupos. Ela só serve para comprar cartas.
 
 ### 5.1. Como se ganha
 
 | Evento | EN |
 |---|---:|
-| Atividade verificada | 20 |
-| Semana com a meta cumprida | 40 |
-| Sequência de 4 semanas | 50 |
-| Sequência de 8 semanas | 100 |
-| Sequência de 12 semanas | 200 |
-| Desafio concluído (ver §11) | 150 |
-| Missão semanal concluída (§7) | 10 a 30 |
-| Rival da semana vencido (§8.2) | 30 |
-| Desafio extra concluído (§8.3) | 25 para quem aceitou, 10 para quem convidou |
+| Atividade verificada | 10 |
+| Semana com a meta cumprida | 20 |
+| Sequência de 4 semanas | 25 |
+| Sequência de 8 semanas | 50 |
+| Sequência de 12 semanas | 100 |
+| Desafio concluído (ver §12) | 75 |
+| Missão semanal concluída (§7) | 5 a 15 |
+| Rival da semana vencido (§8) | 15 |
+| Jogada concluída, para quem recebeu (§6.4) | 1,5 × o preço da carta |
+| Jogada concluída, para quem enviou (§6.4) | 0,5 × o preço da carta |
 
 As sequências seguem a mesma regra das conquistas: a melhor sequência num único desafio, sem somar desafios. Cada marco conta uma vez.
+
+**Alvo do balanceamento:** quem cumpre a meta com regularidade ganha cerca de 90 a 110 EN por semana, o suficiente para 2 ou 3 cartas. É essa escassez que faz cada gasto importar.
 
 ### 5.2. Bônus por atividade
 
 | Qualificador | EN |
 |---|---:|
-| Começou antes das 06:00 | 10 |
-| Começou entre 06:00 e 08:00 | 5 |
-| Fim de semana | 5 |
-| Primeira atividade da semana | 5 |
-| Primeira atividade num dia da semana ainda sem treino | 5 |
-| Primeiro tipo de atividade novo na semana | 10 |
+| Começou antes das 06:00 | 5 |
+| Começou entre 06:00 e 08:00 | 3 |
+| Fim de semana | 3 |
+| Primeira atividade da semana | 3 |
+| Primeira atividade num dia da semana ainda sem treino | 3 |
+| Primeiro tipo de atividade novo na semana | 5 |
 
-- Máximo de **15 EN de bônus por atividade**.
+- Máximo de **10 EN de bônus por atividade**.
 - Horários e semanas no fuso do grupo da atividade. Toda semana vai de segunda a domingo, como no desafio.
 - Várias atividades no mesmo dia rendem o bônus de dia novo só uma vez.
 
@@ -108,32 +198,98 @@ As sequências seguem a mesma regra das conquistas: a melhor sequência num úni
 Não existe carteira nem livro-razão. O saldo é calculado a cada consulta, como as conquistas (`decisoes/0018-perfil-e-pagina-do-membro.md`):
 
 ```text
-saldo = Energia ganha (calculada) − soma das compras
+saldo = Energia ganha (calculada) − soma de cartas.preco
 ```
 
 Regras que garantem um saldo estável:
 
 - Só atividades `Verificada` geram Energia. `Verificada` é final, então um crédito nunca desaparece.
 - Os qualificadores ("primeira da semana", "dia novo", "tipo novo") são calculados sobre as atividades **não rejeitadas**, em ordem de `started_at`. Uma atividade pendente já ocupa sua posição. Se ela for rejeitada, a seguinte pode ganhar o bônus, mas nenhum crédito é perdido.
+- Uma Jogada só rende Energia quando fica `Concluida`, e isso depende de uma atividade `Verificada`. Esse crédito também nunca desaparece.
 - Por isso a Energia ganha **só cresce**, e o saldo nunca fica negativo se cada compra verificar `saldo >= preço`.
+- Usar uma carta não muda o saldo: o custo entrou na compra.
 - Atividades de grupos que a pessoa deixou continuam valendo, como as conquistas.
 
-A regra fica numa função pura (`CalculoEnergia`), com testes unitários.
+A regra fica numa função pura (`CalculoEnergia`), com testes unitários. Um dos testes simula uma semana típica e confere o alvo de §5.1.
 
-## 6. Loja
+## 6. Loja e cartas
 
-- O catálogo fica no código: de 15 a 20 itens, nas camadas do avatar (§4).
-- Alguns itens básicos de cada camada são gratuitos e não precisam de compra.
-- Preços de referência: roupa básica 50, cabelo 80, boné ou óculos 100, fone de ouvido 120, tênis 150, roupa rara 400.
-- Uma compra é permanente. Um item não pode ser comprado duas vezes (`UNIQUE (usuario_id, item)`).
-- A compra roda numa transação que bloqueia a linha do usuário, recalcula o saldo e só grava se `saldo >= preço`.
-- Nada de consumíveis, itens temporários ou itens com data.
+### 6.1. Catálogo
+
+O catálogo fica no código, sem tabela. Cada carta tem nome, tipo, preço e efeito.
+
+| Carta | Tipo | Preço | Efeito |
+|---|---|---:|---|
+| +10 MIN | `Provocacao` | 30 | Uma atividade com pelo menos a duração mínima do desafio + 10 minutos. |
+| +20 MIN | `Provocacao` | 45 | Uma atividade com pelo menos a duração mínima do desafio + 20 minutos. |
+| VARIEDADE | `Provocacao` | 35 | Uma atividade de tipo diferente da última atividade verificada do destinatário. |
+| FIM DE SEMANA | `Provocacao` | 35 | Uma atividade que comece no sábado ou no domingo. |
+| ANTES DAS 8 | `Provocacao` | 40 | Uma atividade que comece antes das 08:00. |
+| DESAFIO DUPLO | `Resposta` | 40 | Aceita a Provocação e devolve o mesmo objetivo para o remetente, como uma Jogada nova. |
+| APOSTA | `Resposta` | 25 | Aceita a Provocação. Se a Jogada for concluída, a recompensa do destinatário sobe 50%. Se não for, a carta está perdida. |
+| PRAZO EXTRA | `Resposta` | 20 | Aceita a Provocação com 24 horas a mais de prazo. |
+| MUDANÇA DE PLANOS | `Resposta` | 25 | Aceita a Provocação trocando o objetivo por um equivalente, conforme uma tabela fixa (§12). |
+
+- Os objetivos usam as regras e o fuso do grupo da Jogada. Sem desafio ativo, as cartas +10 MIN e +20 MIN não podem ser jogadas nesse grupo.
+- Cumprir a Provocação também conta para a meta oficial, como qualquer atividade. Não existe tipo especial de atividade.
+- Não cumprir ou recusar não muda nada no progresso oficial.
+
+### 6.2. Compra e Mão
+
+- A **Mão** é por pessoa, com no máximo **5 cartas**, e vale em qualquer grupo.
+- A compra roda numa transação que bloqueia a linha do usuário, recalcula o saldo e só grava se `saldo >= preço` e a Mão tiver espaço.
+- A linha de `cartas` guarda o preço pago e a data em que a carta foi usada. Mudar o catálogo depois não altera cartas já compradas.
+- Não há pacotes aleatórios, troca de cartas nem devolução.
+
+### 6.3. Jogar uma carta
+
+- Uma Provocação é jogada da Mão para outro membro do mesmo grupo que esteja no modo Jogo.
+- O destinatário recebe uma `Notificacao` no aplicativo (`decisoes/0020-notificacoes-no-aplicativo.md`) e vê a encenação na próxima visita à cena.
+- Diante de uma Provocação, o destinatário pode:
+  - **Aceitar**, de graça;
+  - **Aceitar com uma Resposta** da própria Mão (DESAFIO DUPLO, APOSTA, PRAZO EXTRA ou MUDANÇA DE PLANOS), no máximo uma por Jogada;
+  - **Recusar**, de graça e sem consequência.
+- Uma Jogada criada por DESAFIO DUPLO não aceita outro DESAFIO DUPLO. Não existem cadeias de contra-ataque.
+
+**Limites**, conferidos na mesma transação que bloqueia a linha do remetente:
+
+| Regra | Limite |
+|---|---:|
+| Cartas na Mão | 5 |
+| Jogadas recebidas ativas | 2 |
+| Jogadas enviadas ativas | 2 |
+| Jogada ativa por par de pessoas | 1 |
+| Jogada nova para a mesma pessoa | 1 a cada 24 horas |
+
+Os limites ficam em constantes no código, fáceis de ajustar depois de observar o uso.
+
+### 6.4. Ciclo de vida de uma Jogada
+
+**Gravado:** remetente, destinatário, grupo, carta, `enviada_em`, `expira_em`, `resposta` (`Aceita` ou `Recusada`), `respondida_em`, carta de resposta usada, `origem_id` (a Jogada original, no DESAFIO DUPLO), `vista_em` e `resultado_visto_em`.
+
+**Calculado na leitura**, sem tarefa agendada:
+
+| Situação | Condição |
+|---|---|
+| `Enviada` | Sem resposta e antes de `expira_em`. |
+| `Recusada` | `resposta = Recusada`. |
+| `Aceita` | Aceita e ainda sem atividade que conte. |
+| `AguardandoVerificacao` | Aceita, com atividade que conta ainda não verificada. |
+| `Concluida` | Aceita, com atividade que conta `Verificada`. |
+| `Expirada` | Passou de `expira_em` sem resposta, ou aceita sem atividade que conte até lá. |
+
+- **Atividade que conta:** não rejeitada, do destinatário, no grupo da Jogada, com `started_at` entre `enviada_em` e `expira_em`, que cumpre o objetivo da carta. A Jogada precisa ter sido aceita antes de `expira_em`.
+- Uma atividade feita antes de aceitar, mas depois do envio, conta.
+- A verificação pode acontecer depois de `expira_em`: o que importa é o `started_at`.
+- A mesma atividade pode concluir várias Jogadas e missões.
+- **Prazo:** 48 horas a partir do envio. FIM DE SEMANA vale até o fim do próximo domingo. ANTES DAS 8 vale até as 08:00 da segunda manhã depois do envio, para que sempre haja duas manhãs. PRAZO EXTRA soma 24 horas, uma vez por Jogada. Tudo no fuso do grupo.
+- **Recompensas** (§5.1): ao ficar `Concluida`, o destinatário ganha 1,5 × o preço da carta e o remetente ganha 0,5 × o preço. Com APOSTA, a parte do destinatário sobe 50%. Na Jogada criada por DESAFIO DUPLO, as recompensas usam o preço da Provocação original.
 
 ## 7. Missões semanais
 
 - Toda semana (de segunda a domingo, no fuso do grupo), cada pessoa recebe de 2 a 3 missões, sorteadas de uma lista fixa no código. O sorteio é determinístico por usuário e semana, então não precisa ser gravado.
 - O progresso vem das atividades verificadas, como tudo o mais.
-- A mesma atividade pode contar para várias missões.
+- A mesma atividade pode contar para várias missões e Jogadas.
 - Exemplos:
   - Treinar em 3 dias diferentes.
   - Registrar 2 tipos de atividade diferentes.
@@ -142,33 +298,30 @@ A regra fica numa função pura (`CalculoEnergia`), com testes unitários.
 - Missões não exigem mais do que uma participação saudável nem um desempenho físico específico.
 - Não há missões diárias.
 
-## 8. Interações amistosas
-
-Todas são voluntárias, inofensivas e não tocam no desafio oficial.
-
-### 8.1. Toca aqui
-
-- Na cena, tocar no avatar de um colega permite dar um "Toca aqui" (um *high five*).
-- No máximo um por par de pessoas por dia.
-- O colega vê o toque como um pequeno indicador junto do avatar dele na cena. Não cria notificação.
-- Não vale Energia.
-
-### 8.2. Rival da semana
+## 8. Rival da semana
 
 - Cada pessoa pode escolher um rival por semana no grupo. O rival não precisa aceitar e não perde nada.
 - Critério normalizado: vence quem cumprir a meta semanal primeiro (pelo horário de verificação da sessão que completou a meta). Se só um cumprir, esse vence. Se ninguém cumprir, não há vencedor.
-- Prêmio: 30 EN e um selo, só para quem escolheu.
+- Prêmio: 15 EN e um selo, só para quem escolheu.
 - Não há aposta de Energia.
+- Na cena, os rivais fazem `provocar` no começo da semana, e o vencedor faz `comemorando` no fim (§3.3).
 
-### 8.3. Desafio extra
+## 9. Enfeites
 
-- Uma pessoa convida um colega para um treino extra opcional.
-- O colega tem 72 horas para aceitar e, depois de aceitar, 72 horas para registrar uma atividade que seja verificada.
-- Qualquer atividade normal serve, e ela conta para a meta oficial como sempre. Não existe tipo especial de atividade.
-- Quem aceitou recebe 25 EN e quem convidou recebe 10 EN.
-- Recusar ou não cumprir não tem consequência.
+As Conquistas existentes liberam **Enfeites**, objetos que aparecem ao lado do avatar na cena. Eles são calculados como as conquistas, sem tabela e sem compra.
 
-## 9. Fases de implementação
+| Conquista | Enfeite |
+|---|---|
+| Sequência de 4 semanas | Planta |
+| Sequência de 8 semanas | Bicicleta |
+| Sequência de 12 semanas | Troféu |
+| 10 atividades | Tapete de ioga |
+| 50 atividades | Haltere |
+| 100 atividades | Medalha |
+
+A pessoa escolhe qual Enfeite liberado mostrar, ou nenhum.
+
+## 10. Fases de implementação
 
 Cada fase entrega algo visível e pode ser a última. Todas ficam na fatia `Jogo` (backend `Features/Jogo`, frontend `features/jogo`), exceto onde indicado.
 
@@ -178,72 +331,86 @@ Cada fase entrega algo visível e pode ser a última. Todas ficam na fatia `Jogo
 - `PUT /api/usuarios/eu/modo-inicio` e o campo `modoInicio` na sessão (fatias `Usuarios` e `Autenticacao`).
 - Opção na página Configurações e cartão de convite único na tela App.
 - `InicioPage` escolhe entre a visão App atual e a cena, na mesma rota.
-- Escolha do pacote CC0, com o arquivo de licença junto dos sprites.
-- Cena com avatares padrão e poses pelo progresso. Ainda sem Energia nem personalização.
+- As folhas padrão, o chão da praça e o `LICENSE` CC0 no bundle.
+- Cena em círculo com as poses `parado`, `treinando` e `comemorando` e as variações de `parado`.
+- O `Avatar` mostra o `retrato` da folha padrão.
 
-### G2 — Avatar
-
-- Tabela `avatares`: uma linha por usuário, uma coluna por camada.
-- Editor em `/perfil/avatar`, só com os itens gratuitos.
-- `GET /api/grupos/{id}/avatares` devolve os avatares dos membros, usados pela cena e pelo `Avatar`, que passa a desenhar a cabeça.
-
-### G3 — Energia e Loja
+### G2 — Energia
 
 - Regra pura `CalculoEnergia` e a consulta SQL que a alimenta.
-- Tabela `compras`.
-- `GET /api/jogo/loja` (catálogo, itens comprados e saldo) e `POST /api/jogo/compras`.
-- Saldo na cena e no Perfil.
+- Saldo na cena e no Perfil, só leitura.
 
-### G4 — Missões semanais
+### G3 — Cartas
+
+- Tabelas `cartas` e `jogadas`.
+- Loja com as Provocações e a Mão: `GET /api/jogo/loja` e `POST /api/jogo/cartas`.
+- Jogar, aceitar e recusar: `POST /api/grupos/{id}/jogadas`, `PUT /api/jogadas/{id}/resposta`.
+- Situações e recompensas calculadas na leitura.
+- `Notificacao` de carta recebida.
+- Encenações `andar`, `arremessar`, `receber`, `aceitar` e `recusar`.
+
+### G4 — Respostas
+
+- DESAFIO DUPLO, APOSTA, PRAZO EXTRA e MUDANÇA DE PLANOS.
+
+### G5 — Missões semanais
 
 - Lista fixa, sorteio determinístico e progresso derivado.
-- A recompensa entra na Energia ganha.
+- A recompensa entra na Energia ganha. Brilho na cena.
 
-### G5 — Toca aqui
+### G6 — Avatar importado e Enfeites
 
-- Tabela `toques`, com `UNIQUE` por par e dia.
-- Indicador na cena.
+- Tabela `avatares`: uma linha por usuário, com o caminho da folha importada.
+- Editor em `/perfil/avatar`, upload validado e redefinição pelo `Proprietario` ou por um `Administrador`.
+- `GET /api/grupos/{id}/avatares` e o download da folha.
+- Enfeites liberados pelas conquistas.
 
-### G6 — Rival da semana e Desafio extra
+### G7 — Rival da semana
 
-- Tabelas `rivais` e `desafios_extras`.
-- Resultados e recompensas derivados das atividades verificadas.
+- Tabela `rivais`.
+- Resultado e recompensa derivados das atividades verificadas.
+- Encenação `provocar`.
 
-## 10. Adiado e descartado
+## 11. Adiado e descartado
 
 **Adiado**, sem fase definida:
 
 | Ideia | Motivo |
 |---|---|
-| Eventos do grupo (festival de fim de semana, bingo, 100 sessões) | Precisam de datas, regras e itens próprios. Reavaliar depois da G6. |
+| Eventos do grupo (festival de fim de semana, bingo, 100 sessões) | Precisam de datas, regras e itens próprios. Reavaliar depois da G7. |
 | Marcos coletivos do grupo | Idem. |
-| Itens de edição limitada | Exigem catálogo com datas. |
-| Animações especiais, poses extras, fundos de cena | Dependem de mais arte. Podem entrar na loja depois. |
+| Cartas novas | Observar o uso das 9 primeiras antes. |
+| Ciclos de andar de frente e de costas | O andar de lado com balanço atende. Exigiriam mais linhas em toda folha importada. |
 
 **Descartado:**
 
 | Ideia | Motivo |
 |---|---|
-| Carteira e livro-razão de transações | A Energia calculada na leitura atende sem sincronização nem idempotência. |
-| Consumíveis (Proteção, Boost, Modo Invisível) | Só fazem sentido com pegadinhas e efeitos temporários, que não queremos. |
+| Carteira e livro-razão de transações | A Energia calculada na leitura, menos o preço guardado em cada carta, atende sem sincronização nem idempotência. |
+| Loja de cosméticos | Itens permanentes deixam de importar depois de comprados. A Energia vai só para cartas, e os Enfeites vêm das conquistas. |
+| Cartas de defesa (BLOQUEIO, ESCUDO) | Fazem o mesmo que recusar e desligar o modo Jogo, que são grátis. |
+| Toca aqui | Sem Energia e sem escolha. A cena já tem interação com as cartas. |
+| Desafio extra | As Provocações fazem o mesmo, com mais variedade. |
 | Pegadinhas e efeitos sobre outros jogadores | Contrariam "ninguém prejudica ninguém". |
-| Duelos com aposta e compromissos (*bounties*) | Apostar Energia traz perda e pressão, o contrário de leve. |
+| Cadeias de contra-ataque, troca de cartas, pacotes aleatórios | Complexidade e sorte sem ganho para a constância. |
+| Duelos com aposta entre pessoas | A APOSTA só arrisca a própria Energia. Apostar contra outra pessoa traz perda e pressão. |
 | Missões diárias | Pedem abrir o aplicativo todo dia e distraem do objetivo. |
 | Ranking de Energia | Mistura jogo com desempenho e cria uma segunda classificação. |
 | Distância e eventos baseados em distância | Fora do escopo (`arquitetura.md` §19). |
 
-## 11. Questões em aberto
+## 12. Questões em aberto
 
-1. **O que é "desafio concluído" (150 EN)?** Recomendação: desafio `Encerrado` com todas as semanas que contavam para a pessoa cumpridas.
-2. **Semana das missões para quem está em vários grupos.** Recomendação: avaliar cada atividade na semana do fuso do seu grupo e usar como referência a semana do grupo em destaque.
-3. **Qual pacote CC0?** Critérios: estilo urbano, quadros pequenos (por exemplo 32×32), poucos quadros por animação, camadas compatíveis entre si e no máximo 200 KB no total.
-4. **Bônus antes das 06:00.** Fica por enquanto. Revisar se ele estimular treino de madrugada em vez de constância.
-5. **Cena com 10 membros em tela pequena.** Definir o layout (fileiras, rolagem lateral) e o limite de animações simultâneas.
+1. **Tabela da MUDANÇA DE PLANOS.** Recomendação: trocar dentro da mesma faixa de preço (+10 MIN ↔ VARIEDADE ↔ FIM DE SEMANA; +20 MIN ↔ ANTES DAS 8), e a pessoa escolhe entre os equivalentes.
+2. **Valores das recompensas.** Recomendação: começar com 1,5× e 0,5× e conferir com o teste de simulação semanal de `CalculoEnergia` antes da G3.
+3. **O que é "desafio concluído" (75 EN)?** Recomendação: desafio `Encerrado` com todas as semanas que contavam para a pessoa cumpridas.
+4. **Semana das missões para quem está em vários grupos.** Recomendação: avaliar cada atividade na semana do fuso do seu grupo e usar como referência a semana do grupo em destaque.
+5. **Madrugada.** O bônus antes das 06:00 somado à carta ANTES DAS 8 pode estimular treino de madrugada em vez de constância. Revisar depois de observar o uso.
+6. **Enfeite e cena com 10 pessoas.** Conferir num celular de 360 px se o Enfeite ao lado do avatar não polui o círculo. Se poluir, mostrar só ao tocar no avatar.
 
-## 12. Critérios de sucesso
+## 13. Critérios de sucesso
 
 1. Quem usa o Jogo registra treinos pelo menos com a mesma regularidade de antes.
-2. Personalizar o avatar é divertido e não toma tempo do treino.
-3. Pessoas com condicionamentos diferentes têm as mesmas chances.
+2. Quem joga gasta Energia toda semana, e as cartas geram conversa no grupo.
+3. Pessoas com condicionamentos diferentes têm chances parecidas. As cartas de duração são opcionais e podem ser recusadas.
 4. Nenhuma mecânica dificulta a meta de outra pessoa.
-5. O desafio oficial continua compreensível e confiável. Quem prefere o App não percebe diferença, salvo pelos avatares no lugar das iniciais.
+5. O desafio oficial continua compreensível e confiável. Quem prefere o App não recebe cartas e não percebe diferença, salvo pelos retratos no lugar das iniciais.
