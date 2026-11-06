@@ -1,18 +1,15 @@
-import { Flame } from "lucide-react";
+const sizes = { sm: "size-9", lg: "size-16" } as const;
 
-const sizes = {
-  sm: { tile: "size-9 rounded-xl", icon: "size-5" },
-  lg: { tile: "size-16 rounded-3xl", icon: "size-8" },
-} as const;
-
+/** O mesmo ícone do aplicativo, gerado por scripts/gerar-icones.sh. */
 export function BrandMark({ size = "lg" }: { size?: keyof typeof sizes }) {
   return (
-    <div
+    <img
+      src="/icon-192.png"
+      alt=""
       aria-hidden="true"
-      className={`inline-grid place-items-center bg-brand text-on-brand ${sizes[size].tile}`}
-    >
-      <Flame className={sizes[size].icon} strokeWidth={2.4} />
-    </div>
+      draggable={false}
+      className={`inline-block ${sizes[size]}`}
+    />
   );
 }
 

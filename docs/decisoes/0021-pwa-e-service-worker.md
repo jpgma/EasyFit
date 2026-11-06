@@ -32,17 +32,10 @@ A Fase 8 pede manifest, Service Worker, cache estático e instalação mobile (`
 - Instalação: em Configurações, o botão "Instalar aplicativo" aparece quando o navegador oferece `beforeinstallprompt` (Chromium e Android). No iOS, aparece a instrução de usar Compartilhar.
 - O backend responde `sw.js` e `manifest.webmanifest` com `no-cache`, como o `index.html`.
 - O Service Worker só é registrado no build de produção. No `npm run dev`, não há cache.
-- Ícones em `public/`, gerados uma única vez a partir de `favicon.svg` com o ImageMagick:
-
-  ```bash
-  magick -background none -density 1536 favicon.svg -resize 192x192 PNG32:icon-192.png
-  magick -background none -density 1536 favicon.svg -resize 512x512 PNG32:icon-512.png
-  # Fundo até a borda, sem cantos arredondados e com o traço reduzido a 72% para caber na zona segura:
-  magick -density 1536 icone-quadrado.svg -resize 512x512 icon-maskable-512.png
-  magick -density 1536 icone-quadrado.svg -resize 180x180 -alpha remove PNG32:apple-touch-icon.png
-  ```
-
-  Em `icone-quadrado.svg`, o `rect` não tem `rx` e o desenho fica dentro de `<g transform="translate(16 16) scale(0.72) translate(-16 -16)">`.
+- Ícones em `public/` (`favicon.ico`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png`), gerados com o ImageMagick por `scripts/gerar-icones.sh` (no Windows, `scripts\gerar-icones.bat`) a partir de `EasyFit/webapp/icon-source.png`, que fica fora de `public/` para não entrar no pré-cache. Para trocar o ícone, passe o PNG novo, quadrado e de preferência com 1024 px: `scripts/gerar-icones.sh novo-icone.png`. O script copia o arquivo para `icon-source.png` e gera tudo de novo:
+  - `favicon.ico`, `icon-192.png` e `icon-512.png`: a arte inteira, com os cantos transparentes. O `BrandMark` da interface usa o `icon-192.png`.
+  - `apple-touch-icon.png`: recorte interno sem os cantos, opaco, porque o iOS arredonda os cantos e pinta a transparência de preto.
+  - `icon-maskable-512.png`: fundo cheio na cor da borda da arte e a arte a 72%, dentro da zona segura.
 
 ## Aviso de instalação (acréscimo)
 
