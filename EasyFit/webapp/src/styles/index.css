@@ -75,8 +75,8 @@
   --color-on-soft: var(--on-soft);
   --color-brand: var(--brand);
   --color-on-brand: var(--on-brand);
-  --color-lime: var(--lime);
-  --color-on-lime: var(--on-lime);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-on-success-soft: var(--on-success-soft);
@@ -93,8 +93,8 @@
   --color-on-danger-soft: var(--on-danger-soft);
   --color-scrim: var(--scrim);
   /* A galeria em tela cheia é escura nos dois temas, para não competir com a foto. */
-  --color-lightbox: oklch(0.12 0.006 160);
-  --color-on-lightbox: oklch(0.97 0.004 95);
+  --color-lightbox: oklch(0.12 0.01 20);
+  --color-on-lightbox: oklch(0.97 0.008 80);
   --shadow-card: var(--card-shadow);
   --shadow-float: var(--float-shadow);
 }
@@ -102,88 +102,90 @@
 :root {
   color-scheme: light dark;
 
-  --background: oklch(0.975 0.006 95);
-  --surface: oklch(1 0 0);
-  --surface-muted: oklch(0.95 0.006 100);
-  --border: oklch(0.91 0.008 100);
-  --border-strong: oklch(0.6 0.015 100);
-  --foreground: oklch(0.22 0.012 160);
-  --muted: oklch(0.48 0.012 150);
-  --placeholder: oklch(0.5 0.012 150);
-  --link: oklch(0.42 0.09 155);
-  --focus: oklch(0.42 0.09 155);
-  --primary: oklch(0.42 0.09 155);
-  --primary-hover: oklch(0.36 0.08 155);
-  --on-primary: oklch(0.985 0.01 120);
-  --soft: oklch(0.94 0.035 150);
-  --soft-hover: oklch(0.9 0.05 150);
-  --soft-border: oklch(0.88 0.05 150);
-  --on-soft: oklch(0.3 0.06 155);
-  --brand: oklch(0.42 0.09 155);
-  --on-brand: oklch(0.985 0.01 120);
-  --lime: oklch(0.89 0.16 125);
-  --on-lime: oklch(0.28 0.06 140);
+  /* Paleta tirada do ícone: laranja do fundo, creme da carta, dourado dos raios e o contorno ameixa. */
+  --background: oklch(0.975 0.012 80);
+  --surface: oklch(0.995 0.004 80);
+  --surface-muted: oklch(0.95 0.016 75);
+  --border: oklch(0.9 0.02 70);
+  --border-strong: oklch(0.6 0.03 50);
+  --foreground: oklch(0.24 0.035 20);
+  --muted: oklch(0.48 0.03 35);
+  --placeholder: oklch(0.5 0.03 35);
+  --link: oklch(0.52 0.17 40);
+  --focus: oklch(0.56 0.17 42);
+  --primary: oklch(0.56 0.17 42);
+  --primary-hover: oklch(0.5 0.17 40);
+  --on-primary: oklch(0.99 0.01 80);
+  --soft: oklch(0.95 0.035 65);
+  --soft-hover: oklch(0.91 0.055 62);
+  --soft-border: oklch(0.88 0.07 60);
+  --on-soft: oklch(0.42 0.13 40);
+  --brand: oklch(0.52 0.18 36);
+  --on-brand: oklch(0.99 0.01 80);
+  --accent: oklch(0.85 0.15 85);
+  --on-accent: oklch(0.3 0.07 45);
   --success: oklch(0.55 0.13 152);
   --success-soft: oklch(0.94 0.045 152);
   --on-success-soft: oklch(0.38 0.1 152);
-  --warning: oklch(0.66 0.14 70);
-  --warning-soft: oklch(0.95 0.05 85);
-  --on-warning-soft: oklch(0.42 0.1 60);
-  --info: oklch(0.52 0.08 240);
-  --info-soft: oklch(0.95 0.02 240);
-  --on-info-soft: oklch(0.4 0.08 240);
-  --danger: oklch(0.5 0.16 25);
-  --danger-soft: oklch(0.95 0.025 25);
-  --danger-soft-hover: oklch(0.91 0.04 25);
-  --danger-soft-border: oklch(0.89 0.05 25);
-  --on-danger-soft: oklch(0.45 0.15 25);
-  --scrim: oklch(0.2 0.01 160 / 0.4);
+  --warning: oklch(0.64 0.14 72);
+  --warning-soft: oklch(0.96 0.05 90);
+  --on-warning-soft: oklch(0.42 0.09 70);
+  --info: oklch(0.52 0.15 280);
+  --info-soft: oklch(0.95 0.025 280);
+  --on-info-soft: oklch(0.42 0.14 280);
+  /* Carmim, mais frio que o laranja da marca, para um erro não parecer destaque. */
+  --danger: oklch(0.5 0.18 12);
+  --danger-soft: oklch(0.95 0.025 10);
+  --danger-soft-hover: oklch(0.91 0.045 10);
+  --danger-soft-border: oklch(0.88 0.06 10);
+  --on-danger-soft: oklch(0.45 0.16 12);
+  --scrim: oklch(0.2 0.02 20 / 0.4);
   --avatar-bg-l: 0.92;
   --avatar-fg-l: 0.38;
   --card-shadow:
-    0 1px 2px oklch(0.3 0.02 150 / 0.05),
-    0 4px 16px -6px oklch(0.3 0.02 150 / 0.08);
-  --float-shadow: 0 10px 30px -10px oklch(0.3 0.05 150 / 0.25);
+    0 1px 2px oklch(0.3 0.04 30 / 0.05),
+    0 4px 16px -6px oklch(0.3 0.04 30 / 0.08);
+  --float-shadow: 0 10px 30px -10px oklch(0.3 0.06 30 / 0.25);
 }
 
-/* O mockup só tem o tema claro: este é derivado dele e acompanha o sistema. */
+/* O tema escuro acompanha o sistema, com o ameixa do contorno do ícone no lugar do preto. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: oklch(0.17 0.012 160);
-    --surface: oklch(0.22 0.014 160);
-    --surface-muted: oklch(0.26 0.014 160);
-    --border: oklch(0.31 0.014 160);
-    --border-strong: oklch(0.58 0.02 160);
-    --foreground: oklch(0.96 0.006 95);
-    --muted: oklch(0.76 0.012 150);
-    --placeholder: oklch(0.72 0.012 150);
-    --link: oklch(0.82 0.12 140);
-    --focus: oklch(0.82 0.12 140);
-    --primary: oklch(0.78 0.14 140);
-    --primary-hover: oklch(0.84 0.14 135);
-    --on-primary: oklch(0.2 0.04 150);
-    --soft: oklch(0.29 0.04 150);
-    --soft-hover: oklch(0.33 0.05 150);
-    --soft-border: oklch(0.37 0.05 150);
-    --on-soft: oklch(0.88 0.08 140);
-    --brand: oklch(0.42 0.09 155);
-    --on-brand: oklch(0.985 0.01 120);
-    --lime: oklch(0.85 0.15 125);
-    --on-lime: oklch(0.25 0.05 140);
+    --background: oklch(0.17 0.018 20);
+    --surface: oklch(0.215 0.022 20);
+    --surface-muted: oklch(0.255 0.024 22);
+    --border: oklch(0.31 0.024 22);
+    --border-strong: oklch(0.58 0.03 35);
+    --foreground: oklch(0.96 0.012 80);
+    --muted: oklch(0.77 0.02 60);
+    --placeholder: oklch(0.72 0.02 60);
+    --link: oklch(0.8 0.13 58);
+    --focus: oklch(0.8 0.13 58);
+    --primary: oklch(0.74 0.17 50);
+    --primary-hover: oklch(0.8 0.15 55);
+    --on-primary: oklch(0.2 0.04 30);
+    --soft: oklch(0.29 0.05 40);
+    --soft-hover: oklch(0.33 0.06 40);
+    --soft-border: oklch(0.38 0.07 40);
+    --on-soft: oklch(0.88 0.08 65);
+    --brand: oklch(0.52 0.18 36);
+    --on-brand: oklch(0.99 0.01 80);
+    --accent: oklch(0.84 0.15 85);
+    --on-accent: oklch(0.25 0.06 45);
     --success: oklch(0.74 0.14 152);
     --success-soft: oklch(0.3 0.05 152);
     --on-success-soft: oklch(0.86 0.12 152);
-    --warning: oklch(0.78 0.13 75);
-    --warning-soft: oklch(0.31 0.05 70);
-    --on-warning-soft: oklch(0.87 0.11 80);
-    --info: oklch(0.72 0.08 240);
-    --info-soft: oklch(0.29 0.03 240);
-    --on-info-soft: oklch(0.86 0.05 240);
-    --danger: oklch(0.74 0.14 25);
-    --danger-soft: oklch(0.3 0.05 25);
-    --danger-soft-hover: oklch(0.35 0.06 25);
-    --danger-soft-border: oklch(0.39 0.07 25);
-    --on-danger-soft: oklch(0.86 0.09 25);
+    --warning: oklch(0.8 0.14 82);
+    --warning-soft: oklch(0.31 0.05 75);
+    --on-warning-soft: oklch(0.88 0.1 85);
+    --info: oklch(0.74 0.11 280);
+    --info-soft: oklch(0.29 0.05 280);
+    --on-info-soft: oklch(0.87 0.06 280);
+    --danger: oklch(0.72 0.15 12);
+    --danger-soft: oklch(0.3 0.06 12);
+    --danger-soft-hover: oklch(0.35 0.07 12);
+    --danger-soft-border: oklch(0.4 0.08 12);
+    --on-danger-soft: oklch(0.87 0.08 12);
     --scrim: oklch(0 0 0 / 0.6);
     --avatar-bg-l: 0.34;
     --avatar-fg-l: 0.88;

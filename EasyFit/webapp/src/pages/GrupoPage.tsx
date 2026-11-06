@@ -85,7 +85,7 @@ function CabecalhoComDesafio({
     <>
       <section className="overflow-hidden rounded-3xl bg-brand p-5 text-on-brand">
         <div className="flex items-center gap-3">
-          <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-lime font-display text-xl font-bold text-on-lime">
+          <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-accent font-display text-xl font-bold text-on-accent">
             {getIniciais(nome)}
           </div>
           <div className="min-w-0 flex-1">
@@ -110,7 +110,7 @@ function CabecalhoComDesafio({
               className="mt-2 h-2.5 overflow-hidden rounded-full bg-on-brand/20"
             >
               <div
-                className="h-full rounded-full bg-lime"
+                className="h-full rounded-full bg-accent"
                 style={{ width: `${(totalFeito / objetivo) * 100}%` }}
               />
             </div>
@@ -211,7 +211,7 @@ export function GrupoPage() {
       ) : (
         <section className="rounded-3xl bg-brand p-5 text-on-brand">
           <div className="flex items-center gap-3">
-            <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-lime font-display text-xl font-bold text-on-lime">
+            <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-accent font-display text-xl font-bold text-on-accent">
               {getIniciais(nome)}
             </div>
             <div className="min-w-0 flex-1">

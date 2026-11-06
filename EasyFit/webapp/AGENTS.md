@@ -37,11 +37,11 @@ src/
 
 Todo trabalho de UI/UX (telas, componentes, layout, cores, tipografia, animação, acessibilidade, revisão visual) começa carregando a skill `ui-ux-pro-max` (`.claude/skills/ui-ux-pro-max/`). Use as buscas por `--domain` e `--stack react`/`--stack html-tailwind` e, antes de entregar, o checklist de `references/pro-rules.md`.
 
-As recomendações dela não se sobrepõem às regras deste repositório. Em caso de conflito, valem estas regras, o mockup e a ADR 0014. Em particular:
+As recomendações dela não se sobrepõem às regras deste repositório. Em caso de conflito, valem estas regras, o mockup e as ADRs 0014 e 0025. Em particular:
 
 - Não use `--design-system --persist`: os tokens ficam em `styles/index.css`, sem pasta `design-system/`.
 - Não adote fontes do Google Fonts nem ícones externos. Os símbolos de reação continuam sendo emojis.
-- Não troque a identidade visual do mockup por uma paleta ou estilo sugerido pela skill.
+- Não troque a identidade visual por uma paleta ou estilo sugerido pela skill. As cores vêm do ícone do aplicativo (decisão 0025).
 
 ## Desempenho
 

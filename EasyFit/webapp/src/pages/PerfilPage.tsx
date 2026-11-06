@@ -141,7 +141,7 @@ export function PerfilPage() {
                       key={conquista.codigo}
                       className="card flex items-center gap-3 p-4"
                     >
-                      <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-lime text-on-lime">
+                      <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent text-on-accent">
                         <Award aria-hidden="true" className="size-5" />
                       </div>
                       <div className="min-w-0">

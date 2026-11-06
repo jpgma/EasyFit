@@ -32,8 +32,8 @@ A decisão 0007 adotou o mockup `easyfit-mockup-main` como referência de aparê
 
 O mockup `fitas-e-amigos` define a aparência e os fluxos das telas. `arquitetura.md`, `AGENTS.md` e o glossário prevalecem em regras de negócio, nomes, segurança e dependências.
 
-- **Paleta:** valores OKLCH do mockup atrás dos tokens semânticos de `styles/index.css`. Pares de texto foram escurecidos onde o mockup não atinge o contraste WCAG AA, conferidos nos dois temas.
-- **Tema escuro:** o mockup só tem o tema claro. O escuro foi derivado dele e acompanha o sistema, sem seletor manual.
+- **Paleta:** substituída pela decisão 0025, que tira as cores do ícone do aplicativo. Os tokens semânticos de `styles/index.css` continuam os mesmos, exceto `lime`, renomeado para `accent`.
+- **Tema escuro:** o mockup só tem o tema claro. O escuro acompanha o sistema, sem seletor manual.
 - **Avatares:** a matiz vem do identificador do usuário, em `--avatar-hue`, e a luminosidade vem do tema. É a única exceção à regra de usar apenas tokens de cor.
 - **Reações na interface:** `Kudos` aparece como "Dar moral" e "deu moral"; no código, na API e no banco continua `Kudos`. Cada reação tem sempre o mesmo símbolo, usado ao lado do texto ou sozinho quando falta espaço: 💪 `Kudos`, 🤨 `Suspeito`, ❌ `Rejeitar`.
 - **Componentes:** próprios. Sem Radix, shadcn, sonner, recharts nem TanStack Router.

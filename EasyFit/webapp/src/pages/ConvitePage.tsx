@@ -99,7 +99,7 @@ export function ConvitePage() {
           {convidadoPor} te convidou
         </div>
         <div className="-mt-10 px-6 pb-6">
-          <div className="grid size-20 place-items-center rounded-3xl border-4 border-surface bg-lime font-display text-2xl font-bold text-on-lime">
+          <div className="grid size-20 place-items-center rounded-3xl border-4 border-surface bg-accent font-display text-2xl font-bold text-on-accent">
             {getIniciais(grupoNome)}
           </div>
           <h1 className="mt-3 text-2xl font-bold break-words">{grupoNome}</h1>
