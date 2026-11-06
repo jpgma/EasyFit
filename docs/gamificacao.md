@@ -20,7 +20,7 @@ No Jogo, os membros do grupo aparecem como avatares em pixel-art, num círculo. 
 
 ### 1.2. Direção criativa
 
-Pixel-art contemporâneo com estilo de vida urbano: streetwear, tênis, roupa de academia, fones de ouvido, café, academia, praça.
+Pixel-art contemporâneo com estilo de vida urbano: streetwear, tênis, roupa de academia, fones de ouvido, café, academia, praça com barra de calistenia.
 
 Evitar fantasia, medieval, monstros, magia, armas, combate, classes e atributos de RPG. As cartas são bilhetes de provocação entre amigos, não feitiços.
 
@@ -56,8 +56,8 @@ A tela Jogo mostra:
 - Os avatares ficam num **círculo**, virados para o centro. Quem está à esquerda do centro olha para a direita, e quem está à direita aparece espelhado (`scaleX(-1)`).
 - A ordem de desenho segue o y dos pés: quem está mais abaixo na tela fica na frente.
 - Escala inteira, com `image-rendering: pixelated`. O quadro de 32 px aparece em 2× (64 px). Num celular de 360 px, o círculo tem raio de cerca de 130 px e cabem 10 avatares a cerca de 80 px de distância. Grupos de até 5 pessoas usam 3×.
-- Um Enfeite (§9) pode aparecer ao lado de cada avatar.
-- Tocar num avatar abre a página do membro. No modo Jogo, também permite jogar uma carta da Mão para esse colega.
+- O primeiro Enfeite da vitrine (§9.2) aparece ao lado de cada avatar.
+- Tocar num avatar mostra a vitrine de Enfeites e dá acesso à página do membro. No modo Jogo, também permite jogar uma carta da Mão para esse colega.
 
 ### 3.2. Poses
 
@@ -85,6 +85,7 @@ As interações acontecem no centro do círculo. Como tudo é assíncrono, cada 
 | Jogada expirada | A carta some com o carimbo EXPIRADA. Nenhum avatar reage. |
 | Rivais da semana | Na primeira visita da semana, os dois avançam um passo e fazem `provocar`. Ao fim da semana, o vencedor faz `comemorando`. |
 | Missão concluída | `comemorando` com um brilho em CSS. |
+| Enfeite novo (vista só pelo dono) | `comemorando`, e o Enfeite aparece ao lado com o mesmo brilho (§9.2). |
 
 - O movimento vertical usa o mesmo `andar` de lado, com um balanço de 1 a 2 px. O deslizamento na vertical é aceito como estilo.
 - No máximo uma encenação de cada vez, e no máximo 3 em sequência por visita. As demais aparecem só como estado final.
@@ -150,10 +151,10 @@ Todo o bundle é CC0, com o arquivo `LICENSE` junto dos sprites. Nada é carrega
 | Peça | Tamanho | Quantidade |
 |---|---|---:|
 | Folhas padrão de avatar | 256×384 | 3 a 4 |
-| Chão da praça (vista de cima) | cerca de 180×150, em 2× | 1 |
+| Chão da praça (vista de cima), com barra fixa num canto | cerca de 180×150, em 2× | 1 |
 | Moldura de carta | 24×32 | 2 (Provocação, Resposta) |
 | Ícone de carta | 16×16 | 9 |
-| Enfeite | 16×16 ou 32×32 | 6 |
+| Enfeite | 16×16 ou 32×32 | 19 (§9.1) |
 
 ## 5. Energia
 
@@ -308,18 +309,71 @@ Os limites ficam em constantes no código, fáceis de ajustar depois de observar
 
 ## 9. Enfeites
 
-As Conquistas existentes liberam **Enfeites**, objetos que aparecem ao lado do avatar na cena. Eles são calculados como as conquistas, sem tabela e sem compra.
+Cada Conquista libera um **Enfeite**: um objeto que conta, só de olhar, o que a pessoa conquistou. Quem pedala muito ganha a bicicleta; quem treina cedo ganha o despertador. Os Enfeites são calculados como as conquistas, sem tabela e sem compra.
 
-| Conquista | Enfeite |
-|---|---|
-| Sequência de 4 semanas | Planta |
-| Sequência de 8 semanas | Bicicleta |
-| Sequência de 12 semanas | Troféu |
-| 10 atividades | Tapete de ioga |
-| 50 atividades | Haltere |
-| 100 atividades | Medalha |
+### 9.1. Conquistas e Enfeites
 
-A pessoa escolhe qual Enfeite liberado mostrar, ou nenhum.
+As conquistas marcadas como **nova** ainda não existem em `ConquistasUsuario` e entram na G6. Todas contam só atividades `Verificada`, somando todos os grupos, com horários no fuso do grupo de cada atividade, como as atuais.
+
+**Constância**, a conquista principal: o Enfeite evolui em vez de se repetir.
+
+| Conquista | Condição | Enfeite |
+|---|---|---|
+| `Sequencia4` | Sequência de 4 semanas | Muda num vaso |
+| `Sequencia8` | Sequência de 8 semanas | Planta com flor (substitui a muda) |
+| `Sequencia12` | Sequência de 12 semanas | Árvore pequena em vaso (substitui a planta) |
+| `Treinos10` | 10 atividades | Medalha de bronze |
+| `Treinos50` | 50 atividades | Medalha de prata (substitui a de bronze) |
+| `Treinos100` | 100 atividades | Medalha de ouro (substitui a de prata) |
+| `DesafioCompleto` (nova) | Um desafio `Encerrado` com todas as semanas que contavam cumpridas (a mesma regra de §12, item 3) | Troféu |
+
+**Tipo de atividade**, uma por tipo, com **20 atividades** daquele tipo. `Outro` não tem conquista.
+
+| Conquista | Tipo | Enfeite |
+|---|---|---|
+| `RatoDeAcademia` (nova) | `Musculacao` | Haltere |
+| `Corredor` (nova) | `Corrida` | Cronômetro |
+| `Andarilho` (nova) | `Caminhada` | Cachorro na coleira |
+| `Ciclista` (nova) | `Ciclismo` | Bicicleta |
+| `Peixe` (nova) | `Natacao` | Boia |
+| `Boleiro` (nova) | `Esporte` | Bola |
+| `Zen` (nova) | `Yoga` | Tapete de ioga enrolado |
+| `PesoDoCorpo` (nova) | `Calistenia` | Paralelas (as barrinhas de chão) |
+
+**Hábito**, para jeitos diferentes de manter a rotina:
+
+| Conquista | Condição | Enfeite |
+|---|---|---|
+| `Madrugador` | 10 atividades iniciadas antes das 07:00 (já existe) | Despertador |
+| `Noturno` (nova) | 10 atividades iniciadas a partir das 20:00 | Poste de luz da praça |
+| `FimDeSemana` (nova) | 10 atividades no sábado ou no domingo | Caixa de som portátil |
+| `Ecletico` (nova) | Atividades verificadas de 5 tipos diferentes, sem contar `Outro` | Mochila de academia |
+
+- São 19 conquistas e 19 desenhos de Enfeite. A planta e a medalha evoluem, então a cena mostra no máximo 15 objetos diferentes.
+- Nenhuma conquista usa distância, ritmo ou carga: só contagem de atividades, horário e semanas cumpridas. Uma pessoa que faz 20 caminhadas tem a mesma chance de um Enfeite que uma pessoa que faz 20 corridas.
+- Os nomes e os limites (20 por tipo, 10 por hábito) ficam em constantes, como os demais marcos.
+- `Madrugador` e `Noturno` cobrem as duas pontas do dia, para que treinar cedo não seja o único horário premiado (ver §12, item 5).
+
+### 9.2. Vitrine
+
+- A pessoa tem uma **vitrine** com até **3 Enfeites**. A cena mostra o primeiro ao lado do avatar.
+- Tocar no avatar mostra a vitrine inteira, junto do acesso à página do membro e às cartas.
+- Um Enfeite novo entra sozinho na vitrine se houver espaço. A pessoa reorganiza ou tira Enfeites em `/perfil/avatar`.
+- Um Enfeite que evolui troca de nível no mesmo lugar da vitrine.
+- Só aparecem Enfeites de quem está no modo Jogo. Quem está no modo App não expõe nada.
+- **Enfeite novo:** na próxima visita à cena, o avatar faz `comemorando` e o Enfeite aparece com o mesmo brilho em CSS da missão (§3.3). Os colegas veem o Enfeite já no lugar, sem encenação.
+
+A vitrine é uma lista de códigos de conquista, guardada na tabela `avatares` (G6). Um código cuja conquista não vale mais é ignorado na leitura.
+
+**Privacidade.** Hoje as conquistas aparecem só no próprio Perfil (`decisoes/0018-perfil-e-pagina-do-membro.md`). A vitrine mostra aos colegas apenas o que está nela, só para quem escolheu o modo Jogo, e a pessoa pode esvaziá-la. Essa mudança precisa de um ADR na G6.
+
+### 9.3. Calistenia na praça
+
+A Calistenia combina com a direção criativa: é o treino da praça. Por isso:
+
+- O chão da praça (§4.4) tem uma barra fixa num canto, como cenário.
+- A conquista `PesoDoCorpo` libera as Paralelas, um Enfeite que conversa com a barra da praça.
+- Nenhuma carta ou missão favorece a Calistenia. Ela conta como qualquer outro tipo para VARIEDADE, para o bônus de tipo novo (§5.2) e para `Ecletico`.
 
 ## 10. Fases de implementação
 
@@ -363,7 +417,9 @@ Cada fase entrega algo visível e pode ser a última. Todas ficam na fatia `Jogo
 - Tabela `avatares`: uma linha por usuário, com o caminho da folha importada.
 - Editor em `/perfil/avatar`, upload validado e redefinição pelo `Proprietario` ou por um `Administrador`.
 - `GET /api/grupos/{id}/avatares` e o download da folha.
-- Enfeites liberados pelas conquistas.
+- As conquistas novas de §9.1 em `ConquistasUsuario` (fatia `Usuarios`), visíveis no Perfil para todos, inclusive no modo App.
+- Enfeites liberados pelas conquistas, vitrine e encenação de Enfeite novo.
+- ADR sobre mostrar a vitrine aos colegas (§9.2).
 
 ### G7 — Rival da semana
 
@@ -406,6 +462,8 @@ Cada fase entrega algo visível e pode ser a última. Todas ficam na fatia `Jogo
 4. **Semana das missões para quem está em vários grupos.** Recomendação: avaliar cada atividade na semana do fuso do seu grupo e usar como referência a semana do grupo em destaque.
 5. **Madrugada.** O bônus antes das 06:00 somado à carta ANTES DAS 8 pode estimular treino de madrugada em vez de constância. Revisar depois de observar o uso.
 6. **Enfeite e cena com 10 pessoas.** Conferir num celular de 360 px se o Enfeite ao lado do avatar não polui o círculo. Se poluir, mostrar só ao tocar no avatar.
+7. **Limites das conquistas novas.** 20 por tipo pode ser muito para tipos raros, como `Natacao`. Recomendação: começar com 20 e conferir com os dados reais dos grupos antes da G6.
+8. **Atividades antigas de "Treino em casa".** A migração 014 as trocou por `Calistenia`, então elas contam para `PesoDoCorpo`. Recomendação: aceitar, porque quase sempre eram treinos com o peso do corpo.
 
 ## 13. Critérios de sucesso
 

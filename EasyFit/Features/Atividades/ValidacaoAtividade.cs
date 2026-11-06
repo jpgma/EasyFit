@@ -9,7 +9,7 @@ internal static class TipoAtividade
     public const string Natacao = "Natacao";
     public const string Esporte = "Esporte";
     public const string Yoga = "Yoga";
-    public const string TreinoEmCasa = "TreinoEmCasa";
+    public const string Calistenia = "Calistenia";
     public const string Outro = "Outro";
 
     private static readonly HashSet<string> Validos =
@@ -21,7 +21,7 @@ internal static class TipoAtividade
         Natacao,
         Esporte,
         Yoga,
-        TreinoEmCasa,
+        Calistenia,
         Outro,
     ];
 

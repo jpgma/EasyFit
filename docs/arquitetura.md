@@ -702,7 +702,7 @@ Tipos de atividade:
 - Natação.
 - Esporte.
 - Yoga.
-- Treino em casa.
+- Calistenia.
 - Outro.
 
 Tipos de comprovação:

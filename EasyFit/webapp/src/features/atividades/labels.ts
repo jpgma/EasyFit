@@ -12,7 +12,7 @@ export const tipoAtividadeLabels: Record<TipoAtividade, string> = {
   Natacao: "Natação",
   Esporte: "Esporte",
   Yoga: "Yoga",
-  TreinoEmCasa: "Treino em casa",
+  Calistenia: "Calistenia",
   Outro: "Outro",
 };
 

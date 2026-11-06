@@ -6,7 +6,7 @@ export type TipoAtividade =
   | "Natacao"
   | "Esporte"
   | "Yoga"
-  | "TreinoEmCasa"
+  | "Calistenia"
   | "Outro";
 
 export type TipoComprovacao = "RegistroManual" | "Fotografia" | "CapturaDeTela";

@@ -178,7 +178,7 @@ The group pages and the home page show one challenge. It is the active challenge
 
 An active member records an activity with these data:
 
-- Type: `Musculacao`, `Corrida`, `Caminhada`, `Ciclismo`, `Natacao`, `Esporte`, `Yoga`, `TreinoEmCasa` or `Outro`.
+- Type: `Musculacao`, `Corrida`, `Caminhada`, `Ciclismo`, `Natacao`, `Esporte`, `Yoga`, `Calistenia` or `Outro`.
 - Start date and time. It cannot be more than 1 hour in the future.
 - Duration: 1 minute to 24 hours.
 - Description: optional, maximum 500 characters.

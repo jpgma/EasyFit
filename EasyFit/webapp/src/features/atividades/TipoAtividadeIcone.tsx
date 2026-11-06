@@ -1,10 +1,10 @@
 import {
   Activity,
+  BicepsFlexed,
   Bike,
   Dumbbell,
   Flower2,
   Footprints,
-  House,
   PersonStanding,
   Trophy,
   Waves,
@@ -20,7 +20,7 @@ export const tipoAtividadeIcones: Record<TipoAtividade, LucideIcon> = {
   Natacao: Waves,
   Esporte: Trophy,
   Yoga: Flower2,
-  TreinoEmCasa: House,
+  Calistenia: BicepsFlexed,
   Outro: Activity,
 };
 
