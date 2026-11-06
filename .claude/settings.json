@@ -8,6 +8,7 @@
     }
   },
   "enabledPlugins": {
-    "pixel-plugin@pixel-plugin": true
+    "pixel-plugin@pixel-plugin": true,
+    "ui-ux-pro-max@ui-ux-pro-max-skill": false
   }
 }
