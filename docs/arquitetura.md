@@ -1386,6 +1386,10 @@ Desenvolver em fatias verticais funcionais.
 
 Situação: PWA em `decisoes/0021-pwa-e-service-worker.md`; backups em `decisoes/0022-backups.md`; HTTPS pelo Caddy na VM e pelo túnel da Cloudflare no `run.bat --tunnel`. O deploy na Oracle Cloud está bloqueado por falta de capacidade na região e a hospedagem definitiva segue indefinida (ver `decisoes/0005-implantacao-via-ssh.md`).
 
+### Fase 9 — Gamificação (opcional)
+
+Modo Jogo como tela inicial alternativa, com avatar, Energia, loja, missões semanais e interações amistosas, sem alterar a competição oficial. Fases G1 a G6 em `gamificacao.md`; direção em `decisoes/0023-gamificacao.md`.
+
 ---
 
 ## 19. Fora do escopo inicial
