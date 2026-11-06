@@ -776,7 +776,7 @@ Atividades adicionais podem ser registradas, mas não compensam semanas anterior
 
 As semanas devem seguir o fuso horário configurado no grupo.
 
-Padrão inicial:
+Regra fixa para todo o aplicativo (desafios, progresso, perfil e Jogo):
 
 - Segunda-feira como primeiro dia.
 - Domingo como último dia.

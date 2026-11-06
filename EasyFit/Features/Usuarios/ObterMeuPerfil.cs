@@ -107,12 +107,24 @@ internal static class ObterMeuPerfil
         Guid usuarioId,
         CancellationToken cancellationToken)
     {
+        // date_trunc('week') segue a semana ISO, de segunda a domingo. A semana atual vem do fuso
+        // dos grupos da pessoa, como as atividades; com fusos diferentes, vale o primeiro a virar
+        // a semana. Sem grupo, vale o UTC.
         await using var command = new NpgsqlCommand($"""
-            WITH semanas AS (
+            WITH hoje AS (
+                SELECT COALESCE(
+                    (SELECT max((now() AT TIME ZONE g.fuso_horario)::date)
+                     FROM membros_grupo m
+                     JOIN grupos g ON g.id = m.grupo_id
+                     WHERE m.usuario_id = $1 AND m.removed_at IS NULL),
+                    (now() AT TIME ZONE 'UTC')::date) AS dia
+            ),
+            semanas AS (
                 SELECT generate_series(
-                    date_trunc('week', now() AT TIME ZONE 'UTC') - interval '{SemanasNoGrafico - 1} weeks',
-                    date_trunc('week', now() AT TIME ZONE 'UTC'),
+                    date_trunc('week', hoje.dia) - interval '{SemanasNoGrafico - 1} weeks',
+                    date_trunc('week', hoje.dia),
                     interval '1 week')::date AS inicio
+                FROM hoje
             )
             SELECT s.inicio,
                 count(a.id) FILTER (WHERE a.situacao_verificacao = 'Verificada')::int,

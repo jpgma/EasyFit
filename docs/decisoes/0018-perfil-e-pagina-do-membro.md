@@ -20,7 +20,7 @@ O novo mockup (decisão 0014) tem um Perfil com estatísticas, gráfico e conqui
 
 ## Decisão
 
-- `GET /api/usuarios/eu/perfil` devolve totais de treinos verificados, tempo total, melhor sequência, as últimas 8 semanas e as conquistas, somando todos os grupos. O gráfico não tem linha de meta, porque os grupos podem ter metas diferentes.
+- `GET /api/usuarios/eu/perfil` devolve totais de treinos verificados, tempo total, melhor sequência, as últimas 8 semanas (de segunda a domingo) e as conquistas, somando todos os grupos. A semana atual vem do fuso dos grupos ativos da pessoa; com fusos diferentes, vale o primeiro a virar a semana, e sem grupo vale o UTC. O gráfico não tem linha de meta, porque os grupos podem ter metas diferentes.
 - `GET /api/grupos/{id}/membros/{usuarioId}/perfil` exige ser membro ativo do grupo e só traz dados dele: nome, papel, totais no grupo e o desafio em destaque. Nunca e-mail nem conquistas.
 - As conquistas ficam em `ConquistasUsuario`, uma regra pura:
   - sequência de 4, 8 e 12 semanas, usando a melhor sequência em um único desafio, sem somar desafios;

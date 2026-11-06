@@ -128,6 +128,26 @@ public sealed class UsuariosRoutesTests : IAsyncLifetime
         Assert.Equal(12, perfil.Semanas.Sum(s => s.SessoesVerificadas));
     }
 
+    [Theory]
+    [InlineData("Pacific/Kiritimati")] // UTC+14
+    [InlineData("Pacific/Pago_Pago")] // UTC−11
+    public async Task MeuPerfil_SemanasComecamNaSegunda_NoFusoDoGrupo(string fusoHorario)
+    {
+        var ana = await _host.CreateUsuarioAsync("Ana");
+        var grupoId = await _host.CreateGrupoAsync(ana);
+        await _host.ExecuteAsync($"UPDATE grupos SET fuso_horario = '{fusoHorario}' WHERE id = '{grupoId}'");
+        var segundaNoFuso = await _host.ScalarAsync<DateTime>(
+            $"SELECT date_trunc('week', (now() AT TIME ZONE '{fusoHorario}')::date)::date::timestamp");
+
+        var perfil = await ana.Client.GetFromJsonAsync(
+            "/api/usuarios/eu/perfil",
+            AppJsonContext.Default.MeuPerfilResponse,
+            Token);
+
+        Assert.All(perfil!.Semanas, s => Assert.Equal(DayOfWeek.Monday, s.Inicio.DayOfWeek));
+        Assert.Equal(DateOnly.FromDateTime(segundaNoFuso), perfil.Semanas[^1].Inicio);
+    }
+
     [Fact]
     public async Task MeuPerfil_MelhorSequenciaUsaUmUnicoDesafio()
     {

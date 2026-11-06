@@ -100,7 +100,7 @@ As sequências seguem a mesma regra das conquistas: a melhor sequência num úni
 | Primeiro tipo de atividade novo na semana | 10 |
 
 - Máximo de **15 EN de bônus por atividade**.
-- Horários e semanas no fuso do grupo da atividade.
+- Horários e semanas no fuso do grupo da atividade. Toda semana vai de segunda a domingo, como no desafio.
 - Várias atividades no mesmo dia rendem o bônus de dia novo só uma vez.
 
 ### 5.3. Cálculo na leitura
@@ -131,7 +131,7 @@ A regra fica numa função pura (`CalculoEnergia`), com testes unitários.
 
 ## 7. Missões semanais
 
-- Toda semana, cada pessoa recebe de 2 a 3 missões, sorteadas de uma lista fixa no código. O sorteio é determinístico por usuário e semana, então não precisa ser gravado.
+- Toda semana (de segunda a domingo, no fuso do grupo), cada pessoa recebe de 2 a 3 missões, sorteadas de uma lista fixa no código. O sorteio é determinístico por usuário e semana, então não precisa ser gravado.
 - O progresso vem das atividades verificadas, como tudo o mais.
 - A mesma atividade pode contar para várias missões.
 - Exemplos:

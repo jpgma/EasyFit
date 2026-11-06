@@ -207,6 +207,8 @@ Nobody can edit or delete an activity.
 
 ### 7.3. Week of an activity
 
+All weeks in the application start on Monday and stop on Sunday, in the time zone of the group.
+
 The week of an activity is the week of its start date and time, in the time zone of the group. The system does not divide an activity between two weeks.
 
 ### 7.4. Lists of activities
@@ -320,7 +322,7 @@ The profile shows the data of the current user in all his or her groups:
 - Total of verified activities.
 - Total time.
 - Best streak.
-- Chart of the last 8 weeks. The chart does not show a goal line, because each group can have a different goal.
+- Chart of the last 8 weeks, from Monday to Sunday. The current week comes from the time zone of the groups of the user. If the groups have different time zones, the first time zone that starts a new week is used. The chart does not show a goal line, because each group can have a different goal.
 - Achievements.
 - List of groups.
 
