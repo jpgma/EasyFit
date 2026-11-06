@@ -68,7 +68,10 @@ EasyFit/                    # aplicação: API e frontend
 EasyFit.UnitTests/          # regras puras e testes de arquitetura
 EasyFit.IntegrationTests/   # HTTP e SQL contra o PostgreSQL
 deploy/  scripts/  docs/
+pixel-art/                  # scripts Python que geram a arte do Jogo (criada com a primeira arte)
 ```
+
+Arte em pixel do Jogo (avatares, Enfeites, cartas, cenário): use a skill `.claude/skills/pixel-art-studio/`, que segue `docs/avatar-formato.md` e `docs/gamificacao.md` §4.4. Cada arte tem um `pixel-art/<slug>/build.py` versionado; nunca edite o PNG à mão. Arquivos do Aseprite (`.aseprite`, `.ase`) são trabalhados sempre com o plugin `pixel-plugin` (habilitado em `.claude/settings.json`; exige o Aseprite instalado e configurado com `/pixel-setup`).
 
 Não recrie `src/`, `tests/` ou `web/`: projetos ficam na raiz e o frontend fica em `EasyFit/webapp/`. Ver `docs/decisoes/0004-estrutura-do-repositorio.md`.
 
