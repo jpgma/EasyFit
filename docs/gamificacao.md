@@ -1,6 +1,6 @@
 # Gamificação — EasyFit
 
-> **Status:** proposta refinada, ainda sem código. A direção geral está em `decisoes/0023-gamificacao.md`, com as mudanças de `decisoes/0024-cartas-e-avatar-importado.md`. O formato da folha de sprites está em `avatar-formato.md`. Cada fase atualiza `funcionalidades.md` quando for entregue.
+> **Status:** proposta refinada, ainda sem código. A direção geral está em `decisoes/0023-gamificacao.md`, com as mudanças de `decisoes/0024-cartas-e-avatar-importado.md`. O formato da folha de sprites está em `avatar-formato.md`, e o avatar base e o kit de camadas estão em `avatar-kit.md`. Cada fase atualiza `funcionalidades.md` quando for entregue.
 
 ## 1. Visão
 
@@ -97,7 +97,7 @@ As interações acontecem no centro do círculo. Como tudo é assíncrono, cada 
 ## 4. Avatar
 
 - Cada usuário tem um único avatar, igual em todos os grupos.
-- Quem nunca configurou o avatar recebe uma das folhas padrão do bundle, escolhida de forma estável pelo identificador do usuário.
+- Quem nunca configurou o avatar recebe uma das 6 folhas padrão do bundle, escolhida de forma estável pelo identificador do usuário.
 - A pessoa pode **importar a própria folha de sprites**, num formato documentado publicamente (§4.3).
 - Fora da cena, o componente `Avatar` mostra a célula `retrato` da folha no lugar das iniciais. Isso vale para todos, inclusive para quem está no modo App.
 - O avatar é só visual: nenhuma folha dá vantagem no Jogo.
@@ -113,22 +113,22 @@ Resumo de `avatar-formato.md`:
 
 ### 4.2. Animações
 
-A arte padrão deriva do template CC0 *2D Platformer Character Template*, cujos quadros têm 16×16. A arte é redesenhada em 32×32, mantendo as proporções e o ritmo.
+A arte padrão é o personagem do template CC0 *2D Platformer Character Template*, em quadros de 16×16 ampliados 2×, com pele, cabelo, roupa e acessórios trocáveis. As linhas novas são montadas com peças dos quadros do template. Detalhes em `avatar-kit.md` §3.1.
 
 | Linha | Quadros | Repetição | Uso | Base no template |
 |---|---:|---|---|---|
-| `retrato` | 1 | estático | `Avatar` fora da cena | cabeça do Idle1, ampliada |
-| `parado` | 4 | sim, 200 ms | pose padrão, respirando | Idle1 + 3 quadros novos |
+| `retrato` | 1 | estático | `Avatar` fora da cena | cabeça do JumpTurn1 (de frente), ampliada 3× |
+| `parado` | 4 | sim, 200 ms | pose padrão, respirando | Idle1, com a parte de cima descendo 1 px |
 | `andar` | 8 | sim, 100 ms | ir ao centro e voltar | Walk1–8 |
-| `treinando` | 6 | sim, 90 ms | atividade aguardando verificação | Jog1–8, sem deslocamento |
+| `treinando` | 6 | sim, 90 ms | atividade aguardando verificação | Jog 1, 2, 4, 5, 6 e 8 |
 | `comemorando` | 6 | sim, 120 ms | meta cumprida, Jogada e missão concluídas, rival vencido | Jump1–5, como pulo no lugar |
-| `alongar` | 4 | uma vez | variação de `parado` | nova |
-| `olhar` | 4 | uma vez | variação de `parado` | nova |
-| `arremessar` | 5 | uma vez; a carta sai no terceiro quadro | jogar uma carta, DESAFIO DUPLO | Crouch1 (preparo), Dash (seguimento) |
-| `receber` | 4 | uma vez | pegar a carta | Crouch2 + quadros novos |
-| `aceitar` | 4 | uma vez | aceitar a carta (soco no ar) | nova |
-| `recusar` | 3 | uma vez | recusar a carta (dar de ombros) | nova |
-| `provocar` | 4 | uma vez | encontro dos rivais | nova |
+| `alongar` | 4 | uma vez | variação de `parado` | Idle1 com o braço do WallSlide |
+| `olhar` | 4 | uma vez | variação de `parado` | Idle1 com o olho para a frente e para trás |
+| `arremessar` | 5 | uma vez; a carta sai no terceiro quadro | jogar uma carta, DESAFIO DUPLO | Crouch 1–2 (preparo), Dash 1–2 (seguimento), Idle1 |
+| `receber` | 4 | uma vez | pegar a carta | Idle1 com os braços do Jump2 |
+| `aceitar` | 4 | uma vez | aceitar a carta (soco no ar) | Crouch1, Idle1 com o braço do WallSlide |
+| `recusar` | 3 | uma vez | recusar a carta (dar de ombros) | Idle1 com os braços erguidos 1 px |
+| `provocar` | 4 | uma vez | encontro dos rivais | Idle1 com o braço esticado do Dash |
 
 - São 53 quadros por folha. Com paleta pequena, um PNG fica entre 5 e 15 KB.
 - Não precisam de animação própria: virar (espelho instantâneo), o voo e os carimbos da carta (CSS) e o brilho da missão (CSS).
@@ -150,7 +150,7 @@ Todo o bundle é CC0, com o arquivo `LICENSE` junto dos sprites. Nada é carrega
 
 | Peça | Tamanho | Quantidade |
 |---|---|---:|
-| Folhas padrão de avatar | 256×384 | 3 a 4 |
+| Folhas padrão de avatar (pele clara, morena e negra; corpo masculino e feminino) | 256×384 | 6 |
 | Chão da praça (vista de cima), com barra fixa num canto | cerca de 180×150, em 2× | 1 |
 | Moldura de carta | 24×32 | 2 (Provocação, Resposta) |
 | Ícone de carta | 16×16 | 9 |
@@ -385,7 +385,7 @@ Cada fase entrega algo visível e pode ser a última. Todas ficam na fatia `Jogo
 - `PUT /api/usuarios/eu/modo-inicio` e o campo `modoInicio` na sessão (fatias `Usuarios` e `Autenticacao`).
 - Opção na página Configurações e cartão de convite único na tela App.
 - `InicioPage` escolhe entre a visão App atual e a cena, na mesma rota.
-- As folhas padrão, o chão da praça e o `LICENSE` CC0 no bundle.
+- As folhas padrão (geradas em `pixel-art/avatar-base/saida/`), o chão da praça e o `LICENSE` CC0 no bundle.
 - Cena em círculo com as poses `parado`, `treinando` e `comemorando` e as variações de `parado`.
 - O `Avatar` mostra o `retrato` da folha padrão.
 
@@ -436,6 +436,7 @@ Cada fase entrega algo visível e pode ser a última. Todas ficam na fatia `Jogo
 | Eventos do grupo (festival de fim de semana, bingo, 100 sessões) | Precisam de datas, regras e itens próprios. Reavaliar depois da G7. |
 | Marcos coletivos do grupo | Idem. |
 | Cartas novas | Observar o uso das 9 primeiras antes. |
+| Editor de avatar por peças (`avatar-kit.md` §7) | Montar o avatar com corpo, pele, cabelo, roupa e acessórios do kit, guardando só as escolhas. Reavaliar depois da G6. |
 | Ciclos de andar de frente e de costas | O andar de lado com balanço atende. Exigiriam mais linhas em toda folha importada. |
 
 **Descartado:**

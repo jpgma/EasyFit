@@ -1,0 +1,11 @@
+{
+  "nome": "Davi",
+  "corpo": "masculino",
+  "pele": "morena",
+  "cabelo": { "estilo": "raspado", "cor": "preto" },
+  "blusa": { "estilo": "regata", "cor": "#d63c3c" },
+  "calca": { "estilo": "short", "cor": "#7d7f8c" },
+  "tenis": { "cor": "#2a2a33", "sola": "#f0f0f4" },
+  "meia": "#f4f4f8",
+  "acessorios": { "munhequeira": "#2a2a33", "garrafa": "#36a3d9" }
+}

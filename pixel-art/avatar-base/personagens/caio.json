@@ -1,0 +1,11 @@
+{
+  "nome": "Caio",
+  "corpo": "masculino",
+  "pele": "clara",
+  "cabelo": { "estilo": "curto", "cor": "castanho" },
+  "blusa": { "estilo": "camiseta", "cor": "#3f73d9" },
+  "calca": { "estilo": "short", "cor": "#2c2c38" },
+  "tenis": { "cor": "#f0f0f4", "sola": "#8d8d9c" },
+  "meia": "#f4f4f8",
+  "acessorios": { "fone": "#2a2a33" }
+}

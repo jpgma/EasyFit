@@ -1,0 +1,10 @@
+{
+  "nome": "Lara",
+  "corpo": "feminino",
+  "pele": "morena",
+  "cabelo": { "estilo": "coque", "cor": "castanho" },
+  "blusa": { "estilo": "camiseta", "cor": "#3fae6a" },
+  "calca": { "estilo": "jogger", "cor": "#2c2c38" },
+  "tenis": { "cor": "#f08a2c", "sola": "#f0f0f4" },
+  "acessorios": { "fone": "#f0f0f4" }
+}

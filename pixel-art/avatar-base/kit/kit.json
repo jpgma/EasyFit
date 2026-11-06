@@ -1,0 +1,507 @@
+{
+  "rig_sha256": "237cf665a8bbc55bc3abc249c17d05e8c61c3a647b37248b43c5b38ab53691ad",
+  "quadro": 16,
+  "escala": 2,
+  "animacoes": [
+    {
+      "nome": "retrato",
+      "quadros": 1,
+      "ms": 0,
+      "repete": false
+    },
+    {
+      "nome": "parado",
+      "quadros": 4,
+      "ms": 200,
+      "repete": true
+    },
+    {
+      "nome": "andar",
+      "quadros": 8,
+      "ms": 100,
+      "repete": true
+    },
+    {
+      "nome": "treinando",
+      "quadros": 6,
+      "ms": 90,
+      "repete": true
+    },
+    {
+      "nome": "comemorando",
+      "quadros": 6,
+      "ms": 120,
+      "repete": true
+    },
+    {
+      "nome": "alongar",
+      "quadros": 4,
+      "ms": 150,
+      "repete": false
+    },
+    {
+      "nome": "olhar",
+      "quadros": 4,
+      "ms": 200,
+      "repete": false
+    },
+    {
+      "nome": "arremessar",
+      "quadros": 5,
+      "ms": 80,
+      "repete": false
+    },
+    {
+      "nome": "receber",
+      "quadros": 4,
+      "ms": 100,
+      "repete": false
+    },
+    {
+      "nome": "aceitar",
+      "quadros": 4,
+      "ms": 120,
+      "repete": false
+    },
+    {
+      "nome": "recusar",
+      "quadros": 3,
+      "ms": 150,
+      "repete": false
+    },
+    {
+      "nome": "provocar",
+      "quadros": 4,
+      "ms": 120,
+      "repete": false
+    }
+  ],
+  "camadas": [
+    "braco-tras",
+    "garrafa",
+    "perna-tras",
+    "tronco-masculino",
+    "tronco-feminino",
+    "capuz",
+    "perna-frente",
+    "braco-frente",
+    "cabeca",
+    "rosto-masculino",
+    "rosto-feminino",
+    "cabelo-raspado",
+    "cabelo-curto",
+    "cabelo-crespo",
+    "cabelo-rabo",
+    "cabelo-coque",
+    "bone",
+    "fone"
+  ],
+  "cores_id": {
+    "#803939": [
+      "pele",
+      0
+    ],
+    "#bf5656": [
+      "pele",
+      1
+    ],
+    "#fa7070": [
+      "pele",
+      2
+    ],
+    "#193780": [
+      "olho",
+      0
+    ],
+    "#2653bf": [
+      "olho",
+      1
+    ],
+    "#326cfa": [
+      "olho",
+      2
+    ],
+    "#628039": [
+      "tronco",
+      0
+    ],
+    "#93bf56": [
+      "tronco",
+      1
+    ],
+    "#c1fa70": [
+      "tronco",
+      2
+    ],
+    "#801973": [
+      "quadril",
+      0
+    ],
+    "#bf26ac": [
+      "quadril",
+      1
+    ],
+    "#fa32e1": [
+      "quadril",
+      2
+    ],
+    "#398074": [
+      "braco",
+      0
+    ],
+    "#56bfae": [
+      "braco",
+      1
+    ],
+    "#70fae3": [
+      "braco",
+      2
+    ],
+    "#805119": [
+      "antebraco",
+      0
+    ],
+    "#bf7926": [
+      "antebraco",
+      1
+    ],
+    "#fa9e32": [
+      "antebraco",
+      2
+    ],
+    "#4b3980": [
+      "punho",
+      0
+    ],
+    "#7056bf": [
+      "punho",
+      1
+    ],
+    "#9370fa": [
+      "punho",
+      2
+    ],
+    "#1e8019": [
+      "mao",
+      0
+    ],
+    "#2dbf26": [
+      "mao",
+      1
+    ],
+    "#3afa32": [
+      "mao",
+      2
+    ],
+    "#803951": [
+      "coxa",
+      0
+    ],
+    "#bf5679": [
+      "coxa",
+      1
+    ],
+    "#fa709e": [
+      "coxa",
+      2
+    ],
+    "#195980": [
+      "canela",
+      0
+    ],
+    "#2686bf": [
+      "canela",
+      1
+    ],
+    "#32affa": [
+      "canela",
+      2
+    ],
+    "#7a8039": [
+      "tornozelo",
+      0
+    ],
+    "#b7bf56": [
+      "tornozelo",
+      1
+    ],
+    "#effa70": [
+      "tornozelo",
+      2
+    ],
+    "#6a1980": [
+      "pe",
+      0
+    ],
+    "#9f26bf": [
+      "pe",
+      1
+    ],
+    "#d032fa": [
+      "pe",
+      2
+    ],
+    "#39805c": [
+      "cabelo",
+      0
+    ],
+    "#56bf8a": [
+      "cabelo",
+      1
+    ],
+    "#70fab5": [
+      "cabelo",
+      2
+    ],
+    "#802f19": [
+      "bone",
+      0
+    ],
+    "#bf4626": [
+      "bone",
+      1
+    ],
+    "#fa5b32": [
+      "bone",
+      2
+    ],
+    "#393f80": [
+      "bone_aba",
+      0
+    ],
+    "#565fbf": [
+      "bone_aba",
+      1
+    ],
+    "#707cfa": [
+      "bone_aba",
+      2
+    ],
+    "#408019": [
+      "fone",
+      0
+    ],
+    "#60bf26": [
+      "fone",
+      1
+    ],
+    "#7dfa32": [
+      "fone",
+      2
+    ],
+    "#803968": [
+      "fone_concha",
+      0
+    ],
+    "#bf569c": [
+      "fone_concha",
+      1
+    ],
+    "#fa70cc": [
+      "fone_concha",
+      2
+    ],
+    "#197b80": [
+      "capuz",
+      0
+    ],
+    "#26b9bf": [
+      "capuz",
+      1
+    ],
+    "#32f2fa": [
+      "capuz",
+      2
+    ],
+    "#806e39": [
+      "garrafa",
+      0
+    ],
+    "#bfa556": [
+      "garrafa",
+      1
+    ],
+    "#fad770": [
+      "garrafa",
+      2
+    ],
+    "#481980": [
+      "garrafa_tampa",
+      0
+    ],
+    "#6c26bf": [
+      "garrafa_tampa",
+      1
+    ],
+    "#8d32fa": [
+      "garrafa_tampa",
+      2
+    ]
+  },
+  "contorno": "#0e071b",
+  "regioes_base": {
+    "pele": "pele",
+    "mao": "pele",
+    "braco": "pele",
+    "antebraco": "pele",
+    "punho": "pele",
+    "coxa": "pele",
+    "canela": "pele",
+    "tornozelo": "pele",
+    "olho": "olho",
+    "cabelo": "cabelo",
+    "pe": "tenis",
+    "bone": "bone",
+    "bone_aba": [
+      "bone",
+      0
+    ],
+    "fone": [
+      "fone",
+      1
+    ],
+    "fone_concha": [
+      "fone",
+      0
+    ],
+    "capuz": "blusa",
+    "garrafa": "garrafa",
+    "garrafa_tampa": [
+      "garrafa_tampa",
+      1
+    ]
+  },
+  "blusas": {
+    "camiseta": {
+      "tronco": "blusa",
+      "braco": "blusa"
+    },
+    "regata": {
+      "tronco": "blusa"
+    },
+    "moletom": {
+      "tronco": "blusa",
+      "braco": "blusa",
+      "antebraco": "blusa",
+      "punho": [
+        "blusa",
+        0
+      ]
+    }
+  },
+  "calcas": {
+    "short": {
+      "quadril": "calca",
+      "coxa": "calca"
+    },
+    "legging": {
+      "quadril": "calca",
+      "coxa": "calca",
+      "canela": "calca"
+    },
+    "jogger": {
+      "quadril": "calca",
+      "coxa": "calca",
+      "canela": "calca",
+      "tornozelo": [
+        "calca",
+        0
+      ]
+    }
+  },
+  "camadas_blusa": {
+    "moletom": [
+      "capuz"
+    ]
+  },
+  "acessorios": {
+    "bone": {
+      "camada": "bone"
+    },
+    "fone": {
+      "camada": "fone"
+    },
+    "garrafa": {
+      "camada": "garrafa",
+      "tampa": "#3a3a44"
+    },
+    "munhequeira": {
+      "regioes": {
+        "punho": "munhequeira"
+      }
+    }
+  },
+  "meia": {
+    "regioes": {
+      "tornozelo": "meia"
+    },
+    "exceto_calcas": [
+      "jogger"
+    ]
+  },
+  "peles": {
+    "clara": [
+      "#e0a07e",
+      "#f6c9a4",
+      "#fde3cc"
+    ],
+    "morena": [
+      "#a5683f",
+      "#c98f5e",
+      "#e2ae80"
+    ],
+    "negra": [
+      "#5a3826",
+      "#87573a",
+      "#a8744f"
+    ]
+  },
+  "cabelos": {
+    "estilos": [
+      "raspado",
+      "curto",
+      "crespo",
+      "rabo",
+      "coque",
+      "careca"
+    ],
+    "cores": {
+      "preto": [
+        "#1a1932",
+        "#2a2840",
+        "#45405a"
+      ],
+      "castanho": [
+        "#3f2619",
+        "#64402a",
+        "#8a5e3e"
+      ],
+      "loiro": [
+        "#a9783a",
+        "#d8ad5c",
+        "#f1d488"
+      ],
+      "ruivo": [
+        "#7f321d",
+        "#b0502b",
+        "#d97a45"
+      ],
+      "grisalho": [
+        "#7d7b86",
+        "#aeacb5",
+        "#d8d7de"
+      ]
+    }
+  },
+  "olho": [
+    "#0e071b",
+    "#0e071b",
+    "#0e071b"
+  ],
+  "rampa": {
+    "steps": 3,
+    "hue_shift": 10,
+    "dark": 0.3,
+    "light": 0.4
+  }
+}

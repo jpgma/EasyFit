@@ -1,0 +1,10 @@
+{
+  "nome": "Bia",
+  "corpo": "feminino",
+  "pele": "clara",
+  "cabelo": { "estilo": "rabo", "cor": "loiro" },
+  "blusa": { "estilo": "regata", "cor": "#e0558f" },
+  "calca": { "estilo": "legging", "cor": "#3a3448" },
+  "tenis": { "cor": "#f0f0f4", "sola": "#e0558f" },
+  "acessorios": { "munhequeira": "#f4f4f8" }
+}

@@ -20,7 +20,7 @@ O aplicativo re-codifica a folha no navegador antes de enviar e confere tudo de 
 - Cada célula mostra o personagem **de lado, virado para a direita**. O aplicativo espelha a célula quando o avatar olha para a esquerda.
 - **Âncora:** o ponto entre os pés fica no pixel (16, 31) de cada célula, com a linha 31 como chão. O aplicativo usa esse ponto para posicionar o avatar e decidir quem fica na frente.
 - O personagem deve caber na célula em todos os quadros. Ele não se desloca dentro da célula: o aplicativo cuida do deslocamento ao andar.
-- Recomendação de proporção: corpo de cerca de 12 px de largura e 28 px de altura, e cabeça de cerca de 10 × 10 px, como no template de referência redesenhado em 2×.
+- Recomendação de proporção: a do template de referência ampliado 2×, com a cabeça de cerca de 8 × 8 px, o corpo de cerca de 8 px de largura e o personagem inteiro com cerca de 28 px de altura, incluindo o contorno.
 - Pixel-art sem antisserrilhado: o aplicativo amplia em escala inteira com `image-rendering: pixelated`.
 
 ## 3. Linhas
@@ -57,4 +57,4 @@ O aplicativo nunca muda os tempos nem a ordem dos quadros. Assim, todas as pesso
 
 ## 5. Referência
 
-A arte padrão deriva do *2D Platformer Character Template* (CC0), cujos quadros têm 16 × 16 px. A correspondência entre as linhas e as animações do template está em `gamificacao.md` §4.2.
+As animações da arte padrão seguem a estrutura do *2D Platformer Character Template* (CC0), cujos quadros têm 16 × 16 px. A correspondência entre as linhas e as animações do template está em `gamificacao.md` §4.2. As folhas padrão são geradas pelo rig descrito em `avatar-kit.md`.

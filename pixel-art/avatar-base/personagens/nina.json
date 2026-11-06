@@ -1,0 +1,10 @@
+{
+  "nome": "Nina",
+  "corpo": "feminino",
+  "pele": "negra",
+  "cabelo": { "estilo": "rabo", "cor": "preto" },
+  "blusa": { "estilo": "camiseta", "cor": "#f4f4f8" },
+  "calca": { "estilo": "legging", "cor": "#7a4fc9" },
+  "tenis": { "cor": "#e0558f", "sola": "#f0f0f4" },
+  "acessorios": { "bone": "#d63c3c" }
+}

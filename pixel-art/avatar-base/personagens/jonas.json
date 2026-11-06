@@ -1,0 +1,9 @@
+{
+  "nome": "Jonas",
+  "corpo": "masculino",
+  "pele": "negra",
+  "cabelo": { "estilo": "crespo", "cor": "preto" },
+  "blusa": { "estilo": "moletom", "cor": "#e0a92c" },
+  "calca": { "estilo": "jogger", "cor": "#2c3456" },
+  "tenis": { "cor": "#f0f0f4", "sola": "#d63c3c" }
+}
