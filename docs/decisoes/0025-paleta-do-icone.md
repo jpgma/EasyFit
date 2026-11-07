@@ -1,10 +1,10 @@
 # 0025 — Paleta tirada do ícone do aplicativo
 
-**Status:** DECIDIDA. Substitui a paleta da decisão 0014; o resto dela continua valendo.
+**Status:** SUBSTITUÍDA pela decisão 0027 (identidade visual Wrexercise).
 
 ## Contexto
 
-A decisão 0014 trouxe do mockup uma paleta verde. O aplicativo ganhou um ícone próprio (`EasyFit/webapp/icon-source.png`): carta creme com um braço flexionado, sobre raios laranja e dourados, cartas azul e roxa atrás e contorno ameixa. Com a interface verde e o ícone laranja, a tela inicial do PWA, a aba do navegador e as telas não pareciam o mesmo produto.
+A decisão 0014 trouxe do mockup uma paleta verde. O aplicativo ganhou um ícone próprio (`Wrexercise/webapp/icon-source.png`): carta creme com um braço flexionado, sobre raios laranja e dourados, cartas azul e roxa atrás e contorno ameixa. Com a interface verde e o ícone laranja, a tela inicial do PWA, a aba do navegador e as telas não pareciam o mesmo produto.
 
 ## Alternativas consideradas
 
@@ -34,7 +34,7 @@ A decisão 0014 trouxe do mockup uma paleta verde. O aplicativo ganhou um ícone
 - **Situações:** erro (`danger`) vira carmim, mais frio que o laranja, para não ser confundido com destaque. Aviso (`warning`) continua âmbar e só aparece com ícone ou texto. Informação (`info`) usa o roxo-azulado das cartas. Sucesso continua verde.
 - **Contraste:** todo par de texto passa 4,5:1 e todo ícone ou borda de campo passa 3:1, nos dois temas.
 
-Os valores ficam em `EasyFit/webapp/src/styles/index.css`. O `theme-color` de `index.html` e as cores do `manifest.webmanifest` acompanham os fundos e a marca.
+Os valores ficam em `Wrexercise/webapp/src/styles/index.css`. O `theme-color` de `index.html` e as cores do `manifest.webmanifest` acompanham os fundos e a marca.
 
 ## Impacto
 

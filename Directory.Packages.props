@@ -1,6 +1,6 @@
 <Project>
   <!-- Toda dependência nova exige justificativa e entrada em
-       EasyFit.UnitTests/Architecture/PackageAllowlistTests.cs. -->
+       Wrexercise.UnitTests/Architecture/PackageAllowlistTests.cs. -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>

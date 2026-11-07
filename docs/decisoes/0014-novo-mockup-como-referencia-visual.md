@@ -32,7 +32,8 @@ A decisão 0007 adotou o mockup `easyfit-mockup-main` como referência de aparê
 
 O mockup `fitas-e-amigos` define a aparência e os fluxos das telas. `arquitetura.md`, `AGENTS.md` e o glossário prevalecem em regras de negócio, nomes, segurança e dependências.
 
-- **Paleta:** substituída pela decisão 0025, que tira as cores do ícone do aplicativo. Os tokens semânticos de `styles/index.css` continuam os mesmos, exceto `lime`, renomeado para `accent`.
+- **Paleta:** substituída pela decisão 0025 e depois pela 0027 (identidade Wrexercise). O token `lime` virou `accent` e, na 0027, `reward`.
+- **Fontes:** a Bricolage Grotesque foi substituída pela Anton na decisão 0027.
 - **Tema escuro:** o mockup só tem o tema claro. O escuro acompanha o sistema, sem seletor manual.
 - **Avatares:** a matiz vem do identificador do usuário, em `--avatar-hue`, e a luminosidade vem do tema. É a única exceção à regra de usar apenas tokens de cor.
 - **Reações na interface:** `Kudos` aparece como "Dar moral" e "deu moral"; no código, na API e no banco continua `Kudos`. Cada reação tem sempre o mesmo símbolo, usado ao lado do texto ou sozinho quando falta espaço: 💪 `Kudos`, 🤨 `Suspeito`, ❌ `Rejeitar`.

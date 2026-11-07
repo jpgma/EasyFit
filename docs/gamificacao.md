@@ -1,4 +1,4 @@
-# Gamificação — EasyFit
+# Gamificação — Wrexercise
 
 > **Status:** proposta refinada, ainda sem código. A direção geral está em `decisoes/0023-gamificacao.md`, com as mudanças de `decisoes/0024-cartas-e-avatar-importado.md`. O formato da folha de sprites está em `avatar-formato.md`, e o avatar base e o kit de camadas estão em `avatar-kit.md`. Cada fase atualiza `funcionalidades.md` quando for entregue.
 
@@ -25,6 +25,23 @@ Pixel-art contemporâneo com estilo de vida urbano: streetwear, tênis, roupa de
 Evitar fantasia, medieval, monstros, magia, armas, combate, classes e atributos de RPG. As cartas são bilhetes de provocação entre amigos, não feitiços.
 
 O avatar é uma versão estilizada de uma pessoa real.
+
+### 1.3. Identidade visual do Jogo
+
+O Jogo é a parte mais expressiva da identidade Wrexercise (`decisoes/0027-identidade-visual-wrexercise.md`): um fliperama urbano onde a turma se encontra. As regras abaixo valem para as fases G1 a G7 e não mudam nenhuma mecânica.
+
+- **Cena:** uma quadra ou praça urbana vista de cima, com asfalto, marcações tracejadas de quadra, um alambrado ou mureta, a barra de calistenia (§9.3) e no máximo um grafite discreto. Nada de grama de RPG, pedras, tochas ou castelos.
+- **Paleta da pixel art:** os tons da marca guiam o cenário e as molduras: Asphalt `#222633` e uma rampa de cinzas-azulados para o chão, Chalk `#F5F1E8` para as linhas, Coral `#FF684A`, Electric Violet `#7957E8`, Signal Yellow `#FFD34E` e Lime `#A8D978` como acentos. Peles e cabelos continuam com as próprias rampas (`avatar-kit.md`). Salve a paleta na skill como `wrexercise` e use `Sprite(palette="wrexercise")`.
+- **UI em volta da cena:** componentes comuns do aplicativo (tokens de `styles/index.css`). Violeta (`game`) marca o que é do Jogo: saldo de Energia, Mão, botão de jogar carta. Amarelo (`reward`) é recompensa e conquista; lime (`progress`), progresso das Missões e da meta.
+- **Selos:** Missões, Rival e situação de Jogada usam os selos `badge-*` (caixa alta, contorno, sombra de adesivo). O Rival da semana ganha um selo com o número da posição, como placar.
+- **Movimento:** só as animações das folhas (§4.2) e as encenações (§3.3). A UI em volta usa os mesmos `pop` e `burst` do aplicativo, uma vez, e respeita `prefers-reduced-motion`.
+
+#### Cartas
+
+- **Mesma moldura para todas** (§4.4): contorno grosso escuro, cantos levemente recortados e um número de preço no canto, como etiqueta de placar.
+- **Hierarquia fixa:** nome em Anton e caixa alta (como no catálogo, §6.1); selo do tipo; ícone em pixel de 16×16; efeito em uma frase curta; preço em EN.
+- **Provocação e Resposta:** a moldura e a hierarquia são as mesmas, e muda só o acento. Provocação usa coral, com uma faixa de "linhas de movimento" no topo. Resposta usa violeta, com a faixa em halftone. O selo do tipo diz o nome por extenso, para a diferença não depender só da cor.
+- Nenhuma carta nova e nenhuma carta de defesa (§11). Os efeitos são os de §6.1.
 
 ## 2. Modos da tela inicial
 
@@ -151,8 +168,8 @@ Todo o bundle é CC0, com o arquivo `LICENSE` junto dos sprites. Nada é carrega
 | Peça | Tamanho | Quantidade |
 |---|---|---:|
 | Folhas padrão de avatar (pele clara, morena e negra; corpo masculino e feminino) | 256×384 | 6 |
-| Chão da praça (vista de cima), com barra fixa num canto | cerca de 180×150, em 2× | 1 |
-| Moldura de carta | 24×32 | 2 (Provocação, Resposta) |
+| Chão da praça (vista de cima, quadra urbana; ver §1.3), com barra fixa num canto | cerca de 180×150, em 2× | 1 |
+| Moldura de carta (mesma forma, acento coral ou violeta; ver §1.3) | 24×32 | 2 (Provocação, Resposta) |
 | Ícone de carta | 16×16 | 9 |
 | Enfeite | 16×16 ou 32×32 | 19 (§9.1) |
 

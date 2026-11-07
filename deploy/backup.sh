@@ -16,7 +16,7 @@ falhar() {
 
 backup() {
   data=$(date +%Y%m%d-%H%M%S)
-  dump="$destino/easyfit-$data.dump"
+  dump="$destino/wrexercise-$data.dump"
   arquivo="$destino/evidencias-$data.tar.gz"
 
   # Grava em .tmp e só renomeia depois de conferir: um backup pela metade nunca parece válido.
@@ -30,7 +30,7 @@ backup() {
   mv "$arquivo.tmp" "$arquivo"
 
   find "$destino" -maxdepth 1 -type f \
-    \( -name 'easyfit-*.dump' -o -name 'evidencias-*.tar.gz' \) \
+    \( -name 'wrexercise-*.dump' -o -name 'easyfit-*.dump' -o -name 'evidencias-*.tar.gz' \) \
     -mtime +"$retencao_dias" -delete
   rm -f "$destino"/*.tmp
 
@@ -41,7 +41,9 @@ backup() {
 restore() {
   data=${1:-}
   [ -n "$data" ] || falhar "informe a data do backup, por exemplo 20261105-030000."
-  dump="$destino/easyfit-$data.dump"
+  dump="$destino/wrexercise-$data.dump"
+  # Backups anteriores à troca de nome (decisão 0026) têm o prefixo antigo.
+  [ -f "$dump" ] || [ ! -f "$destino/easyfit-$data.dump" ] || dump="$destino/easyfit-$data.dump"
   arquivo="$destino/evidencias-$data.tar.gz"
   [ -f "$dump" ] || falhar "$dump não existe."
   [ -f "$arquivo" ] || falhar "$arquivo não existe."

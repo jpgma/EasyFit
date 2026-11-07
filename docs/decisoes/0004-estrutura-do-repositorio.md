@@ -15,22 +15,22 @@ A estrutura inicial separava o código em `src/`, `tests/` e `web/`. Com um úni
 ## Decisão
 
 ```text
-EasyFit/                    # aplicação: API e frontend
+Wrexercise/                 # aplicação: API e frontend
 ├── Features/
 ├── Infrastructure/
 ├── webapp/                 # código-fonte do frontend
 └── wwwroot/                # gerado a partir de webapp/, fora do git
-EasyFit.UnitTests/
-EasyFit.IntegrationTests/
+Wrexercise.UnitTests/
+Wrexercise.IntegrationTests/
 deploy/
 scripts/
 docs/
 ```
 
-`EasyFit.csproj` exclui `webapp/**` de seus itens padrão.
+`Wrexercise.csproj` exclui `webapp/**` de seus itens padrão.
 
 ## Impacto
 
 - Sem essa exclusão, o SDK Web trataria os arquivos JSON de `webapp/`, incluindo os de `node_modules/`, como conteúdo a publicar. A exclusão precisa permanecer enquanto o frontend estiver dentro do projeto.
-- O frontend continua sendo um projeto Node independente: os comandos `npm` rodam em `EasyFit/webapp/`.
+- O frontend continua sendo um projeto Node independente: os comandos `npm` rodam em `Wrexercise/webapp/`.
 - Testes continuam fora do projeto da aplicação, para não entrarem no binário Native AOT.

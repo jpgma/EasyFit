@@ -78,7 +78,7 @@ Entrada, remoção, saída, transferência, alteração de papel e criação de 
 ## Impacto
 
 - Novas tabelas `grupos`, `membros_grupo` e `convites_grupo`, sem `ON DELETE CASCADE`, porque ainda não existe exclusão de conta nem de grupo.
-- Novos contratos entre fatias: `EasyFit.Features.Grupos.Contracts` (`GrupoAcesso`, `GrupoEntrada`, `PapelMembro`), que as próximas fatias usarão para verificar o pertencimento, e `EasyFit.Features.Convites.Contracts` (`ConviteAceite`), usado pelo cadastro.
+- Novos contratos entre fatias: `Wrexercise.Features.Grupos.Contracts` (`GrupoAcesso`, `GrupoEntrada`, `PapelMembro`), que as próximas fatias usarão para verificar o pertencimento, e `Wrexercise.Features.Convites.Contracts` (`ConviteAceite`), usado pelo cadastro.
 - `SessaoToken` passou a se chamar `OpaqueToken`, porque também gera os convites.
 - **Compromisso aceito:** um Proprietário sozinho no grupo não consegue sair, porque o grupo não pode ser excluído nem transferido. Até a Q029 ser decidida, o operador resolve isso diretamente no banco.
 - **Compromisso aceito:** o link não pode ser recuperado depois de gerado. Quem perder o link cancela o convite e gera outro.

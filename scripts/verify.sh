@@ -16,38 +16,38 @@ esac
 step() { printf '\n==> %s\n' "$1"; }
 
 step "Backend: formatação"
-dotnet format EasyFit.slnx --verify-no-changes
+dotnet format Wrexercise.slnx --verify-no-changes
 
 step "Backend: build (avisos de AOT são erros)"
-dotnet build EasyFit.slnx -c Release --nologo -v quiet
+dotnet build Wrexercise.slnx -c Release --nologo -v quiet
 
 step "Backend: testes unitários e de arquitetura"
-dotnet test --project EasyFit.UnitTests -c Release --no-build
+dotnet test --project Wrexercise.UnitTests -c Release --no-build
 
 step "Frontend: dependências"
-(cd EasyFit/webapp && npm ci --no-audit --no-fund)
+(cd Wrexercise/webapp && npm ci --no-audit --no-fund)
 
 step "Frontend: Prettier"
-(cd EasyFit/webapp && npm run --silent format:check)
+(cd Wrexercise/webapp && npm run --silent format:check)
 
 step "Frontend: ESLint"
-(cd EasyFit/webapp && npm run --silent lint)
+(cd Wrexercise/webapp && npm run --silent lint)
 
 step "Frontend: tipos"
-(cd EasyFit/webapp && npm run --silent typecheck)
+(cd Wrexercise/webapp && npm run --silent typecheck)
 
 step "Frontend: build"
-(cd EasyFit/webapp && npm run --silent build)
+(cd Wrexercise/webapp && npm run --silent build)
 
 if [ "$full" = true ]; then
   step "Banco de desenvolvimento"
   scripts/dev-db.sh
 
   step "Backend: testes de integração"
-  dotnet test --project EasyFit.IntegrationTests -c Release --no-build
+  dotnet test --project Wrexercise.IntegrationTests -c Release --no-build
 
   step "Imagem linux/arm64 (publicação Native AOT real)"
-  docker buildx build --platform linux/arm64 -f deploy/Dockerfile -t easyfit:verify-arm64 --load .
+  docker buildx build --platform linux/arm64 -f deploy/Dockerfile -t wrexercise:verify-arm64 --load .
 fi
 
 printf '\nTudo certo.\n'

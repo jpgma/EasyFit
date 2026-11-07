@@ -20,7 +20,7 @@ A Fase 8 pede manifest, Service Worker, cache estático e instalação mobile (`
 
 ## Decisão
 
-- `EasyFit/webapp/sw.js` é escrito à mão em JS puro. O plugin `serviceWorker()` em `vite.config.ts` gera `wwwroot/sw.js` com:
+- `Wrexercise/webapp/sw.js` é escrito à mão em JS puro. O plugin `serviceWorker()` em `vite.config.ts` gera `wwwroot/sw.js` com:
   - a versão: um hash dos nomes do bundle e do conteúdo de `public/`;
   - o pré-cache: `index.html`, o chunk de entrada com seus imports estáticos, o CSS, as fontes e os arquivos de `public/`.
 - `/api/*`, `/health` e `/ready` nunca passam pelo Service Worker, o que inclui evidências e miniaturas. Requisições que não são `GET` ou que vêm de outra origem também não.
@@ -32,19 +32,19 @@ A Fase 8 pede manifest, Service Worker, cache estático e instalação mobile (`
 - Instalação: em Configurações, o botão "Instalar aplicativo" aparece quando o navegador oferece `beforeinstallprompt` (Chromium e Android). No iOS, aparece a instrução de usar Compartilhar.
 - O backend responde `sw.js` e `manifest.webmanifest` com `no-cache`, como o `index.html`.
 - O Service Worker só é registrado no build de produção. No `npm run dev`, não há cache.
-- Ícones em `public/` (`favicon.ico`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png`), gerados com o ImageMagick por `scripts/gerar-icones.sh` (no Windows, `scripts\gerar-icones.bat`) a partir de `EasyFit/webapp/icon-source.png`, que fica fora de `public/` para não entrar no pré-cache. Para trocar o ícone, passe o PNG novo, quadrado e de preferência com 1024 px: `scripts/gerar-icones.sh novo-icone.png`. O script copia o arquivo para `icon-source.png` e gera tudo de novo:
+- Ícones em `public/` (`favicon.ico`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png`), gerados com o ImageMagick por `scripts/gerar-icones.sh` (no Windows, `scripts\gerar-icones.bat`) a partir de `Wrexercise/webapp/icon-source.png`, que fica fora de `public/` para não entrar no pré-cache. Para trocar o ícone, passe o PNG novo, quadrado e de preferência com 1024 px: `scripts/gerar-icones.sh novo-icone.png`. O script copia o arquivo para `icon-source.png` e gera tudo de novo:
   - `favicon.ico`, `icon-192.png` e `icon-512.png`: a arte inteira, com os cantos transparentes. O `BrandMark` da interface usa o `icon-192.png`.
   - `apple-touch-icon.png`: recorte interno sem os cantos, opaco, porque o iOS arredonda os cantos e pinta a transparência de preto.
   - `icon-maskable-512.png`: fundo cheio na cor da borda da arte e a arte a 72%, dentro da zona segura.
 
 ## Aviso de instalação (acréscimo)
 
-Quem usa o EasyFit pelo navegador raramente abre Configurações, então não descobre que pode instalar o aplicativo.
+Quem usa o Wrexercise pelo navegador raramente abre Configurações, então não descobre que pode instalar o aplicativo.
 
 - Um aviso em `AvisosDoApp`, no mesmo formato do de versão nova, oferece a instalação: botão "Instalar" quando o navegador oferece `beforeinstallprompt`, e a instrução do menu Compartilhar no iOS.
 - Aparece só para quem entrou na conta, com conexão e sem o aviso de versão nova na tela. Some depois da instalação e não aparece no aplicativo instalado.
 - Não some sozinho, porque tem uma ação. Um botão "Dispensar" o esconde por 30 dias. A opção em Configurações continua disponível.
-- A dispensa fica num cookie comum, `ef_instalacao_dispensada`, e não em `localStorage`, que o ESLint bloqueia para evitar credenciais no navegador. O cookie não é credencial, e o backend o ignora.
+- A dispensa fica num cookie comum, `wx_instalacao_dispensada`, e não em `localStorage`, que o ESLint bloqueia para evitar credenciais no navegador. O cookie não é credencial, e o backend o ignora.
 - **Alternativas descartadas:** liberar `localStorage` enfraqueceria a regra do ESLint; guardar a dispensa só na memória repetiria o aviso a cada visita.
 - **Compromisso aceito:** Firefox e Safari no computador não oferecem instalação por script e não mostram o aviso.
 

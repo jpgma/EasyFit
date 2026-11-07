@@ -2,9 +2,9 @@
 **/obj
 **/node_modules
 **/TestResults
-EasyFit/wwwroot
+Wrexercise/wwwroot
 .git
 .env
 docs
-EasyFit.UnitTests
-EasyFit.IntegrationTests
+Wrexercise.UnitTests
+Wrexercise.IntegrationTests

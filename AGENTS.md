@@ -1,8 +1,8 @@
-# Regras do repositório — EasyFit
+# Regras do repositório — Wrexercise
 
 Aplicação web privada para pequenos grupos manterem a rotina de exercícios por meio de desafios e validação comunitária. Arquitetura completa em `docs/arquitetura.md`; resumo de todas as funcionalidades em `docs/funcionalidades.md`; decisões pendentes em `docs/questoes-abertas.md`; decisões tomadas em `docs/decisoes/`.
 
-Regras específicas de cada stack: `EasyFit/AGENTS.md` e `EasyFit/webapp/AGENTS.md`.
+Regras específicas de cada stack: `Wrexercise/AGENTS.md` e `Wrexercise/webapp/AGENTS.md`.
 
 **Princípio:** simples o suficiente para uma única pessoa entender, implantar e manter. Entre duas alternativas que atendem aos requisitos, escolha a mais simples.
 
@@ -60,26 +60,26 @@ Ao introduzir um conceito novo, acrescente-o aqui na mesma alteração.
 Monólito modular com fatias verticais. Cada funcionalidade é dona de seus endpoints, contratos, SQL, regras e testes.
 
 ```text
-EasyFit/                    # aplicação: API e frontend
+Wrexercise/                 # aplicação: API e frontend
 ├── Features/               # fatias verticais
 ├── Infrastructure/         # recursos compartilhados
 ├── webapp/                 # código-fonte do frontend (React)
 └── wwwroot/                # gerado a partir de webapp/, fora do git
-EasyFit.UnitTests/          # regras puras e testes de arquitetura
-EasyFit.IntegrationTests/   # HTTP e SQL contra o PostgreSQL
+Wrexercise.UnitTests/       # regras puras e testes de arquitetura
+Wrexercise.IntegrationTests/   # HTTP e SQL contra o PostgreSQL
 deploy/  scripts/  docs/
 pixel-art/                  # scripts Python que geram a arte do Jogo (avatar base: docs/avatar-kit.md)
 ```
 
 Arte em pixel do Jogo (avatares, Enfeites, cartas, cenário): use a skill `.claude/skills/pixel-art-studio/`, que segue `docs/avatar-formato.md`, `docs/avatar-kit.md` e `docs/gamificacao.md` §4.4. Cada arte tem um `pixel-art/<slug>/build.py` versionado; nunca edite o PNG à mão. Arquivos do Aseprite (`.aseprite`, `.ase`) são trabalhados sempre com o plugin `pixel-plugin` (habilitado em `.claude/settings.json`; exige o Aseprite instalado e configurado com `/pixel-setup`). A configuração fica em `~/.config/pixel-mcp/config.json`, com o caminho do Aseprite usando `/`; os scripts de `pixel-art/` falam com o mesmo servidor por `pixel-art/avatar-base/aseprite_mcp.py`.
 
-Não recrie `src/`, `tests/` ou `web/`: projetos ficam na raiz e o frontend fica em `EasyFit/webapp/`. Ver `docs/decisoes/0004-estrutura-do-repositorio.md`.
+Não recrie `src/`, `tests/` ou `web/`: projetos ficam na raiz e o frontend fica em `Wrexercise/webapp/`. Ver `docs/decisoes/0004-estrutura-do-repositorio.md`.
 
 Fatias planejadas, criadas apenas na fase correspondente de `docs/arquitetura.md` §18: `Autenticacao`, `Usuarios`, `Grupos`, `Convites`, `Desafios`, `Atividades`, `Reacoes`, `Progresso`, `Feed`, `Notificacoes`, `Jogo` (opcional, fases em `docs/gamificacao.md`).
 
 - Não crie pastas, arquivos ou dependências antes de precisar deles.
-- Uma fatia não acessa detalhes internos de outra. Para obter dados de outra fatia, faça uma consulta SQL explícita ou use um contrato pequeno e estável (ver `EasyFit/AGENTS.md`). Um teste de arquitetura e uma regra de ESLint verificam isso.
-- Testes ficam nos projetos de teste, espelhando o caminho da fatia, e nunca dentro de `EasyFit/`.
+- Uma fatia não acessa detalhes internos de outra. Para obter dados de outra fatia, faça uma consulta SQL explícita ou use um contrato pequeno e estável (ver `Wrexercise/AGENTS.md`). Um teste de arquitetura e uma regra de ESLint verificam isso.
+- Testes ficam nos projetos de teste, espelhando o caminho da fatia, e nunca dentro de `Wrexercise/`.
 
 ## Proibido sem uma decisão registrada
 

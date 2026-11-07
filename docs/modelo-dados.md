@@ -1,6 +1,6 @@
-# Modelo de dados — EasyFit
+# Modelo de dados — Wrexercise
 
-Este documento descreve o esquema em uso e cresce junto com as migrações. O modelo planejado está em `arquitetura.md`, seções 7 e 9. A fonte da verdade são os arquivos em `EasyFit/Infrastructure/Database/Migrations/`.
+Este documento descreve o esquema em uso e cresce junto com as migrações. O modelo planejado está em `arquitetura.md`, seções 7 e 9. A fonte da verdade são os arquivos em `Wrexercise/Infrastructure/Database/Migrations/`.
 
 ## `usuarios`
 

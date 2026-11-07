@@ -42,7 +42,7 @@ class Aseprite:
                                    stderr=subprocess.DEVNULL, env=env)
         self._id = 0
         self._req("initialize", {"protocolVersion": "2024-11-05", "capabilities": {},
-                                 "clientInfo": {"name": "easyfit-avatar", "version": "1"}})
+                                 "clientInfo": {"name": "wrexercise-avatar", "version": "1"}})
         self._enviar({"jsonrpc": "2.0", "method": "notifications/initialized"})
 
     def __enter__(self):

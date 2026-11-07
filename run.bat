@@ -20,31 +20,31 @@ cd /d "%~dp0"
 rem HTTP evita o aviso de certificado. Os navegadores tratam localhost como seguro
 rem e aceitam o cookie Secure da sessão; só o Caddy responde a este nome.
 set "URL=http://localhost"
-set "DATA_ROOT=%LOCALAPPDATA%\EasyFit\local"
+set "DATA_ROOT=%LOCALAPPDATA%\Wrexercise\local"
 
 rem O compose.yaml exige estas variáveis em qualquer comando, inclusive logs e down.
 set "DOMAIN=%URL%"
-set "DB_PASSWORD=easyfit_local"
-set "DB_CONNECTION=Host=db;Port=5432;Database=easyfit;Username=easyfit;Password=easyfit_local"
-set "EASYFIT_IMAGE=easyfit:local"
+set "DB_PASSWORD=wrexercise_local"
+set "DB_CONNECTION=Host=db;Port=5432;Database=wrexercise;Username=wrexercise;Password=wrexercise_local"
+set "WREXERCISE_IMAGE=wrexercise:local"
 set "CADASTRO_ABERTO=true"
 set "DATA_DIR=%DATA_ROOT:\=/%"
 
 rem Fora de DATA_ROOT: run.bat reset apaga os dados, mas mantém os backups.
 rem Defina BACKUP_DIR antes, por exemplo com uma pasta do OneDrive, para ter cópia fora desta máquina.
-if not defined BACKUP_DIR set "BACKUP_DIR=%LOCALAPPDATA%\EasyFit\backups"
+if not defined BACKUP_DIR set "BACKUP_DIR=%LOCALAPPDATA%\Wrexercise\backups"
 set "BACKUP_DIR=%BACKUP_DIR:\=/%"
 
 rem Fora de DATA_ROOT: run.bat reset apaga os dados, mas mantém o túnel.
 set "TUNNEL_HOST=fit.jpgmaraujo.com.br"
-set "TUNNEL_NAME=easyfit-local"
-set "TUNNEL_ROOT=%LOCALAPPDATA%\EasyFit\cloudflared"
+set "TUNNEL_NAME=wx-local"
+set "TUNNEL_ROOT=%LOCALAPPDATA%\Wrexercise\cloudflared"
 set "TUNNEL_DIR=%TUNNEL_ROOT:\=/%"
 set "TUNNEL_IMAGE=cloudflare/cloudflared:2026.10.3"
 set "CLOUDFLARED=docker run --rm -v "%TUNNEL_DIR%:/home/nonroot/.cloudflared" %TUNNEL_IMAGE% tunnel"
 
-rem Projeto próprio: não se mistura com o banco de desenvolvimento (easyfit-dev).
-set "COMPOSE=docker compose -p easyfit-local -f deploy/compose.yaml"
+rem Projeto próprio: não se mistura com o banco de desenvolvimento (wrexercise-dev).
+set "COMPOSE=docker compose -p wrexercise-local -f deploy/compose.yaml"
 
 set "DOCKER_BUILD_EXTRAS="
 set "REBUILD="
@@ -88,11 +88,11 @@ if defined TUNNEL (
 
 echo.
 if defined REBUILD (
-  echo ==^> Construindo %EASYFIT_IMAGE% do zero ^(--no-cache^)
+  echo ==^> Construindo %WREXERCISE_IMAGE% do zero ^(--no-cache^)
 ) else (
-  echo ==^> Construindo %EASYFIT_IMAGE% para esta máquina
+  echo ==^> Construindo %WREXERCISE_IMAGE% para esta máquina
 )
-docker buildx build %DOCKER_BUILD_EXTRAS% -f deploy/Dockerfile -t %EASYFIT_IMAGE% --load .
+docker buildx build %DOCKER_BUILD_EXTRAS% -f deploy/Dockerfile -t %WREXERCISE_IMAGE% --load .
 if errorlevel 1 goto :fail
 
 echo.
@@ -118,7 +118,7 @@ if errorlevel 1 goto :fail
 
 echo.
 echo.
-echo EasyFit rodando em %URL%
+echo Wrexercise rodando em %URL%
 if defined TUNNEL call :check_tunnel
 echo Para parar: run.bat stop
 exit /b 0
@@ -158,10 +158,10 @@ echo.
 echo ==^> Verificando https://%TUNNEL_HOST%/ready
 curl.exe -fs --retry 30 --retry-all-errors --retry-delay 2 --max-time 5 https://%TUNNEL_HOST%/ready
 if errorlevel 1 (
-  echo Ainda sem resposta. Se persistir, veja: docker logs easyfit-local-tunnel-1
+  echo Ainda sem resposta. Se persistir, veja: docker logs wrexercise-local-tunnel-1
 ) else (
   echo.
-  echo EasyFit publicado em https://%TUNNEL_HOST%
+  echo Wrexercise publicado em https://%TUNNEL_HOST%
 )
 exit /b 0
 

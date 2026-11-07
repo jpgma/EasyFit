@@ -1,6 +1,6 @@
 ---
 name: pixel-art-studio
-description: Claude IS the pixel artist — designs and places every pixel directly via Python/Pillow (scripts/pixelstudio.py). No Aseprite, no MCP server. Creates sprites, characters, items, tiles/tilesets, animations (idle/walk/run/attack), applies limited palettes, hue-shifted ramps, dithering, shading, selective outlines, and exports PNG / animated GIF / spritesheet+JSON for game engines. Can also STUDY a pixel-art file the user provides and grow its knowledge base. EXCEPTION: whenever an Aseprite file (.aseprite/.ase) is involved — reading, editing, animating or exporting it — use the pixel-plugin skills instead (pixel-art-creator / pixel-art-animator / pixel-art-professional / pixel-art-exporter, aseprite MCP). Otherwise prefer this skill. In the EasyFit repo, use it for every Jogo asset: avatar sheets (folha de avatar), Enfeites, card frames/icons (Carta), the praça floor, PWA icons in pixel style. Trigger on pixel art, sprite, sprite sheet, folha de sprites, avatar, enfeite, ícone de carta, arte do Jogo, arte do bundle, 8-bit, 16-bit, retro game art, tileset, pixel animation, GIF sprite, วาด pixel art, สร้าง sprite, ทำ pixel art, พิกเซล, ตัวละครเกม, ไอคอนเกม, เรียนรู้จากไฟล์ pixel art.
+description: Claude IS the pixel artist — designs and places every pixel directly via Python/Pillow (scripts/pixelstudio.py). No Aseprite, no MCP server. Creates sprites, characters, items, tiles/tilesets, animations (idle/walk/run/attack), applies limited palettes, hue-shifted ramps, dithering, shading, selective outlines, and exports PNG / animated GIF / spritesheet+JSON for game engines. Can also STUDY a pixel-art file the user provides and grow its knowledge base. EXCEPTION: whenever an Aseprite file (.aseprite/.ase) is involved — reading, editing, animating or exporting it — use the pixel-plugin skills instead (pixel-art-creator / pixel-art-animator / pixel-art-professional / pixel-art-exporter, aseprite MCP). Otherwise prefer this skill. In the Wrexercise repo, use it for every Jogo asset: avatar sheets (folha de avatar), Enfeites, card frames/icons (Carta), the praça floor, PWA icons in pixel style. Trigger on pixel art, sprite, sprite sheet, folha de sprites, avatar, enfeite, ícone de carta, arte do Jogo, arte do bundle, 8-bit, 16-bit, retro game art, tileset, pixel animation, GIF sprite, วาด pixel art, สร้าง sprite, ทำ pixel art, พิกเซล, ตัวละครเกม, ไอคอนเกม, เรียนรู้จากไฟล์ pixel art.
 ---
 
 # Pixel Art Studio
@@ -13,7 +13,7 @@ never skip it. You are the artist; the library is just your hand.
 Requirement: `python -c "import PIL"` — if missing, `pip install --user pillow`.
 (This repo runs on Windows: the interpreter is `python`, not `python3`.)
 
-**EasyFit:** read the "EasyFit project rules" section at the end before starting any asset.
+**Wrexercise:** read the "Wrexercise project rules" section at the end before starting any asset.
 
 ## The Loop
 
@@ -136,14 +136,14 @@ regenerable `build.py` you keep editing. After cleaning, switch back to the norm
 - Randomness only via `noise(seed=)` — renders must be deterministic.
 - Report includes the 1x master path when done.
 
-## EasyFit project rules
+## Wrexercise project rules
 
 These override the generic guidance above when working in this repository.
 
 - **Aseprite files go to pixel-plugin.** Any task that reads, edits, animates or exports a
   `.aseprite`/`.ase` file (e.g. `assets/character.aseprite`) uses the `pixel-plugin` skills and
   commands (`/pixel-export`, etc.) through the aseprite MCP, not Pillow — Pillow cannot read the
-  format. The EasyFit rules below (sizes, avatar format, CC0, no anti-aliasing) still apply to
+  format. The Wrexercise rules below (sizes, avatar format, CC0, no anti-aliasing) still apply to
   whatever is exported. If the aseprite MCP is not available, stop and ask the user to run
   `/pixel-setup` instead of working around it.
 
@@ -161,13 +161,14 @@ These override the generic guidance above when working in this repository.
 - **No anti-aliasing at the edge against transparency.** The app scales by integer factors with
   `image-rendering: pixelated`; ship only 1x masters to the bundle.
 - **Style:** contemporary urban pixel art (streetwear, sneakers, gym wear) — see
-  `docs/gamificacao.md` §1.2. Keep one shared palette across all bundle art; once chosen, save it
-  with `--save-palette easyfit` and use `Sprite(palette="easyfit")` everywhere.
+  `docs/gamificacao.md` §1.2 and the Wrexercise identity in §1.3 (urban court, brand accent colors,
+  card frame rules). Keep one shared palette across all bundle art; once chosen, save it
+  with `--save-palette wrexercise` and use `Sprite(palette="wrexercise")` everywhere.
 - **License:** everything shipped in the bundle is CC0 and sits next to a `LICENSE` file. Never
   trace or copy pixels from non-CC0 art; studying a reference for technique is fine.
 - **Where things live:** `pixel-art/<slug>/` holds `build.py` (source of truth, committed) and
   previews. Only the final 1x PNG goes into the webapp; if its destination folder under
-  `EasyFit/webapp/` does not exist yet, ask before creating it (repo rule: no folders before
+  `Wrexercise/webapp/` does not exist yet, ask before creating it (repo rule: no folders before
   they are needed).
 - **Verify the shipped file** before finishing: dimensions, mode `RGBA`, size in bytes, no
   semi-transparent edge pixels — e.g.

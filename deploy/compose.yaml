@@ -5,7 +5,7 @@
 
 services:
   app:
-    image: ${EASYFIT_IMAGE:-easyfit:latest}
+    image: ${WREXERCISE_IMAGE:-wrexercise:latest}
     restart: unless-stopped
     environment:
       ConnectionStrings__Database: ${DB_CONNECTION:?defina DB_CONNECTION no .env}
@@ -14,7 +14,7 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ${DATA_DIR:-/srv/easyfit}/evidencias:/dados/evidencias
+      - ${DATA_DIR:-/srv/wrexercise}/evidencias:/dados/evidencias
     mem_limit: 384m
     cpus: 0.50
 
@@ -22,11 +22,11 @@ services:
     image: postgres:17.11-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: easyfit
-      POSTGRES_USER: easyfit
+      POSTGRES_DB: wrexercise
+      POSTGRES_USER: wrexercise
       POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env}
     volumes:
-      - ${DATA_DIR:-/srv/easyfit}/postgres:/var/lib/postgresql/data
+      - ${DATA_DIR:-/srv/wrexercise}/postgres:/var/lib/postgresql/data
     command:
       - postgres
       - -c
@@ -45,7 +45,7 @@ services:
       - checkpoint_completion_target=0.9
     # Por TCP: na primeira inicialização, o servidor temporário só atende pelo socket Unix.
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U easyfit -d easyfit"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U wrexercise -d wrexercise"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -59,16 +59,16 @@ services:
     entrypoint: ["sh", "/backup.sh"]
     environment:
       PGHOST: db
-      PGUSER: easyfit
-      PGDATABASE: easyfit
+      PGUSER: wrexercise
+      PGDATABASE: wrexercise
       PGPASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env}
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - ./backup.sh:/backup.sh:ro
-      - ${DATA_DIR:-/srv/easyfit}/evidencias:/dados/evidencias
-      - ${BACKUP_DIR:-/srv/easyfit/backups}:/backups
+      - ${DATA_DIR:-/srv/wrexercise}/evidencias:/dados/evidencias
+      - ${BACKUP_DIR:-/srv/wrexercise/backups}:/backups
     mem_limit: 256m
     cpus: 0.50
 
