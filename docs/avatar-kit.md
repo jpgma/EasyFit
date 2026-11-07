@@ -162,3 +162,7 @@ O kit foi feito para permitir, no futuro, um editor em `/perfil/avatar` em que a
 - As cores livres do JSON seriam trocadas por paletas fixas no editor, para manter o contraste com o contorno.
 - Os testes de `compor.py` e da versão TypeScript usam os mesmos casos: o mesmo JSON precisa gerar os mesmos pixels.
 - Precisa de um ADR na fase em que for feito, porque muda o que a tabela `avatares` guarda.
+
+## 6. Aseprite e `pixel-plugin`
+
+Arquivos do Aseprite (`.aseprite`, `.ase`) são trabalhados sempre com o plugin `pixel-plugin`, habilitado em `.claude/settings.json`. Ele exige o Aseprite instalado e configurado com `/pixel-setup`. A configuração fica em `~/.config/pixel-mcp/config.json`, com o caminho do Aseprite usando `/`. Os scripts de `pixel-art/` falam com o mesmo servidor por `pixel-art/avatar-base/aseprite_mcp.py`. Arte feita com a skill `pixel-art-studio` (sem Aseprite) segue `docs/avatar-formato.md` e `docs/gamificacao.md` §4.4.

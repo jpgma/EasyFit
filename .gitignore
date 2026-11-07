@@ -26,3 +26,6 @@ Wrexercise/evidencias-dev/
 
 # Python
 __pycache__/
+
+# Worktrees do Claude Code (fora das buscas de Glob/Grep)
+.claude/worktrees/

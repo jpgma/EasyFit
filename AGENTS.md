@@ -71,7 +71,7 @@ deploy/  scripts/  docs/
 pixel-art/                  # scripts Python que geram a arte do Jogo (avatar base: docs/avatar-kit.md)
 ```
 
-Arte em pixel do Jogo (avatares, Enfeites, cartas, cenário): use a skill `.claude/skills/pixel-art-studio/`, que segue `docs/avatar-formato.md`, `docs/avatar-kit.md` e `docs/gamificacao.md` §4.4. Cada arte tem um `pixel-art/<slug>/build.py` versionado; nunca edite o PNG à mão. Arquivos do Aseprite (`.aseprite`, `.ase`) são trabalhados sempre com o plugin `pixel-plugin` (habilitado em `.claude/settings.json`; exige o Aseprite instalado e configurado com `/pixel-setup`). A configuração fica em `~/.config/pixel-mcp/config.json`, com o caminho do Aseprite usando `/`; os scripts de `pixel-art/` falam com o mesmo servidor por `pixel-art/avatar-base/aseprite_mcp.py`.
+Arte em pixel do Jogo: use a skill `.claude/skills/pixel-art-studio/` (ver `docs/avatar-kit.md`). Cada arte tem um `pixel-art/<slug>/build.py` versionado; nunca edite o PNG à mão. Arquivos `.aseprite`/`.ase` usam sempre o plugin `pixel-plugin` (configuração em `docs/avatar-kit.md` §6).
 
 Não recrie `src/`, `tests/` ou `web/`: projetos ficam na raiz e o frontend fica em `Wrexercise/webapp/`. Ver `docs/decisoes/0004-estrutura-do-repositorio.md`.
 
