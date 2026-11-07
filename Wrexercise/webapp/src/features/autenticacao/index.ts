@@ -1,6 +1,8 @@
 export {
   useAlterarNome,
   useAlterarSenha,
+  useConfiguracaoInicial,
+  useConfigurarPrimeiroUsuario,
   useEntrar,
   useRedefinirSenha,
   useRegistrar,

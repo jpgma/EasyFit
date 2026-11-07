@@ -9,7 +9,6 @@ services:
     restart: unless-stopped
     environment:
       ConnectionStrings__Database: ${DB_CONNECTION:?defina DB_CONNECTION no .env}
-      Autenticacao__CadastroAberto: ${CADASTRO_ABERTO:-false}
     depends_on:
       db:
         condition: service_healthy

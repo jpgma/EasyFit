@@ -2,7 +2,9 @@ import { WifiOff } from "lucide-react";
 import { Navigate, Outlet, useLocation } from "react-router";
 import { EmptyState } from "@/components/EmptyState";
 import { SplashScreen } from "@/components/SplashScreen";
-import { useSessao } from "@/features/autenticacao";
+import { useConfiguracaoInicial, useSessao } from "@/features/autenticacao";
+
+const configuracaoInicialPath = "/configuracao-inicial";
 
 type GateProps = {
   allow: "logado" | "anonimo";
@@ -12,6 +14,10 @@ type GateProps = {
 // Só decide o que mostrar: quem protege os dados continua sendo o backend.
 function SessaoGate({ allow, redirectTo }: GateProps) {
   const { data: usuario, isPending, fetchStatus, refetch } = useSessao();
+  // Só quem não tem sessão precisa saber se o app já foi configurado.
+  const configuracao = useConfiguracaoInicial(
+    allow === "anonimo" && usuario === null,
+  );
   const location = useLocation();
 
   // Com o dado já em cache, uma falha ao revalidar não tira a pessoa da tela atual.
@@ -40,11 +46,27 @@ function SessaoGate({ allow, redirectTo }: GateProps) {
   }
 
   const isLogado = usuario !== null;
-  return isLogado === (allow === "logado") ? (
-    <Outlet />
-  ) : (
-    <Navigate to={getStateRedirect(location.state) ?? redirectTo} replace />
-  );
+  if (isLogado !== (allow === "logado")) {
+    return (
+      <Navigate to={getStateRedirect(location.state) ?? redirectTo} replace />
+    );
+  }
+
+  // Sem usuários no app, as telas de entrada dão lugar à configuração inicial.
+  if (!isLogado && allow === "anonimo") {
+    if (configuracao.isPending && configuracao.fetchStatus !== "paused") {
+      return <SplashScreen />;
+    }
+    const naConfiguracao = location.pathname === configuracaoInicialPath;
+    if (configuracao.data === true && !naConfiguracao) {
+      return <Navigate to={configuracaoInicialPath} replace />;
+    }
+    if (configuracao.data !== true && naConfiguracao) {
+      return <Navigate to="/entrar" replace />;
+    }
+  }
+
+  return <Outlet />;
 }
 
 /** Quem veio de um convite volta para ele depois de entrar. */

@@ -89,7 +89,6 @@ iniciar_banco() {
 # O app e o túnel leem a configuração do ambiente, como nos contêineres de compose.yaml.
 ambiente_app() {
   export ConnectionStrings__Database="Host=127.0.0.1;Port=5432;Database=wrexercise;Username=wrexercise;Password=$DB_PASSWORD;Maximum Pool Size=10"
-  export Autenticacao__CadastroAberto=false
   export Evidencias__Diretorio=$dados/evidencias
   export ASPNETCORE_URLS=http://127.0.0.1:8080
   # Sem isto o ASP.NET usa o diretório atual (o pai de app/) e não acha wwwroot nem appsettings.json.

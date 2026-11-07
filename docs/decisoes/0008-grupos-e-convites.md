@@ -38,7 +38,7 @@ A Fase 3 precisa de grupos, convites, entrada em grupo e controle de permissões
 
 **Cadastro**
 
-- Com um convite, não depende de `Autenticacao:CadastroAberto`. Sem convite, segue a decisão 0006: essa configuração continua existindo para criar a primeira conta.
+- O convite é o único caminho de cadastro. A primeira conta nasce na configuração inicial (decisão 0031), que substituiu `Autenticacao:CadastroAberto`.
 - Convite recusado desfaz toda a transação: nenhuma conta fica para trás.
 
 **Grupos**

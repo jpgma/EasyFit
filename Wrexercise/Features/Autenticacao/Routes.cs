@@ -30,6 +30,9 @@ internal static class AutenticacaoRoutes
     {
         var group = routes.MapGroup("/api/autenticacao");
 
+        group.MapGet("/configuracao-inicial", ObterConfiguracaoInicial.HandleAsync);
+        group.MapPost("/configuracao-inicial", ConfigurarPrimeiroUsuario.HandleAsync)
+            .RequireRateLimiting(TentativasPolicy);
         group.MapPost("/registrar", Registrar.HandleAsync).RequireRateLimiting(TentativasPolicy);
         group.MapPost("/entrar", Entrar.HandleAsync).RequireRateLimiting(TentativasPolicy);
         group.MapPost("/sair", Sair.HandleAsync);

@@ -1,6 +1,6 @@
 # 0006 — Autenticação por sessão
 
-**Status:** DECIDIDA. Parcialmente substituída pela decisão 0019 (alteração e redefinição de senha).
+**Status:** DECIDIDA. Parcialmente substituída pela decisão 0019 (alteração e redefinição de senha) e pela decisão 0031 (a configuração `Autenticacao:CadastroAberto` foi trocada pela configuração inicial).
 
 ## Contexto
 

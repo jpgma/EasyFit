@@ -6,8 +6,9 @@ rem   run.bat --rebuild    igual ao padrão, mas reconstrói a imagem sem cache 
 rem                          (frontend wwwroot + Native AOT) e recria o contêiner app
 rem   run.bat rebuild      atalho para --rebuild
 rem   run.bat --tunnel     igual ao padrão, mas publica em https://wx-dev.jpgmaraujo.com.br por um túnel
-rem                          da Cloudflare, com o cadastro sem convite fechado. Pode ser combinado com
-rem                          --rebuild. Na primeira vez, pede o login na Cloudflare pelo navegador.
+rem                          da Cloudflare. Pode ser combinado com --rebuild. Na primeira vez, pede o
+rem                          login na Cloudflare pelo navegador. Com o banco vazio, quem abrir o link
+rem                          primeiro cria a primeira conta: abra-o logo após subir.
 rem   run.bat --ssh        em vez de subir aqui, pergunta host, porta, usuário do Termux e chave SSH e implanta
 rem                          no celular Android (Termux, sem root) por SSH: app, PostgreSQL e túnel da
 rem                          Cloudflare rodam nativos, sem Docker nem VM no alvo. Grava as respostas em
@@ -33,7 +34,6 @@ set "DOMAIN=%URL%"
 set "DB_PASSWORD=wrexercise_local"
 set "DB_CONNECTION=Host=db;Port=5432;Database=wrexercise;Username=wrexercise;Password=wrexercise_local"
 set "WREXERCISE_IMAGE=wrexercise:local"
-set "CADASTRO_ABERTO=true"
 set "DATA_DIR=%DATA_ROOT:\=/%"
 
 rem Fora de DATA_ROOT: run.bat reset apaga os dados, mas mantém os backups.
@@ -93,8 +93,6 @@ exit /b 2
 :start
 if defined SSH_MODE goto :ssh
 if defined TUNNEL (
-  rem Na internet, novas contas só entram por convite.
-  set "CADASTRO_ABERTO=false"
   set "COMPOSE=%COMPOSE% -f deploy/compose.tunnel.yaml"
   call :prepare_tunnel
   if errorlevel 1 goto :fail

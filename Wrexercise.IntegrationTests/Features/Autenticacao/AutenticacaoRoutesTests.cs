@@ -14,6 +14,7 @@ namespace Wrexercise.IntegrationTests.Features.Autenticacao;
 public sealed class AutenticacaoRoutesTests : IAsyncLifetime
 {
     private const string Registrar = "/api/autenticacao/registrar";
+    private const string ConfiguracaoInicial = "/api/autenticacao/configuracao-inicial";
     private const string Entrar = "/api/autenticacao/entrar";
     private const string Sair = "/api/autenticacao/sair";
     private const string Sessao = "/api/autenticacao/sessao";
@@ -38,7 +39,7 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
         await using var factory = CreateFactory();
         using var client = CreateClient(factory);
 
-        var response = await RegistrarAsync(client, "Ana", "  Ana@Exemplo.com ");
+        var response = await CriarContaAsync(client, "Ana", "  Ana@Exemplo.com ");
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var created = await response.Content.ReadFromJsonAsync(AppJsonContext.Default.SessaoResponse, Token);
@@ -53,39 +54,86 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Registrar_IsRefused_WhenCadastroIsClosed()
+    public async Task ConfiguracaoInicial_IsPendente_OnlyWhileThereAreNoUsers()
     {
-        await using var factory = CreateFactory(cadastroAberto: "false");
+        await using var factory = CreateFactory();
         using var client = CreateClient(factory);
 
-        var response = await RegistrarAsync(client, "Ana", "ana@exemplo.com");
+        var antes = await client.GetFromJsonAsync(
+            ConfiguracaoInicial, AppJsonContext.Default.ConfiguracaoInicialResponse, Token);
+        await CriarContaAsync(client, "Ana", "ana@exemplo.com");
+        var depois = await client.GetFromJsonAsync(
+            ConfiguracaoInicial, AppJsonContext.Default.ConfiguracaoInicialResponse, Token);
 
-        await AssertProblemAsync(response, HttpStatusCode.Forbidden, "CADASTRO_FECHADO");
+        Assert.True(antes?.Pendente);
+        Assert.False(depois?.Pendente);
+    }
+
+    [Fact]
+    public async Task ConfiguracaoInicial_IsRefused_WhenAUserAlreadyExists()
+    {
+        await using var factory = CreateFactory();
+        using var client = CreateClient(factory);
+        await CriarContaAsync(client, "Ana", "ana@exemplo.com");
+
+        using var outro = CreateClient(factory);
+        var response = await CriarContaAsync(outro, "Outra Ana", "outra@exemplo.com");
+
+        await AssertProblemAsync(response, HttpStatusCode.Conflict, "CONFIGURACAO_JA_CONCLUIDA");
+        Assert.False(response.Headers.Contains("Set-Cookie"));
+        Assert.Equal(1L, await CountAsync("SELECT count(*) FROM usuarios"));
+    }
+
+    [Fact]
+    public async Task ConfiguracaoInicial_CreatesOnlyOneUser_WhenCalledConcurrently()
+    {
+        await using var factory = CreateFactory();
+        using var primeiro = CreateClient(factory);
+        using var segundo = CreateClient(factory);
+
+        var responses = await Task.WhenAll(
+            CriarContaAsync(primeiro, "Ana", "ana@exemplo.com"),
+            CriarContaAsync(segundo, "Bia", "bia@exemplo.com"));
+
+        Assert.Single(responses, response => response.StatusCode == HttpStatusCode.Created);
+        Assert.Single(responses, response => response.StatusCode == HttpStatusCode.Conflict);
+        Assert.Equal(1L, await CountAsync("SELECT count(*) FROM usuarios"));
+    }
+
+    [Theory]
+    [InlineData("", "ana@exemplo.com", Senha)]
+    [InlineData("Ana", "sem-arroba", Senha)]
+    [InlineData("Ana", "ana@exemplo.com", "curta")]
+    [InlineData(null, null, null)]
+    public async Task ConfiguracaoInicial_RejectsInvalidData(string? nome, string? email, string? senha)
+    {
+        await using var factory = CreateFactory();
+        using var client = CreateClient(factory);
+
+        var response = await client.PostAsJsonAsync(
+            ConfiguracaoInicial,
+            new ConfiguracaoInicialRequest(nome, email, senha),
+            AppJsonContext.Default.ConfiguracaoInicialRequest,
+            Token);
+
+        await AssertProblemAsync(response, HttpStatusCode.BadRequest, "DADOS_INVALIDOS");
         Assert.Equal(0L, await CountAsync("SELECT count(*) FROM usuarios"));
     }
 
     [Fact]
-    public async Task Registrar_IsClosed_WhenTheSettingIsMissing()
-    {
-        await using var factory = CreateFactory(cadastroAberto: "", environment: "Production");
-        using var client = CreateClient(factory);
-
-        var response = await RegistrarAsync(client, "Ana", "ana@exemplo.com");
-
-        await AssertProblemAsync(response, HttpStatusCode.Forbidden, "CADASTRO_FECHADO");
-    }
-
-    [Fact]
-    public async Task Registrar_RejectsRepeatedEmail_RegardlessOfCase()
+    public async Task Registrar_WithoutAnInvite_IsRefused_EvenBeforeTheFirstUser()
     {
         await using var factory = CreateFactory();
         using var client = CreateClient(factory);
-        await RegistrarAsync(client, "Ana", "ana@exemplo.com");
 
-        var response = await RegistrarAsync(client, "Outra Ana", "ANA@exemplo.com");
+        var response = await client.PostAsJsonAsync(
+            Registrar,
+            new RegistrarRequest("Ana", "ana@exemplo.com", Senha),
+            AppJsonContext.Default.RegistrarRequest,
+            Token);
 
-        await AssertProblemAsync(response, HttpStatusCode.Conflict, "EMAIL_JA_CADASTRADO");
-        Assert.Equal(1L, await CountAsync("SELECT count(*) FROM usuarios"));
+        await AssertProblemAsync(response, HttpStatusCode.Forbidden, "CADASTRO_FECHADO");
+        Assert.Equal(0L, await CountAsync("SELECT count(*) FROM usuarios"));
     }
 
     [Theory]
@@ -99,7 +147,10 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
         using var client = CreateClient(factory);
 
         var response = await client.PostAsJsonAsync(
-            Registrar, new RegistrarRequest(nome, email, senha), AppJsonContext.Default.RegistrarRequest, Token);
+            Registrar,
+            new RegistrarRequest(nome, email, senha, "qualquer-convite"),
+            AppJsonContext.Default.RegistrarRequest,
+            Token);
 
         await AssertProblemAsync(response, HttpStatusCode.BadRequest, "DADOS_INVALIDOS");
     }
@@ -122,7 +173,7 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
         await using var factory = CreateFactory();
         using (var registering = CreateClient(factory))
         {
-            await RegistrarAsync(registering, "Ana", "ana@exemplo.com");
+            await CriarContaAsync(registering, "Ana", "ana@exemplo.com");
         }
 
         using var client = CreateClient(factory);
@@ -138,7 +189,7 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
     {
         await using var factory = CreateFactory();
         using var client = CreateClient(factory);
-        await RegistrarAsync(client, "Ana", "ana@exemplo.com");
+        await CriarContaAsync(client, "Ana", "ana@exemplo.com");
         await client.PostAsync(Sair, null, Token);
 
         var wrongPassword = await EntrarAsync(client, "ana@exemplo.com", "senha-errada");
@@ -156,7 +207,7 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
     {
         await using var factory = CreateFactory();
         using var client = CreateClient(factory);
-        await RegistrarAsync(client, "Ana", "ana@exemplo.com");
+        await CriarContaAsync(client, "Ana", "ana@exemplo.com");
         await ExecuteAsync("UPDATE sessoes_autenticacao SET expires_at = now() - interval '1 minute'");
 
         await EntrarAsync(client, "ana@exemplo.com", Senha);
@@ -192,7 +243,7 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
     {
         await using var factory = CreateFactory();
         using var client = CreateClient(factory);
-        await RegistrarAsync(client, "Ana", "ana@exemplo.com");
+        await CriarContaAsync(client, "Ana", "ana@exemplo.com");
         await ExecuteAsync("UPDATE sessoes_autenticacao SET expires_at = now() - interval '1 minute'");
 
         var response = await client.GetAsync(Sessao, Token);
@@ -205,7 +256,7 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
     {
         await using var factory = CreateFactory();
         using var registering = CreateClient(factory, handleCookies: false);
-        var cookie = ReadSessionCookie(await RegistrarAsync(registering, "Ana", "ana@exemplo.com"));
+        var cookie = ReadSessionCookie(await CriarContaAsync(registering, "Ana", "ana@exemplo.com"));
 
         using var client = CreateClient(factory, handleCookies: false);
         client.DefaultRequestHeaders.Add("Cookie", $"wx_session={cookie.Value}");
@@ -237,7 +288,7 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
         await using var factory = CreateFactory();
         using var phone = CreateClient(factory);
         using var laptop = CreateClient(factory);
-        await RegistrarAsync(phone, "Ana", "ana@exemplo.com");
+        await CriarContaAsync(phone, "Ana", "ana@exemplo.com");
         await EntrarAsync(laptop, "ana@exemplo.com", Senha);
 
         await phone.PostAsync(Sair, null, Token);
@@ -251,7 +302,7 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
     {
         await using var factory = CreateFactory();
         using var client = CreateClient(factory);
-        await RegistrarAsync(client, "Ana", "ana@exemplo.com");
+        await CriarContaAsync(client, "Ana", "ana@exemplo.com");
         await ExecuteAsync("UPDATE sessoes_autenticacao SET expires_at = now() + interval '10 days'");
 
         var response = await client.GetAsync(Sessao, Token);
@@ -267,7 +318,7 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
     {
         await using var factory = CreateFactory();
         using var client = CreateClient(factory);
-        await RegistrarAsync(client, "Ana", "ana@exemplo.com");
+        await CriarContaAsync(client, "Ana", "ana@exemplo.com");
 
         var response = await client.GetAsync(Sessao, Token);
 
@@ -281,7 +332,7 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
         await using var factory = CreateFactory();
         using var client = CreateClient(factory, handleCookies: false);
 
-        var cookie = ReadSessionCookie(await RegistrarAsync(client, "Ana", "ana@exemplo.com"));
+        var cookie = ReadSessionCookie(await CriarContaAsync(client, "Ana", "ana@exemplo.com"));
 
         Assert.Equal(1L, await CountAsync(
             "SELECT count(*) FROM sessoes_autenticacao WHERE token_hash = $1", OpaqueToken.Hash(cookie.Value)));
@@ -297,7 +348,7 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
         await using var factory = CreateFactory();
         using var client = CreateClient(factory, handleCookies: false);
 
-        var cookie = ReadSessionCookie(await RegistrarAsync(client, "Ana", "ana@exemplo.com"));
+        var cookie = ReadSessionCookie(await CriarContaAsync(client, "Ana", "ana@exemplo.com"));
 
         Assert.Contains("httponly", cookie.Attributes, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("samesite=lax", cookie.Attributes, StringComparison.OrdinalIgnoreCase);
@@ -312,7 +363,7 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
         await using var factory = CreateFactory(environment: "Production");
         using var client = CreateClient(factory, handleCookies: false);
 
-        var cookie = ReadSessionCookie(await RegistrarAsync(client, "Ana", "ana@exemplo.com"));
+        var cookie = ReadSessionCookie(await CriarContaAsync(client, "Ana", "ana@exemplo.com"));
 
         Assert.Contains("secure", cookie.Attributes, StringComparison.OrdinalIgnoreCase);
     }
@@ -324,7 +375,7 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
     {
         await using var factory = CreateFactory();
         using var client = CreateClient(factory);
-        await RegistrarAsync(client, "Ana", "ana@exemplo.com");
+        await CriarContaAsync(client, "Ana", "ana@exemplo.com");
 
         client.DefaultRequestHeaders.Remove("Origin");
         if (origin is not null)
@@ -360,21 +411,22 @@ public sealed class AutenticacaoRoutesTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.Unauthorized, unaffected.StatusCode);
     }
 
-    private static Task<HttpResponseMessage> RegistrarAsync(HttpClient client, string nome, string email) =>
+    // A primeira conta nasce na configuração inicial; as demais exigem convite (ver ConvitesRoutesTests).
+    private static Task<HttpResponseMessage> CriarContaAsync(HttpClient client, string nome, string email) =>
         client.PostAsJsonAsync(
-            Registrar, new RegistrarRequest(nome, email, Senha), AppJsonContext.Default.RegistrarRequest, Token);
+            ConfiguracaoInicial,
+            new ConfiguracaoInicialRequest(nome, email, Senha),
+            AppJsonContext.Default.ConfiguracaoInicialRequest,
+            Token);
 
     private static Task<HttpResponseMessage> EntrarAsync(HttpClient client, string email, string senha) =>
         client.PostAsJsonAsync(Entrar, new EntrarRequest(email, senha), AppJsonContext.Default.EntrarRequest, Token);
 
-    private WebApplicationFactory<Program> CreateFactory(
-        string cadastroAberto = "true",
-        string environment = "Development") =>
+    private WebApplicationFactory<Program> CreateFactory(string environment = "Development") =>
         new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             builder.UseEnvironment(environment);
             builder.UseSetting("ConnectionStrings:Database", _database.ConnectionString);
-            builder.UseSetting("Autenticacao:CadastroAberto", cadastroAberto);
         });
 
     private static HttpClient CreateClient(WebApplicationFactory<Program> factory, bool handleCookies = true)

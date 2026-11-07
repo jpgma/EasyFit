@@ -24,27 +24,26 @@ internal sealed class ApiTestHost : IAsyncDisposable
 
     internal Npgsql.NpgsqlDataSource DataSource => _database.DataSource;
 
-    private ApiTestHost(TestDatabase database, string cadastroAberto, string evidenciasDiretorio)
+    private ApiTestHost(TestDatabase database, string evidenciasDiretorio)
     {
         _database = database;
         _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             builder.UseEnvironment("Development");
             builder.UseSetting("ConnectionStrings:Database", database.ConnectionString);
-            builder.UseSetting("Autenticacao:CadastroAberto", cadastroAberto);
             builder.UseSetting("Evidencias:Diretorio", evidenciasDiretorio);
         });
     }
 
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
-    public static async Task<ApiTestHost> CreateAsync(string cadastroAberto = "false")
+    public static async Task<ApiTestHost> CreateAsync()
     {
         var database = await TestDatabase.CreateAsync();
         await MigrationRunner.RunAsync(database.DataSource, MigrationCatalog.LoadEmbedded(), NullLogger.Instance, Token);
         var evidenciasDiretorio = Path.Combine(Path.GetTempPath(), "wrexercise-test-evidencias", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(evidenciasDiretorio);
-        return new ApiTestHost(database, cadastroAberto, evidenciasDiretorio);
+        return new ApiTestHost(database, evidenciasDiretorio);
     }
 
     public HttpClient CreateAnonimo()

@@ -103,15 +103,8 @@ docker compose --env-file .env -f deploy/compose.yaml run --rm app reset-senha p
 
 ### Primeira conta
 
-O cadastro fica fechado em produção. Para criar a primeira conta:
-
-1. Defina `CADASTRO_ABERTO=true` no `.env`.
-2. Rode `docker compose --env-file .env -f deploy/compose.yaml up -d app`.
-3. Crie a conta em `/criar-conta`.
-4. Volte para `CADASTRO_ABERTO=false` e repita o passo 2.
-
-Em desenvolvimento, o cadastro já vem aberto. Ver `docs/decisoes/0006-autenticacao-por-sessao.md`.
+Com o banco sem nenhum usuário, o app mostra a tela de configuração inicial (`/configuracao-inicial`). Abra o endereço do app logo após subir e crie a primeira conta ali. A tela se fecha para sempre assim que existe um usuário. Quem abrir o endereço primeiro cria a conta, então não deixe o app exposto sem abri-lo. Ver `docs/decisoes/0031-configuracao-inicial.md`.
 
 ### Novos membros
 
-A primeira conta cria o primeiro grupo. Depois disso, ninguém precisa do cadastro aberto: o Proprietário ou um Administrador gera um link de convite na tela do grupo, e quem o recebe cria a conta por ele. Cada link vale para uma pessoa, por 7 dias. Ver `docs/decisoes/0008-grupos-e-convites.md`.
+A primeira conta cria o primeiro grupo. Depois disso, o cadastro só funciona por convite: o Proprietário ou um Administrador gera um link de convite na tela do grupo, e quem o recebe cria a conta por ele. Cada link vale para uma pessoa, por 7 dias. Ver `docs/decisoes/0008-grupos-e-convites.md`.

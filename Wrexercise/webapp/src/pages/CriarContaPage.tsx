@@ -9,7 +9,7 @@ import { useRegistrar } from "@/features/autenticacao";
 import { extractConviteToken } from "@/features/convites";
 import { getErrorMessage } from "@/services/api";
 
-// Os limites acompanham Features/Autenticacao/Rules.cs; o backend é quem decide.
+// Os limites acompanham Features/Autenticacao/ValidacaoConta.cs; o backend é quem decide.
 // O esquema fica na página para o Zod só entrar no bundle desta tela lazy.
 const schema = z
   .object({

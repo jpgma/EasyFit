@@ -57,9 +57,20 @@ Reaction types (the code names are also used in the interface):
 
 - A person can create an account only with an invitation link. The account, the login session and the entry into the group occur in one operation.
 - If the system refuses the invitation, the system does not create the account.
-- The operator can set `Autenticacao:CadastroAberto` to true. Then a person can create an account without an invitation. The operator uses this only to create the first account. The default value is false.
+- If the request has no invitation, the system refuses it with the code `CADASTRO_FECHADO`.
 - Data for an account: display name (1 to 80 characters), e-mail (unique, maximum 254 characters) and password (8 to 128 characters).
 - If the e-mail is already in use, the system tells the person.
+
+### 3.1.1. First setup (`ConfiguracaoInicial`)
+
+- When the application has no `Usuario`, the page `/configuracao-inicial` creates the first account. The data are the same as in section 3.1, without an invitation.
+- The first account and its login session occur in one operation. After that, the user goes to the home page.
+- The first user is a normal `Usuario`. The user has no global role. The user creates a `Grupo`, becomes its `Proprietario` and sends the invitations.
+- While no `Usuario` exists, the pages `/entrar` and `/criar-conta` send the person to `/configuracao-inicial`.
+- When one `Usuario` exists, the page closes for ever. The page sends the person to `/entrar`. The system refuses new requests with the code `CONFIGURACAO_JA_CONCLUIDA`.
+- If two requests arrive at the same time, the system creates only one account.
+- The page has no secret code. The first person who opens the page creates the account. The operator opens the application address right after the installation.
+- The operator does not need a setting for this. There is no `Autenticacao:CadastroAberto`.
 
 ### 3.2. Log in and log out
 

@@ -52,6 +52,49 @@ export function useSessao() {
   });
 }
 
+type ConfiguracaoInicialResponse = {
+  pendente: boolean;
+};
+
+const configuracaoInicialKey = [
+  "autenticacao",
+  "configuracao-inicial",
+] as const;
+
+/**
+ * Diz se o app ainda não tem nenhum usuário. Só vale a pena consultar sem sessão.
+ * Depois que a configuração termina ela nunca volta a ficar pendente, então o valor não expira.
+ */
+export function useConfiguracaoInicial(enabled = true) {
+  return useQuery({
+    queryKey: configuracaoInicialKey,
+    queryFn: ({ signal }) =>
+      getJson<ConfiguracaoInicialResponse>(
+        `${basePath}/configuracao-inicial`,
+        signal,
+      ),
+    enabled,
+    select: (data) => data.pendente,
+    staleTime: (query) => (query.state.data?.pendente === false ? Infinity : 0),
+    retry: 1,
+  });
+}
+
+export function useConfigurarPrimeiroUsuario() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Omit<RegistrarData, "conviteToken">) =>
+      postJson<SessaoResponse>(`${basePath}/configuracao-inicial`, data),
+    onSuccess: ({ usuario }) => {
+      queryClient.setQueryData<ConfiguracaoInicialResponse>(
+        configuracaoInicialKey,
+        { pendente: false },
+      );
+      queryClient.setQueryData(sessaoKey, usuario);
+    },
+  });
+}
+
 export function useEntrar() {
   const queryClient = useQueryClient();
   return useMutation({

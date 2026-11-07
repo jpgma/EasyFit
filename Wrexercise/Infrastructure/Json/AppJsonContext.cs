@@ -26,6 +26,8 @@ namespace Wrexercise.Infrastructure.Json;
 [JsonSerializable(typeof(ComentarioRequest))]
 [JsonSerializable(typeof(ComentarioResponse))]
 [JsonSerializable(typeof(ComentariosResponse))]
+[JsonSerializable(typeof(ConfiguracaoInicialRequest))]
+[JsonSerializable(typeof(ConfiguracaoInicialResponse))]
 [JsonSerializable(typeof(ConviteConsultaResponse))]
 [JsonSerializable(typeof(ConviteAtualResponse))]
 [JsonSerializable(typeof(ConviteResponse))]

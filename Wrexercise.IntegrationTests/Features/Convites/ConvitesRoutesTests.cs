@@ -17,7 +17,7 @@ public sealed class ConvitesRoutesTests : IAsyncLifetime
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
     // O cadastro fica fechado: entrar com um convite precisa funcionar assim mesmo.
-    public async ValueTask InitializeAsync() => _host = await ApiTestHost.CreateAsync(cadastroAberto: "false");
+    public async ValueTask InitializeAsync() => _host = await ApiTestHost.CreateAsync();
 
     public ValueTask DisposeAsync() => _host.DisposeAsync();
 

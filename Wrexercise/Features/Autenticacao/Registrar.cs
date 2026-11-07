@@ -37,15 +37,14 @@ internal static class Registrar
         RegistrarRequest request,
         HttpContext context,
         NpgsqlDataSource dataSource,
-        IConfiguration configuration,
         ILoggerFactory loggerFactory,
         CancellationToken cancellationToken)
     {
         // Texto em branco conta como ausência de convite; o convite recusado é decidido na transação.
         var conviteToken = string.IsNullOrWhiteSpace(request.ConviteToken) ? null : request.ConviteToken.Trim();
 
-        // O convite é o caminho normal; o cadastro aberto existe para criar a primeira conta.
-        if (conviteToken is null && !IsCadastroAberto(configuration))
+        // O convite é o único caminho; a primeira conta nasce na configuração inicial.
+        if (conviteToken is null)
         {
             return ApiProblem.Create(
                 StatusCodes.Status403Forbidden,
@@ -148,9 +147,6 @@ internal static class Registrar
         await transaction.CommitAsync(cancellationToken);
         return new RegistroResult(RegistroStatus.Criado, new UsuarioResponse(usuarioId, nomeExibicao, email), token);
     }
-
-    private static bool IsCadastroAberto(IConfiguration configuration) =>
-        bool.TryParse(configuration["Autenticacao:CadastroAberto"], out var aberto) && aberto;
 
     private static IResult InvalidData() => ApiProblem.Create(
         StatusCodes.Status400BadRequest,
