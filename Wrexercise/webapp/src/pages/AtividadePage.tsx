@@ -89,7 +89,7 @@ export function AtividadePage() {
             <div className="mt-5 flex items-center gap-3">
               <TipoAtividadeIcone tipo={tipo} className="size-12" />
               <div className="min-w-0">
-                <p className="font-display text-xl font-bold">
+                <p className="font-display text-xl">
                   {tipoAtividadeLabels[tipo]}
                 </p>
                 <p className="flex flex-wrap items-center gap-x-3 text-sm text-muted">

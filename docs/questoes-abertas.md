@@ -688,7 +688,7 @@ A interface deve ser moderna, leve e mobile-first.
 
 Não utilizar dependências externas para carregar fontes ou recursos visuais.
 
-**Situação atual:** tipografia e temas claro e escuro foram definidos a partir do mockup (`decisoes/0014-novo-mockup-como-referencia-visual.md`); a paleta vem do ícone do aplicativo (`decisoes/0025-paleta-do-icone.md`). Falta avaliar a necessidade de um seletor manual de tema.
+**Situação atual:** tipografia e temas claro e escuro foram definidos a partir do mockup (`decisoes/0014-novo-mockup-como-referencia-visual.md`); a paleta, as fontes e a linguagem gráfica vêm da identidade Wrexercise (`decisoes/0027-identidade-visual-wrexercise.md`). Falta avaliar a necessidade de um seletor manual de tema.
 
 ## Q032 — Quais páginas serão obrigatórias no MVP?
 

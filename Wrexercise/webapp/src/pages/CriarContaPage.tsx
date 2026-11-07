@@ -64,7 +64,7 @@ export function CriarContaPage() {
       </div>
 
       <div className="animate-slide-up">
-        <h1 className="mt-8 text-3xl font-bold">Criar sua conta</h1>
+        <h1 className="mt-8 text-3xl uppercase">Criar sua conta</h1>
         <p className="mt-2 text-muted">
           O Wrexercise funciona por convite. Seus dados ficam visíveis só para o
           seu grupo.

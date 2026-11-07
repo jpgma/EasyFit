@@ -33,7 +33,7 @@ export function RaizPage() {
       <div className="card">
         <EmptyState
           icon={Users}
-          title="Você ainda não faz parte de um grupo"
+          title="Bora montar a turma?"
           description="Crie um grupo para seus amigos ou use o convite que você recebeu."
           action={
             <Link to="/grupos/novo" className="btn-primary">

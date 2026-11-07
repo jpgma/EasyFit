@@ -83,13 +83,17 @@ function CabecalhoComDesafio({
 
   return (
     <>
-      <section className="overflow-hidden rounded-3xl bg-brand p-5 text-on-brand">
-        <div className="flex items-center gap-3">
-          <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-accent font-display text-xl font-bold text-on-accent">
+      <section className="relative overflow-hidden rounded-2xl border-2 border-outline bg-brand p-5 text-on-brand shadow-sticker">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-4 -right-4 size-36 halftone-ink"
+        />
+        <div className="relative flex items-center gap-3">
+          <div className="grid size-14 shrink-0 rotate-[-4deg] place-items-center rounded-xl border-2 border-outline bg-reward font-display text-xl text-on-reward">
             {getIniciais(nome)}
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-2xl font-bold">{nome}</h1>
+            <h1 className="truncate text-3xl uppercase">{nome}</h1>
             <p className="truncate text-sm opacity-90">
               {totalMembros} {totalMembros === 1 ? "membro" : "membros"}
               {desafio.data && ` · ${desafio.data.nome}`}
@@ -97,20 +101,20 @@ function CabecalhoComDesafio({
           </div>
         </div>
         {objetivo > 0 && (
-          <div className="mt-5">
+          <div className="relative mt-5">
             <div className="flex items-end justify-between">
               <p className="text-sm opacity-90">Treinos do grupo na semana</p>
-              <p className="font-display text-2xl font-bold">
+              <p className="font-display text-2xl">
                 {totalFeito}
                 <span className="text-base opacity-80">/{objetivo}</span>
               </p>
             </div>
             <div
               aria-hidden="true"
-              className="mt-2 h-2.5 overflow-hidden rounded-full bg-on-brand/20"
+              className="mt-2 h-3 overflow-hidden rounded-sm border-2 border-outline bg-surface"
             >
               <div
-                className="h-full rounded-full bg-accent"
+                className="h-full bg-progress"
                 style={{ width: `${(totalFeito / objetivo) * 100}%` }}
               />
             </div>
@@ -209,13 +213,13 @@ export function GrupoPage() {
           grupoId={id}
         />
       ) : (
-        <section className="rounded-3xl bg-brand p-5 text-on-brand">
+        <section className="rounded-2xl border-2 border-outline bg-brand p-5 text-on-brand shadow-sticker">
           <div className="flex items-center gap-3">
-            <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-accent font-display text-xl font-bold text-on-accent">
+            <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-reward font-display text-xl text-on-reward">
               {getIniciais(nome)}
             </div>
             <div className="min-w-0 flex-1">
-              <h1 className="truncate text-2xl font-bold">{nome}</h1>
+              <h1 className="truncate text-2xl uppercase">{nome}</h1>
               <p className="text-sm opacity-90">
                 {totalMembros} de {maxMembros} membros
               </p>
@@ -243,7 +247,7 @@ export function GrupoPage() {
             to={`/desafios/${desafioAtual.id}`}
             className="card flex items-center gap-3 p-4 tap"
           >
-            <Target aria-hidden="true" className="size-5 text-primary" />
+            <Target aria-hidden="true" className="size-5 text-link" />
             <span className="flex-1 text-sm font-semibold">Meta do grupo</span>
             <ChevronRight aria-hidden="true" className="size-4 text-muted" />
           </Link>
@@ -253,7 +257,7 @@ export function GrupoPage() {
               to={`/grupos/${id}/desafios/novo`}
               className="card flex items-center gap-3 p-4 tap"
             >
-              <Plus aria-hidden="true" className="size-5 text-primary" />
+              <Plus aria-hidden="true" className="size-5 text-link" />
               <span className="flex-1 text-sm font-semibold">
                 Criar desafio
               </span>
@@ -266,7 +270,7 @@ export function GrupoPage() {
             to={`/grupos/${id}/convidar`}
             className="card flex items-center gap-3 p-4 tap"
           >
-            <UserPlus aria-hidden="true" className="size-5 text-primary" />
+            <UserPlus aria-hidden="true" className="size-5 text-link" />
             <span className="flex-1 text-sm font-semibold">
               Convidar amigos
             </span>
@@ -336,7 +340,7 @@ export function GrupoPage() {
             <div className="card">
               <EmptyState
                 icon={CheckCircle2}
-                title="Nenhuma atividade ainda"
+                title="Quadra vazia por enquanto"
                 description="Quando alguém do grupo registrar um treino, ele aparece aqui."
               />
             </div>

@@ -185,7 +185,7 @@ function Instalacao() {
         <div className="flex gap-3 text-sm text-muted">
           <Smartphone
             aria-hidden="true"
-            className="size-5 shrink-0 text-primary"
+            className="size-5 shrink-0 text-link"
           />
           <p>
             {modo === "botao"
@@ -228,7 +228,7 @@ export function ConfiguracoesPage() {
 
       <SectionTitle>Privacidade</SectionTitle>
       <div className="card flex gap-3 p-4 text-sm text-muted">
-        <Shield aria-hidden="true" className="size-5 shrink-0 text-primary" />
+        <Shield aria-hidden="true" className="size-5 shrink-0 text-link" />
         <p>
           Seus treinos e comprovantes ficam visíveis apenas para os membros dos
           seus grupos. Ninguém de fora vê nada.

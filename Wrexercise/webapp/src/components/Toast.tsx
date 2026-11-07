@@ -35,7 +35,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         className="pointer-events-none fixed inset-x-0 top-4 z-50 flex justify-center px-4"
       >
         {mensagem && (
-          <p className="animate-slide-up rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium shadow-float">
+          <p className="animate-slide-up rounded-lg border-2 border-outline bg-surface px-4 py-3 text-sm font-semibold shadow-sticker">
             {mensagem}
           </p>
         )}

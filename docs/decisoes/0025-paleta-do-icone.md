@@ -1,6 +1,6 @@
 # 0025 — Paleta tirada do ícone do aplicativo
 
-**Status:** DECIDIDA. Substitui a paleta da decisão 0014; o resto dela continua valendo.
+**Status:** SUBSTITUÍDA pela decisão 0027 (identidade visual Wrexercise).
 
 ## Contexto
 

@@ -15,10 +15,10 @@ import {
 } from "@/services/serviceWorker";
 
 const classesAviso =
-  "pointer-events-auto flex w-full max-w-md animate-slide-up items-center gap-3 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-medium shadow-float";
+  "pointer-events-auto flex w-full max-w-md animate-slide-up items-center gap-3 rounded-xl border-2 border-outline bg-surface px-4 py-2.5 text-sm font-medium shadow-sticker";
 
 const classesBotaoPrimario =
-  "h-11 shrink-0 rounded-lg bg-primary px-4 text-sm font-semibold text-on-primary tap hover:bg-primary-hover";
+  "h-11 shrink-0 rounded-lg border-2 border-outline bg-primary px-4 text-sm font-bold text-on-primary press hover:bg-primary-hover";
 
 /** Avisos de todo o app: falta de conexão, versão nova e convite para instalar o PWA. */
 export function AvisosDoApp() {
@@ -57,10 +57,7 @@ export function AvisosDoApp() {
       )}
       {atualizacao && (
         <div role="status" aria-atomic="true" className={classesAviso}>
-          <RefreshCw
-            aria-hidden="true"
-            className="size-5 shrink-0 text-primary"
-          />
+          <RefreshCw aria-hidden="true" className="size-5 shrink-0 text-link" />
           <p className="flex-1">Nova versão disponível</p>
           <button
             type="button"
@@ -75,7 +72,7 @@ export function AvisosDoApp() {
         <div role="status" aria-atomic="true" className={classesAviso}>
           <Smartphone
             aria-hidden="true"
-            className="size-5 shrink-0 text-primary"
+            className="size-5 shrink-0 text-link"
           />
           <p className="flex-1">
             {instalacao === "botao"

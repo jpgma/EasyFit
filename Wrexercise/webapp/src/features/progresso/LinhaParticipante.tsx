@@ -11,7 +11,7 @@ export function SituacaoParticipante({
   meta: number;
 }) {
   if (verificadas >= meta) {
-    return <span className="chip chip-success">Meta batida</span>;
+    return <span className="badge badge-progress">Meta batida</span>;
   }
   if (verificadas === meta - 1) {
     return <span className="chip chip-soft">Quase lá</span>;
@@ -51,7 +51,7 @@ export function LinhaParticipante({
             {voce && <span className="font-normal text-muted"> (você)</span>}
           </p>
           {contaNestaSemana && (
-            <span className="text-xs font-semibold tabular-nums">
+            <span className="font-score text-base">
               {Math.min(verificadas, meta)}/{meta}
             </span>
           )}

@@ -161,8 +161,8 @@ export function RevisarPage() {
           <div className="card mt-5">
             <EmptyState
               icon={CheckCircle2}
-              title="Nenhuma avaliação pendente"
-              description="Você está em dia com o grupo."
+              title="Tudo em dia"
+              description="Ninguém espera sua avaliação agora. Valeu por fazer a sua parte!"
               action={
                 <Link to={`/grupos/${grupoId}/inicio`} className="btn-primary">
                   Voltar ao início

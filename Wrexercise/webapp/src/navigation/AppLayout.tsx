@@ -12,10 +12,10 @@ type ItemNavegacao = {
 };
 
 const classesSidebar = ({ isActive }: { isActive: boolean }) =>
-  `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-surface-muted ${isActive ? "bg-soft text-on-soft" : "text-muted"}`;
+  `flex items-center gap-3 rounded-lg border-2 px-3 py-2.5 text-sm font-semibold transition-colors ${isActive ? "border-outline bg-soft text-on-soft" : "border-transparent text-muted hover:bg-surface-muted"}`;
 
 const classesTabBar = ({ isActive }: { isActive: boolean }) =>
-  `flex flex-col items-center gap-0.5 py-1.5 text-2xs font-medium ${isActive ? "text-primary" : "text-muted"}`;
+  `relative flex min-h-12 flex-col items-center justify-center gap-0.5 py-1.5 text-2xs font-semibold before:absolute before:top-0 before:h-1 before:w-8 before:rounded-b-sm ${isActive ? "text-foreground before:bg-primary" : "text-muted before:bg-transparent"}`;
 
 /** O grupo atual vem da URL. Nas telas sem grupo na URL, vale o último visitado nesta sessão. */
 function useGrupoAtualId(): string | null {
@@ -90,7 +90,10 @@ export function AppLayout() {
             </NavLink>
           ))}
         </nav>
-        <Link to={registrar} className="btn-primary mt-6 h-12">
+        <Link
+          to={registrar}
+          className="btn-primary mt-6 h-12 px-3 whitespace-nowrap"
+        >
           <Plus aria-hidden="true" className="size-5" />
           Registrar atividade
         </Link>
@@ -105,7 +108,7 @@ export function AppLayout() {
 
       <nav
         aria-label="Principal"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 backdrop-blur lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-outline bg-surface/95 backdrop-blur lg:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div className="mx-auto grid max-w-md grid-cols-5 items-center px-2 py-1.5">
@@ -118,7 +121,7 @@ export function AppLayout() {
           <Link
             to={registrar}
             aria-label="Registrar atividade"
-            className="mx-auto -mt-6 grid size-14 place-items-center rounded-2xl bg-primary text-on-primary shadow-float tap"
+            className="mx-auto -mt-6 grid size-14 rotate-[-3deg] place-items-center rounded-xl border-2 border-outline bg-primary text-on-primary shadow-sticker press"
           >
             <Plus aria-hidden="true" className="size-6" strokeWidth={2.5} />
           </Link>

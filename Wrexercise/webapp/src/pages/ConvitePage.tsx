@@ -94,15 +94,15 @@ export function ConvitePage() {
     <main className="mx-auto flex min-h-dvh max-w-sm flex-col px-6 py-6">
       <Logo />
 
-      <div className="card mt-8 animate-slide-up overflow-hidden">
-        <div className="bg-brand px-6 pt-6 pb-14 text-sm text-on-brand">
+      <div className="card-sticker mt-8 animate-slide-up overflow-hidden">
+        <div className="bg-brand px-6 pt-6 pb-14 text-sm font-semibold text-on-brand halftone-ink">
           {convidadoPor} te convidou
         </div>
         <div className="-mt-10 px-6 pb-6">
-          <div className="grid size-20 place-items-center rounded-3xl border-4 border-surface bg-accent font-display text-2xl font-bold text-on-accent">
+          <div className="grid size-20 place-items-center rounded-3xl border-4 border-surface bg-reward font-display text-2xl text-on-reward">
             {getIniciais(grupoNome)}
           </div>
-          <h1 className="mt-3 text-2xl font-bold break-words">{grupoNome}</h1>
+          <h1 className="mt-3 text-2xl break-words uppercase">{grupoNome}</h1>
           <p className="mt-2 flex items-center gap-2 text-sm text-muted">
             <Users aria-hidden="true" className="size-4 shrink-0" />
             {totalMembros} de {maxMembros} membros

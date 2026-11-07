@@ -1,4 +1,4 @@
-import type { LucideIcon } from "lucide-react";
+import { CircleAlert, type LucideIcon } from "lucide-react";
 import { useId, type ComponentProps, type ReactNode } from "react";
 
 type TextFieldProps = ComponentProps<"input"> & {
@@ -38,7 +38,7 @@ export function TextField({
           id={id}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : hint ? hintId : undefined}
-          className={`input-field ${Icon ? "pl-10" : ""} ${trailing ? "pr-11" : ""} ${error ? "border-danger" : ""}`}
+          className={`input-field ${Icon ? "pl-10" : ""} ${trailing ? "pr-11" : ""}`}
         />
         {trailing && (
           <div className="absolute inset-y-0 right-0 flex items-center pr-3">
@@ -47,7 +47,8 @@ export function TextField({
         )}
       </div>
       {error ? (
-        <p id={errorId} className="input-error">
+        <p id={errorId} className="input-error flex items-center gap-1">
+          <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
           {error}
         </p>
       ) : (

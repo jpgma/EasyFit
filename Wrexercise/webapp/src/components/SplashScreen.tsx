@@ -8,7 +8,9 @@ export function SplashScreen() {
       aria-label="Carregando"
       className="flex min-h-dvh items-center justify-center"
     >
-      <BrandMark />
+      <div className="animate-pop">
+        <BrandMark />
+      </div>
     </div>
   );
 }

@@ -31,18 +31,24 @@ export function EntrarPage() {
 
   return (
     <div className="grid min-h-dvh lg:grid-cols-2">
-      <div className="hidden flex-col justify-between bg-brand p-12 text-on-brand lg:flex">
-        <p className="font-display text-xl font-bold">Wrexercise</p>
-        <p className="font-display text-5xl leading-tight font-bold">
-          Treinar fica mais fácil quando a turma toda está junta.
+      <div className="relative hidden flex-col justify-between overflow-hidden border-r-2 border-outline bg-brand p-12 text-on-brand lg:flex">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 right-0 w-1/2 halftone-ink"
+        />
+        <p className="relative font-display text-xl uppercase">Wrexercise</p>
+        <p className="relative font-display text-6xl leading-none uppercase">
+          Treino bom é treino com a turma.
         </p>
-        <p className="text-sm opacity-80">Grupos privados de até 10 amigos.</p>
+        <p className="relative text-sm font-semibold">
+          Grupos privados de até 10 amigos.
+        </p>
       </div>
 
       <main className="flex flex-col justify-center px-6 py-10">
         <div className="mx-auto w-full max-w-sm animate-slide-up">
           <Logo />
-          <h1 className="mt-10 text-3xl font-bold">Bora treinar?</h1>
+          <h1 className="mt-10 text-3xl uppercase">Bora treinar?</h1>
           <p className="mt-2 text-muted">
             Metas semanais com seus amigos, comprovantes e muito incentivo.
           </p>

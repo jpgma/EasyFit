@@ -30,11 +30,11 @@ export function FaixaSemana({
             aria-label={`Dia ${Number(dia.slice(8))}${treinou ? ": treinou" : ""}`}
           >
             <div
-              className={`mx-auto mb-1 grid size-8 place-items-center rounded-full text-xs font-semibold ${
+              className={`mx-auto mb-1 grid size-8 place-items-center rounded-md text-xs font-bold ${
                 treinou
-                  ? "bg-primary text-on-primary"
+                  ? "border-2 border-outline bg-primary text-on-primary"
                   : eHoje
-                    ? "border-2 border-primary text-primary"
+                    ? "border-2 border-dashed border-outline text-foreground"
                     : "bg-surface-muted"
               }`}
             >

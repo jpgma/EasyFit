@@ -10,13 +10,14 @@
     format("woff2-variations");
 }
 
+/* Display da marca: Anton tem um único peso (400), condensado e forte. */
 @font-face {
-  font-family: "Bricolage Grotesque Variable";
+  font-family: "Anton";
   font-style: normal;
   font-display: swap;
-  font-weight: 200 800;
-  src: url("@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2")
-    format("woff2-variations");
+  font-weight: 400;
+  src: url("@fontsource/anton/files/anton-latin-400-normal.woff2")
+    format("woff2");
 }
 
 @theme {
@@ -24,21 +25,25 @@
     "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, sans-serif;
   --font-display:
-    "Bricolage Grotesque Variable", "Plus Jakarta Sans Variable", ui-sans-serif,
-    system-ui, sans-serif;
+    "Anton", "Plus Jakarta Sans Variable", Impact, "Arial Narrow",
+    ui-sans-serif, sans-serif;
 
-  --radius-sm: 0.625rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.25rem;
-  --radius-2xl: 1.5rem;
-  --radius-3xl: 1.875rem;
+  /* Raios moderados: arredondado, mas sem virar pílula. */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+  --radius-3xl: 1.375rem;
 
   --text-2xs: 0.6875rem;
   --text-2xs--line-height: 1rem;
 
   --animate-fade-in: fade-in 0.3s ease-out both;
   --animate-slide-up: slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* Comemoração curta, uma vez só: meta batida ou conquista. */
+  --animate-pop: pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-burst: burst 0.7s ease-out both;
 
   @keyframes fade-in {
     from {
@@ -50,6 +55,23 @@
     from {
       opacity: 0;
       transform: translateY(12px);
+    }
+  }
+
+  @keyframes pop {
+    from {
+      transform: scale(0.85);
+    }
+  }
+
+  @keyframes burst {
+    from {
+      opacity: 1;
+      transform: scale(0.6) rotate(-8deg);
+    }
+    to {
+      opacity: 0;
+      transform: scale(1.2) rotate(4deg);
     }
   }
 }
@@ -75,8 +97,15 @@
   --color-on-soft: var(--on-soft);
   --color-brand: var(--brand);
   --color-on-brand: var(--on-brand);
-  --color-accent: var(--accent);
-  --color-on-accent: var(--on-accent);
+  --color-reward: var(--reward);
+  --color-on-reward: var(--on-reward);
+  --color-game: var(--game);
+  --color-on-game: var(--on-game);
+  --color-game-soft: var(--game-soft);
+  --color-on-game-soft: var(--on-game-soft);
+  --color-progress: var(--progress);
+  --color-on-progress: var(--on-progress);
+  --color-outline: var(--outline);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-on-success-soft: var(--on-success-soft);
@@ -93,104 +122,135 @@
   --color-on-danger-soft: var(--on-danger-soft);
   --color-scrim: var(--scrim);
   /* A galeria em tela cheia é escura nos dois temas, para não competir com a foto. */
-  --color-lightbox: oklch(0.12 0.01 20);
-  --color-on-lightbox: oklch(0.97 0.008 80);
+  --color-lightbox: #161922;
+  --color-on-lightbox: #f5f1e8;
   --shadow-card: var(--card-shadow);
   --shadow-float: var(--float-shadow);
+  /* Sombra sólida e deslocada, de adesivo: só para destaques. */
+  --shadow-sticker: 3px 3px 0 var(--outline);
+  --shadow-sticker-sm: 2px 2px 0 var(--outline);
 }
 
+/* Paleta Wrexercise (decisão 0027). Só os tokens semânticos abaixo usam estes valores. */
 :root {
   color-scheme: light dark;
 
-  /* Paleta tirada do ícone: laranja do fundo, creme da carta, dourado dos raios e o contorno ameixa. */
-  --background: oklch(0.975 0.012 80);
-  --surface: oklch(0.995 0.004 80);
-  --surface-muted: oklch(0.95 0.016 75);
-  --border: oklch(0.9 0.02 70);
-  --border-strong: oklch(0.6 0.03 50);
-  --foreground: oklch(0.24 0.035 20);
-  --muted: oklch(0.48 0.03 35);
-  --placeholder: oklch(0.5 0.03 35);
-  --link: oklch(0.52 0.17 40);
-  --focus: oklch(0.56 0.17 42);
-  --primary: oklch(0.56 0.17 42);
-  --primary-hover: oklch(0.5 0.17 40);
-  --on-primary: oklch(0.99 0.01 80);
-  --soft: oklch(0.95 0.035 65);
-  --soft-hover: oklch(0.91 0.055 62);
-  --soft-border: oklch(0.88 0.07 60);
-  --on-soft: oklch(0.42 0.13 40);
-  --brand: oklch(0.52 0.18 36);
-  --on-brand: oklch(0.99 0.01 80);
-  --accent: oklch(0.85 0.15 85);
-  --on-accent: oklch(0.3 0.07 45);
-  --success: oklch(0.55 0.13 152);
-  --success-soft: oklch(0.94 0.045 152);
-  --on-success-soft: oklch(0.38 0.1 152);
-  --warning: oklch(0.64 0.14 72);
-  --warning-soft: oklch(0.96 0.05 90);
-  --on-warning-soft: oklch(0.42 0.09 70);
-  --info: oklch(0.52 0.15 280);
-  --info-soft: oklch(0.95 0.025 280);
-  --on-info-soft: oklch(0.42 0.14 280);
-  /* Carmim, mais frio que o laranja da marca, para um erro não parecer destaque. */
-  --danger: oklch(0.5 0.18 12);
-  --danger-soft: oklch(0.95 0.025 10);
-  --danger-soft-hover: oklch(0.91 0.045 10);
-  --danger-soft-border: oklch(0.88 0.06 10);
-  --on-danger-soft: oklch(0.45 0.16 12);
-  --scrim: oklch(0.2 0.02 20 / 0.4);
+  --asphalt: #222633;
+  --chalk: #f5f1e8;
+  --coral: #ff684a;
+  --violet: #7957e8;
+  --yellow: #ffd34e;
+  --lime: #a8d978;
+  --grey: #a9b0c2;
+
+  /* Tema claro: chalk ao fundo, asphalt no texto, coral nas ações. */
+  --background: var(--chalk);
+  --surface: #fffdf8;
+  --surface-muted: #ece6d9;
+  --border: #dcd5c6;
+  --border-strong: #767c8c;
+  --foreground: var(--asphalt);
+  --muted: #565c6e;
+  --placeholder: #656b7d;
+  /* Coral puro sobre chalk não passa 4,5:1 como texto: links e foco usam um coral escurecido. */
+  --link: #b83a22;
+  --focus: #b83a22;
+  --primary: var(--coral);
+  --primary-hover: #ff7d63;
+  /* Texto branco sobre coral não passa; asphalt passa 5,3:1. */
+  --on-primary: var(--asphalt);
+  --soft: #ffe1d8;
+  --soft-hover: #ffd2c5;
+  --soft-border: #f5b3a3;
+  --on-soft: #93301c;
+  --brand: var(--coral);
+  --on-brand: var(--asphalt);
+  /* Contornos grossos e sombras de adesivo. */
+  --outline: var(--asphalt);
+  --reward: var(--yellow);
+  --on-reward: var(--asphalt);
+  --game: var(--violet);
+  --on-game: #ffffff;
+  --game-soft: #ece6ff;
+  --on-game-soft: #4b2fb0;
+  /* Lime só como preenchimento; como texto, use `success`. */
+  --progress: var(--lime);
+  --on-progress: var(--asphalt);
+  --success: #3d7a1c;
+  --success-soft: #e4f3d3;
+  --on-success-soft: #2c5a12;
+  --warning: #a86a0a;
+  --warning-soft: #fff2c8;
+  --on-warning-soft: #6e4a00;
+  --info: #6446d6;
+  --info-soft: #ece6ff;
+  --on-info-soft: #4b2fb0;
+  /* Vermelho frio, separado do coral, para um erro não parecer ação. */
+  --danger: #c21f3c;
+  --danger-soft: #fbe3e6;
+  --danger-soft-hover: #f6cdd3;
+  --danger-soft-border: #efb3bd;
+  --on-danger-soft: #951630;
+  --scrim: rgb(34 38 51 / 0.45);
   --avatar-bg-l: 0.92;
   --avatar-fg-l: 0.38;
-  --card-shadow:
-    0 1px 2px oklch(0.3 0.04 30 / 0.05),
-    0 4px 16px -6px oklch(0.3 0.04 30 / 0.08);
-  --float-shadow: 0 10px 30px -10px oklch(0.3 0.06 30 / 0.25);
+  --card-shadow: 0 1px 0 rgb(34 38 51 / 0.06);
+  --float-shadow: 0 10px 30px -10px rgb(34 38 51 / 0.3);
+  /* Pontos do halftone, como no ícone. */
+  --halftone-dot: rgb(121 87 232 / 0.16);
 }
 
-/* O tema escuro acompanha o sistema, com o ameixa do contorno do ícone no lugar do preto. */
+/* Tema escuro: asphalt ao fundo, chalk no texto, superfícies um pouco mais claras. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: oklch(0.17 0.018 20);
-    --surface: oklch(0.215 0.022 20);
-    --surface-muted: oklch(0.255 0.024 22);
-    --border: oklch(0.31 0.024 22);
-    --border-strong: oklch(0.58 0.03 35);
-    --foreground: oklch(0.96 0.012 80);
-    --muted: oklch(0.77 0.02 60);
-    --placeholder: oklch(0.72 0.02 60);
-    --link: oklch(0.8 0.13 58);
-    --focus: oklch(0.8 0.13 58);
-    --primary: oklch(0.74 0.17 50);
-    --primary-hover: oklch(0.8 0.15 55);
-    --on-primary: oklch(0.2 0.04 30);
-    --soft: oklch(0.29 0.05 40);
-    --soft-hover: oklch(0.33 0.06 40);
-    --soft-border: oklch(0.38 0.07 40);
-    --on-soft: oklch(0.88 0.08 65);
-    --brand: oklch(0.52 0.18 36);
-    --on-brand: oklch(0.99 0.01 80);
-    --accent: oklch(0.84 0.15 85);
-    --on-accent: oklch(0.25 0.06 45);
-    --success: oklch(0.74 0.14 152);
-    --success-soft: oklch(0.3 0.05 152);
-    --on-success-soft: oklch(0.86 0.12 152);
-    --warning: oklch(0.8 0.14 82);
-    --warning-soft: oklch(0.31 0.05 75);
-    --on-warning-soft: oklch(0.88 0.1 85);
-    --info: oklch(0.74 0.11 280);
-    --info-soft: oklch(0.29 0.05 280);
-    --on-info-soft: oklch(0.87 0.06 280);
-    --danger: oklch(0.72 0.15 12);
-    --danger-soft: oklch(0.3 0.06 12);
-    --danger-soft-hover: oklch(0.35 0.07 12);
-    --danger-soft-border: oklch(0.4 0.08 12);
-    --on-danger-soft: oklch(0.87 0.08 12);
-    --scrim: oklch(0 0 0 / 0.6);
+    --background: var(--asphalt);
+    --surface: #2b3040;
+    --surface-muted: #353b4d;
+    --border: #424a5e;
+    --border-strong: #8a91a5;
+    --foreground: var(--chalk);
+    --muted: var(--grey);
+    --placeholder: #9ea5b8;
+    --link: #ff8a70;
+    --focus: #ff8a70;
+    --primary: var(--coral);
+    --primary-hover: #ff8166;
+    --on-primary: var(--asphalt);
+    --soft: #4a2f2e;
+    --soft-hover: #5a3632;
+    --soft-border: #7a4438;
+    --on-soft: #ffc2b3;
+    --brand: var(--coral);
+    --on-brand: var(--asphalt);
+    --outline: #12141c;
+    --reward: var(--yellow);
+    --on-reward: var(--asphalt);
+    --game: #9c82f5;
+    --on-game: var(--asphalt);
+    --game-soft: #3a3366;
+    --on-game-soft: #d6ccff;
+    --progress: var(--lime);
+    --on-progress: var(--asphalt);
+    --success: var(--lime);
+    --success-soft: #2f3d2a;
+    --on-success-soft: #c8e9a6;
+    --warning: #f0b54a;
+    --warning-soft: #45391f;
+    --on-warning-soft: #ffe19a;
+    --info: #9c82f5;
+    --info-soft: #3a3366;
+    --on-info-soft: #d6ccff;
+    --danger: #ff6b81;
+    --danger-soft: #4a2530;
+    --danger-soft-hover: #5a2b38;
+    --danger-soft-border: #7a3446;
+    --on-danger-soft: #ffc1cb;
+    --scrim: rgb(0 0 0 / 0.6);
     --avatar-bg-l: 0.34;
     --avatar-fg-l: 0.88;
-    --card-shadow: 0 1px 2px oklch(0 0 0 / 0.3);
-    --float-shadow: 0 10px 30px -10px oklch(0 0 0 / 0.6);
+    --card-shadow: 0 1px 0 rgb(0 0 0 / 0.25);
+    --float-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.6);
+    --halftone-dot: rgb(156 130 245 / 0.18);
   }
 }
 
@@ -214,11 +274,16 @@
     word-spacing: inherit;
   }
 
+  /* Anton nos títulos grandes; h3 e textos densos ficam na fonte da interface. */
   h1,
-  h2,
+  h2 {
+    @apply font-display font-normal;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+  }
+
   h3 {
-    @apply font-display font-bold;
-    letter-spacing: -0.02em;
+    @apply font-bold;
   }
 
   button:not(:disabled) {
@@ -250,8 +315,77 @@
   }
 }
 
+/* Botão-adesivo: afunda e perde a sombra ao ser pressionado. */
+@utility press {
+  transition:
+    transform 100ms ease,
+    box-shadow 100ms ease,
+    background-color 150ms ease;
+
+  &:active {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+  }
+}
+
 @utility pb-safe {
   padding-bottom: calc(env(safe-area-inset-bottom) + 6rem);
+}
+
+/* Motivos da marca. Use com moderação: reforçam a informação, não competem com ela. */
+@utility halftone {
+  background-image: radial-gradient(
+    var(--halftone-dot) 1.5px,
+    transparent 1.6px
+  );
+  background-size: 9px 9px;
+}
+
+/* Halftone escuro, para fundos coloridos (coral, amarelo). */
+@utility halftone-ink {
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--asphalt) 18%, transparent) 1.5px,
+    transparent 1.6px
+  );
+  background-size: 9px 9px;
+}
+
+/* Explosão de quadrinho: forma da comemoração de meta batida ou de treino registrado. */
+@utility burst {
+  clip-path: polygon(
+    50% 0,
+    61% 18%,
+    82% 8%,
+    79% 31%,
+    100% 35%,
+    85% 52%,
+    98% 72%,
+    75% 74%,
+    70% 97%,
+    52% 84%,
+    33% 100%,
+    27% 77%,
+    4% 80%,
+    14% 59%,
+    0 40%,
+    20% 31%,
+    15% 9%,
+    38% 17%
+  );
+}
+
+/* Divisor tracejado, como a marcação de uma quadra. */
+@utility court-line {
+  border-top: 2px dashed var(--border);
+}
+
+/* Números de placar: progresso, pontos e posições. */
+@utility font-score {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  line-height: 1;
 }
 
 @layer components {
@@ -259,8 +393,18 @@
     @apply rounded-2xl border border-border bg-surface shadow-card;
   }
 
+  /* Destaque com contorno grosso e sombra sólida. No máximo um ou dois por tela. */
+  .card-sticker {
+    @apply rounded-2xl border-2 border-outline bg-surface shadow-sticker;
+  }
+
+  /* Rótulo de seção em caixa alta, como etiqueta de clube. */
+  .eyebrow {
+    @apply text-2xs font-bold tracking-[0.12em] text-muted uppercase;
+  }
+
   .chip {
-    @apply inline-flex shrink-0 items-center gap-1 rounded-full bg-surface-muted px-2 py-0.5 text-2xs font-semibold text-muted;
+    @apply inline-flex shrink-0 items-center gap-1 rounded-md bg-surface-muted px-2 py-0.5 text-2xs font-semibold text-muted;
   }
 
   .chip-soft {
@@ -279,6 +423,40 @@
     @apply bg-danger-soft text-on-danger-soft;
   }
 
+  .chip-game {
+    @apply bg-game-soft text-on-game-soft;
+  }
+
+  /* Selos de clube ou de arcade: caixa alta, contorno e a cor da função. */
+  .badge {
+    @apply inline-flex shrink-0 items-center gap-1 rounded-md border-2 border-outline px-1.5 py-px text-2xs font-extrabold tracking-wide uppercase shadow-sticker-sm;
+  }
+
+  .badge-reward {
+    @apply bg-reward text-on-reward;
+  }
+
+  .badge-progress {
+    @apply bg-progress text-on-progress;
+  }
+
+  .badge-game {
+    @apply bg-game text-on-game;
+  }
+
+  .badge-primary {
+    @apply bg-primary text-on-primary;
+  }
+
+  /* Posição na Classificacao: número de placar dentro de um selo. */
+  .badge-rank {
+    @apply inline-grid size-7 shrink-0 place-items-center rounded-md border-2 border-outline bg-surface font-score text-sm text-foreground;
+  }
+
+  .badge-rank-1 {
+    @apply bg-reward text-on-reward shadow-sticker-sm;
+  }
+
   /* A cor vem do identificador do usuário, em `--avatar-hue`; a luminosidade, do tema. */
   .avatar {
     background: oklch(var(--avatar-bg-l) 0.05 var(--avatar-hue));
@@ -286,38 +464,38 @@
   }
 
   .input-field {
-    @apply h-12 w-full rounded-xl border border-border-strong bg-surface px-3.5 text-[15px] text-foreground transition-shadow duration-200 outline-none placeholder:text-placeholder focus:border-focus focus:ring-2 focus:ring-focus/25;
+    @apply h-12 w-full rounded-lg border-2 border-border-strong bg-surface px-3.5 text-[15px] text-foreground transition-[border-color,box-shadow] duration-150 outline-none placeholder:text-placeholder focus:border-focus focus:ring-3 focus:ring-focus/20 aria-invalid:border-danger;
   }
 
   .input-label {
-    @apply mb-1.5 block text-sm font-medium text-foreground;
+    @apply mb-1.5 block text-sm font-semibold text-foreground;
   }
 
   .input-error {
-    @apply mt-1.5 text-xs font-medium text-danger;
+    @apply mt-1.5 text-xs font-semibold text-danger;
   }
 
   .form-error {
-    @apply rounded-xl border border-danger-soft-border bg-danger-soft p-3 text-sm font-medium text-on-danger-soft;
+    @apply rounded-lg border-2 border-danger-soft-border bg-danger-soft p-3 text-sm font-medium text-on-danger-soft;
   }
 
   .btn-primary {
-    @apply inline-flex h-13 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-on-primary tap hover:bg-primary-hover disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex h-13 items-center justify-center gap-2 rounded-lg border-2 border-outline bg-primary px-5 text-sm font-extrabold tracking-wide text-on-primary uppercase shadow-sticker press hover:bg-primary-hover disabled:pointer-events-none disabled:border-border-strong disabled:bg-surface-muted disabled:text-muted disabled:shadow-none;
   }
 
   .btn-secondary {
-    @apply inline-flex h-13 items-center justify-center gap-2 rounded-xl border border-soft-border bg-soft px-5 text-sm font-semibold text-on-soft tap hover:bg-soft-hover disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex h-13 items-center justify-center gap-2 rounded-lg border-2 border-outline bg-surface px-5 text-sm font-bold text-foreground tap hover:bg-surface-muted disabled:pointer-events-none disabled:opacity-50;
   }
 
   .btn-ghost {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-medium text-foreground tap hover:bg-surface-muted disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-foreground tap hover:bg-surface-muted disabled:pointer-events-none disabled:opacity-50;
   }
 
   .btn-warning {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-warning/30 bg-warning-soft px-5 text-sm font-semibold text-on-warning-soft tap hover:bg-warning-soft/70 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-lg border-2 border-warning/40 bg-warning-soft px-5 text-sm font-bold text-on-warning-soft tap hover:bg-warning-soft/70 disabled:pointer-events-none disabled:opacity-50;
   }
 
   .btn-danger {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-danger-soft-border bg-danger-soft px-5 text-sm font-semibold text-on-danger-soft tap hover:bg-danger-soft-hover disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-lg border-2 border-danger-soft-border bg-danger-soft px-5 text-sm font-bold text-on-danger-soft tap hover:bg-danger-soft-hover disabled:pointer-events-none disabled:opacity-50;
   }
 }

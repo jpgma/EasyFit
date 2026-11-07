@@ -49,8 +49,8 @@ function Dado({
   valor: string;
 }) {
   return (
-    <div className="rounded-2xl bg-surface-muted p-3">
-      <Icon aria-hidden="true" className="size-4 text-primary" />
+    <div className="rounded-xl bg-surface-muted p-3">
+      <Icon aria-hidden="true" className="size-4 text-link" />
       <p className="mt-2 text-xs text-muted">{titulo}</p>
       <p className="text-sm font-semibold break-words">{valor}</p>
     </div>
@@ -132,7 +132,9 @@ function ClassificacaoSection({ desafioId }: { desafioId: string }) {
                 key={item.usuarioId}
                 className="flex items-center gap-3 p-3.5"
               >
-                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-surface-muted text-xs font-bold">
+                <span
+                  className={`badge-rank ${item.posicao === 1 ? "badge-rank-1" : ""}`}
+                >
                   {item.posicao}
                 </span>
                 <Avatar
@@ -168,7 +170,7 @@ function ClassificacaoSection({ desafioId }: { desafioId: string }) {
                 {item.posicao === 1 && (
                   <Medal
                     aria-label="Primeiro lugar"
-                    className="size-5 shrink-0 text-primary"
+                    className="size-5 shrink-0 text-link"
                   />
                 )}
               </li>
@@ -302,7 +304,7 @@ function DesafioConteudo({ desafio }: { desafio: Desafio }) {
           />
         ) : (
           <>
-            <h2 className="mt-1 text-2xl font-bold break-words">
+            <h2 className="mt-1 text-2xl break-words uppercase">
               {desafio.nome}
             </h2>
             {desafio.descricao && (

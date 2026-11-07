@@ -11,7 +11,7 @@ function getCor(
   provisorio: number,
   max: number,
 ): string {
-  if (indice < valor) return valor >= max ? "bg-success" : "bg-primary";
+  if (indice < valor) return valor >= max ? "bg-progress" : "bg-primary";
   return indice < provisorio ? "bg-primary/35" : "bg-surface-muted";
 }
 
@@ -34,7 +34,7 @@ export function Segments({
       {Array.from({ length: max }, (_, indice) => (
         <div
           key={indice}
-          className={`h-1.5 flex-1 rounded-full ${getCor(indice, valor, provisorio, max)}`}
+          className={`h-2 flex-1 rounded-sm ${getCor(indice, valor, provisorio, max)}`}
         />
       ))}
     </div>

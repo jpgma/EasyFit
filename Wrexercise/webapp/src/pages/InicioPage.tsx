@@ -29,13 +29,13 @@ function getSaudacao(agora: Date): string {
 
 function getMotivacao(verificadas: number, provisorias: number, meta: number) {
   if (verificadas >= meta) {
-    return "Meta da semana batida! 🎉 Agora é só manter o ritmo.";
+    return "Mandou bem! Meta da semana batida.";
   }
-  if (provisorias >= meta) return "Meta alcançada, aguardando verificação.";
+  if (provisorias >= meta) return "Meta no papo. Só falta a galera conferir.";
   const faltam = meta - provisorias;
   return faltam === 1
     ? "Falta só mais um treino!"
-    : `Faltam ${faltam} treinos. Dá tempo!`;
+    : `Faltam ${faltam} treinos. Ainda dá tempo!`;
 }
 
 function SuaSemana({
@@ -84,12 +84,16 @@ function SuaSemana({
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1.1fr_1fr]">
-      <section className="card p-5">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-sm font-semibold">Sua semana</p>
+      <section className="card-sticker relative overflow-hidden p-5">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-6 -right-6 size-32 halftone"
+        />
+        <div className="relative flex items-center justify-between gap-2">
+          <p className="eyebrow">Sua semana</p>
           <span className="chip chip-soft">{meta} treinos por semana</span>
         </div>
-        <div className="mt-4 flex items-center gap-5">
+        <div className="relative mt-4 flex items-center gap-5">
           <ProgressRing
             label="Seu progresso nesta semana"
             valor={verificadas}
@@ -97,7 +101,7 @@ function SuaSemana({
             max={meta}
           >
             <div>
-              <p className="font-display text-4xl leading-none font-bold">
+              <p className="font-display text-4xl leading-none">
                 {Math.min(verificadas, meta)}
                 <span className="text-xl text-muted">/{meta}</span>
               </p>
@@ -105,7 +109,7 @@ function SuaSemana({
             </div>
           </ProgressRing>
           <div className="min-w-0 flex-1">
-            <p className="font-display text-xl leading-snug font-bold">
+            <p className="font-display text-2xl leading-tight uppercase">
               {getMotivacao(verificadas, provisorias, meta)}
             </p>
             {semanaAtual && (
@@ -129,7 +133,7 @@ function SuaSemana({
           />
         )}
         {eu && !eu.contaNestaSemana && (
-          <p className="mt-3 rounded-xl bg-surface-muted p-3 text-sm text-muted">
+          <p className="mt-3 rounded-lg bg-surface-muted p-3 text-sm text-muted">
             Você entrou no meio desta semana. Seus treinos contam para a meta a
             partir da próxima segunda.
           </p>
@@ -151,7 +155,8 @@ function SuaSemana({
       <section className="card p-4">
         <div className="flex items-center justify-between gap-2 px-2 pb-2">
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">
+            <p className="eyebrow">Desafio</p>
+            <p className="truncate font-display text-xl uppercase">
               {desafio.data.nome}
             </p>
             <p className="text-xs text-muted">
@@ -228,7 +233,7 @@ export function InicioPage() {
         <Avatar nome={usuario.nomeExibicao} id={usuario.id} size={44} />
         <div className="min-w-0 flex-1">
           <p className="text-sm text-muted first-letter:uppercase">{hoje}</p>
-          <h1 className="truncate text-2xl font-bold">
+          <h1 className="truncate text-3xl uppercase">
             {getSaudacao(agora)}, {primeiroNome}!
           </h1>
         </div>
@@ -252,7 +257,7 @@ export function InicioPage() {
           <div className="card">
             <EmptyState
               icon={Target}
-              title="Nenhum desafio ativo"
+              title="Ninguém lançou um desafio ainda"
               description={
                 canGerenciarDesafios(grupo.data.papel)
                   ? "O grupo está sem meta no momento. Crie um desafio para começar."

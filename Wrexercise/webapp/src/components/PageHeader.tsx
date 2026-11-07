@@ -16,13 +16,13 @@ export function PageHeader({ title, back, subtitle, action }: PageHeaderProps) {
         <Link
           to={back}
           aria-label="Voltar"
-          className="grid size-10 shrink-0 place-items-center rounded-full bg-surface shadow-card tap"
+          className="grid size-11 shrink-0 place-items-center rounded-lg border-2 border-outline bg-surface tap"
         >
           <ChevronLeft aria-hidden="true" className="size-5" />
         </Link>
       )}
       <div className="min-w-0 flex-1">
-        <h1 className="truncate text-2xl font-bold">{title}</h1>
+        <h1 className="truncate text-3xl uppercase">{title}</h1>
         {subtitle && <p className="text-sm text-muted">{subtitle}</p>}
       </div>
       {action}
@@ -39,7 +39,7 @@ export function SectionTitle({
 }) {
   return (
     <div className="mt-7 mb-3 flex items-center justify-between gap-3">
-      <h2 className="text-lg font-bold">{children}</h2>
+      <h2 className="text-xl uppercase">{children}</h2>
       {action}
     </div>
   );

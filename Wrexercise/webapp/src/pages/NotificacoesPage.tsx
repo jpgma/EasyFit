@@ -58,7 +58,7 @@ export function NotificacoesPage() {
         <div className="card">
           <EmptyState
             icon={Bell}
-            title="Nada por aqui"
+            title="Tudo quieto por aqui"
             description="Reações, revisões e treinos para avaliar aparecem aqui."
           />
         </div>

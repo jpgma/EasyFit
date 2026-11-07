@@ -36,7 +36,7 @@ export function RedefinirSenhaPage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-6 py-10">
       <Logo />
-      <h1 className="mt-10 text-3xl font-bold">Nova senha</h1>
+      <h1 className="mt-10 text-3xl uppercase">Nova senha</h1>
 
       {redefinir.isSuccess ? (
         <>

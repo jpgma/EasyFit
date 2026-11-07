@@ -150,7 +150,7 @@ export function MembroPage() {
         <div className="space-y-4">
           <div className="card flex flex-col items-center p-6 text-center">
             <Avatar nome={nomeExibicao} id={usuarioId} size={84} />
-            <p className="mt-3 font-display text-xl font-bold break-words">
+            <p className="mt-3 font-display text-xl break-words">
               {nomeExibicao}
               {voce && <span className="font-normal text-muted"> (você)</span>}
             </p>
@@ -169,7 +169,7 @@ export function MembroPage() {
                       size={120}
                     >
                       <div>
-                        <p className="font-display text-3xl font-bold">
+                        <p className="font-display text-3xl">
                           {Math.min(
                             desafio.sessoesVerificadas,
                             desafio.sessoesPorSemana,
@@ -199,7 +199,7 @@ export function MembroPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="card p-4">
                   <Flame aria-hidden="true" className="size-5 text-warning" />
-                  <p className="mt-2 font-display text-2xl font-bold">
+                  <p className="mt-2 font-display text-2xl">
                     {desafio.sequenciaSemanas}
                   </p>
                   <p className="text-xs text-muted">
@@ -209,8 +209,8 @@ export function MembroPage() {
                   </p>
                 </div>
                 <div className="card p-4">
-                  <Trophy aria-hidden="true" className="size-5 text-primary" />
-                  <p className="mt-2 font-display text-2xl font-bold">
+                  <Trophy aria-hidden="true" className="size-5 text-link" />
+                  <p className="mt-2 font-display text-2xl">
                     {desafio.semanasCumpridas}/{desafio.semanasDisputadas}
                   </p>
                   <p className="text-xs text-muted">metas batidas</p>

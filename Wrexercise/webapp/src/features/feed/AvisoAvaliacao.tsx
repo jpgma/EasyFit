@@ -11,9 +11,9 @@ export function AvisoAvaliacao({ grupoId }: { grupoId: string }) {
   return (
     <Link
       to={`/grupos/${grupoId}/revisar/${primeira.id}`}
-      className="mt-5 flex items-center gap-3 rounded-2xl border border-warning/25 bg-warning-soft p-4 tap"
+      className="mt-5 flex items-center gap-3 rounded-2xl border-2 border-outline bg-warning-soft p-4 shadow-sticker press"
     >
-      <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface text-warning">
+      <div className="grid size-10 shrink-0 place-items-center rounded-lg border-2 border-outline bg-reward text-on-reward">
         <Eye aria-hidden="true" className="size-5" />
       </div>
       <div className="min-w-0 flex-1 text-on-warning-soft">

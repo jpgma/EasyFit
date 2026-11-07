@@ -35,7 +35,7 @@ export function TipoAtividadeIcone({
   return (
     <div
       aria-hidden="true"
-      className={`grid shrink-0 place-items-center rounded-xl bg-soft text-primary ${className}`}
+      className={`grid shrink-0 place-items-center rounded-xl bg-soft text-on-soft ${className}`}
     >
       <Icon className="size-5" />
     </div>

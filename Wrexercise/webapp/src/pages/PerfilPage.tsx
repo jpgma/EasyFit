@@ -31,8 +31,8 @@ function Numero({
 }) {
   return (
     <div className="card p-3">
-      <Icon aria-hidden="true" className="size-4 text-primary" />
-      <p className="mt-2 font-display text-xl font-bold">{valor}</p>
+      <Icon aria-hidden="true" className="size-4 text-link" />
+      <p className="mt-2 font-display text-xl">{valor}</p>
       <p className="text-2xs leading-tight text-muted">{rotulo}</p>
     </div>
   );
@@ -68,7 +68,7 @@ export function PerfilPage() {
           <div className="card flex items-center gap-4 p-5">
             <Avatar nome={usuario.nomeExibicao} id={usuario.id} size={72} />
             <div className="min-w-0">
-              <p className="truncate font-display text-xl font-bold">
+              <p className="truncate font-display text-xl">
                 {usuario.nomeExibicao}
               </p>
               <p className="truncate text-sm text-muted">{usuario.email}</p>
@@ -132,20 +132,24 @@ export function PerfilPage() {
               <SectionTitle>Conquistas</SectionTitle>
               {perfil.data.conquistas.length === 0 ? (
                 <p className="card p-4 text-sm text-muted">
-                  Continue treinando: suas conquistas aparecem aqui.
+                  Nenhuma conquista ainda. A primeira pode vir já no próximo
+                  treino.
                 </p>
               ) : (
-                <ul className="space-y-3">
-                  {perfil.data.conquistas.map((conquista) => (
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {perfil.data.conquistas.map((conquista, indice) => (
                     <li
                       key={conquista.codigo}
-                      className="card flex items-center gap-3 p-4"
+                      className="card-sticker flex animate-pop items-center gap-3 p-4"
+                      style={{ animationDelay: `${indice * 60}ms` }}
                     >
-                      <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent text-on-accent">
-                        <Award aria-hidden="true" className="size-5" />
+                      <div
+                        className={`relative grid size-12 shrink-0 place-items-center rounded-lg border-2 border-outline bg-reward text-on-reward ${indice % 2 ? "rotate-3" : "-rotate-3"}`}
+                      >
+                        <Award aria-hidden="true" className="size-6" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold">
+                        <p className="font-display text-lg leading-tight uppercase">
                           {conquista.titulo}
                         </p>
                         <p className="text-xs text-muted">

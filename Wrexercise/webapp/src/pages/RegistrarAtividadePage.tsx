@@ -67,10 +67,16 @@ function TreinoRegistrado({
 
   return (
     <div className="mx-auto flex max-w-md animate-fade-in flex-col items-center pt-16 text-center">
-      <div className="grid size-20 place-items-center rounded-full bg-success-soft text-success">
-        <CheckCircle2 aria-hidden="true" className="size-10" />
+      <div className="relative grid size-24 place-items-center">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 animate-burst bg-reward burst"
+        />
+        <div className="relative grid size-20 animate-pop place-items-center rounded-xl border-2 border-outline bg-progress text-on-progress shadow-sticker">
+          <CheckCircle2 aria-hidden="true" className="size-10" />
+        </div>
       </div>
-      <h1 className="mt-6 text-3xl font-bold">Treino registrado!</h1>
+      <h1 className="mt-6 text-4xl uppercase">Boa! Tá registrado.</h1>
       <p className="mt-2 text-muted">
         {abaixoDoMinimo
           ? `Registramos, mas sessões abaixo de ${minimoMinutos} min não contam para a meta. `
@@ -253,7 +259,7 @@ export function RegistrarAtividadePage() {
               return (
                 <label
                   key={tipo}
-                  className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl border bg-surface px-2 py-3.5 text-center text-xs font-medium tap has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-focus ${selecionado ? "border-primary bg-soft text-on-soft ring-2 ring-primary/20" : errors.tipo ? "border-danger" : "border-border"}`}
+                  className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 bg-surface px-2 py-3.5 text-center text-xs font-semibold tap has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-focus ${selecionado ? "border-outline bg-soft text-on-soft shadow-sticker-sm" : errors.tipo ? "border-danger" : "border-border"}`}
                 >
                   <input
                     type="radio"
@@ -281,7 +287,7 @@ export function RegistrarAtividadePage() {
             <Minus aria-hidden="true" className="size-5" />
           </button>
           <div className="text-center">
-            <p className="font-display text-3xl font-bold tabular-nums">
+            <p className="font-score text-3xl">
               {duracaoMinutos}
               <span className="text-base text-muted"> min</span>
             </p>
@@ -361,10 +367,10 @@ export function RegistrarAtividadePage() {
         {anexos.length < maximoDeEvidencias && (
           <button
             type="button"
-            className="flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-border-strong bg-surface py-8 text-sm text-muted tap hover:border-primary"
+            className="flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-border-strong bg-surface py-8 text-sm text-muted tap hover:border-outline"
             onClick={() => seletor.current?.click()}
           >
-            <Camera aria-hidden="true" className="size-7 text-primary" />
+            <Camera aria-hidden="true" className="size-7 text-link" />
             <span className="font-medium text-foreground">
               Adicionar foto ou print
             </span>

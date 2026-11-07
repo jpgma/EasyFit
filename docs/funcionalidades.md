@@ -393,6 +393,14 @@ The system makes a notification for these events:
 - On a phone, a tab bar at the bottom shows "Início", "Atividades", "Grupo", "Perfil" and a button to record an activity.
 - On a large screen, a side bar shows the same items.
 
+### 12.1. Appearance
+
+- The application uses the Wrexercise visual identity (see `docs/decisoes/0027-identidade-visual-wrexercise.md`).
+- The application has a light theme and a dark theme. It uses the theme of the system.
+- When the user completes the weekly goal, the progress ring changes to green and shows a short burst one time.
+- After the user records an activity, the page shows "Boa! Tá registrado." and a short burst.
+- When the user has reduced motion on in the system, the application does not show these animations.
+
 ## 13. PWA and offline use
 
 ### 13.1. Installation
@@ -426,6 +434,7 @@ These functions are for the operator. They are not in the interface.
 - `reset-senha <email>`: makes a link to reset a password (see 3.4).
 - `GET /health` and `GET /ready`: show if the application and the database operate.
 - Backup: the `backup` service makes a copy of the database and of the evidence files. It keeps the copies for 7 days. The `restore` command puts a copy back. The operator must stop the application before a restore.
+- `deploy/migrar-nome.sh`: moves a server from the old name EasyFit to Wrexercise one time. It makes a backup, renames the database, the database user and the folders, and updates `.env`. `deploy/remote.sh` stops if the old folder `/opt/easyfit` is on the server.
 - `run.bat` starts the application on Windows. `run.bat --tunnel` makes the application available on the internet through a Cloudflare tunnel.
 
 ## 15. Security rules that have an effect on features
