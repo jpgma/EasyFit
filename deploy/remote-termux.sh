@@ -92,6 +92,8 @@ ambiente_app() {
   export Autenticacao__CadastroAberto=false
   export Evidencias__Diretorio=$dados/evidencias
   export ASPNETCORE_URLS=http://127.0.0.1:8080
+  # Sem isto o ASP.NET usa o diretório atual (o pai de app/) e não acha wwwroot nem appsettings.json.
+  export ASPNETCORE_CONTENTROOT=$base/app
 }
 
 iniciar() {

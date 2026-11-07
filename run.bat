@@ -8,13 +8,12 @@ rem   run.bat rebuild      atalho para --rebuild
 rem   run.bat --tunnel     igual ao padrão, mas publica em https://wx-dev.jpgmaraujo.com.br por um túnel
 rem                          da Cloudflare, com o cadastro sem convite fechado. Pode ser combinado com
 rem                          --rebuild. Na primeira vez, pede o login na Cloudflare pelo navegador.
-rem   run.bat --ssh        em vez de subir aqui, pergunta host, porta, usuário, SO e arquitetura e implanta
-rem                          em outra máquina por SSH (app, banco e túnel da Cloudflare, sem Caddy), com o
-rem                          perfil de memória baixa. Grava as respostas em %LOCALAPPDATA%\Wrexercise\ssh.
-rem                          Exige chave SSH (sem senha), usuário root e Docker no alvo. Pode ser combinado
-rem                          com --rebuild. Ver docs/decisoes/0028-implantacao-ssh-e-perfil-de-memoria.md.
-rem                          Com SO termux (Android sem root) tudo roda nativo, sem Docker nem VM:
-rem                          ver docs/decisoes/0029-implantacao-nativa-no-termux.md.
+rem   run.bat --ssh        em vez de subir aqui, pergunta host, porta, usuário do Termux e chave SSH e implanta
+rem                          no celular Android (Termux, sem root) por SSH: app, PostgreSQL e túnel da
+rem                          Cloudflare rodam nativos, sem Docker nem VM no alvo. Grava as respostas em
+rem                          %LOCALAPPDATA%\Wrexercise\ssh. Exige chave SSH (sem senha) e o sshd ligado no
+rem                          Termux. Pode ser combinado com --rebuild. Ver
+rem                          docs/decisoes/0029-implantacao-nativa-no-termux.md.
 rem   run.bat logs         acompanha os logs da aplicação
 rem   run.bat backup       grava um backup do banco e das evidências em BACKUP_DIR
 rem   run.bat restore D    restaura o backup da data D (AAAAMMDD-HHMMSS), com o app parado
@@ -229,12 +228,10 @@ if not exist "%SSH_DIR%" mkdir "%SSH_DIR%"
 
 set "S_NOME=a14"
 set "S_HOST=192.168.18.75"
-set "S_PORT=9922"
-set "S_USER=root"
-set "S_OS=alpine"
+set "S_PORT=8022"
+set "S_USER="
 set "S_ARCH=arm64"
 set "S_KEY="
-set "S_RAM=baixa"
 set "S_TUNNEL=wx-a14"
 set "S_TUNNEL_HOST=wx-a14.jpgmaraujo.com.br"
 
@@ -247,57 +244,30 @@ if defined S_REUSE call :ssh_load
 if defined S_REUSE set /p "S_REUSE=Usar o perfil salvo '%S_NOME%'? [S/n]: "
 if /i "%S_REUSE%"=="S" goto :ssh_validate
 
-set /p "S_HOST=Host ou IP [%S_HOST%]: "
-set /p "S_PORT=Porta SSH [%S_PORT%]: "
-set /p "S_OS=SO do alvo (alpine|ubuntu|debian|termux) [%S_OS%]: "
-if /i "%S_OS%"=="termux" if "%S_PORT%"=="9922" set "S_PORT=8022"
-if /i "%S_OS%"=="termux" if "%S_USER%"=="root" set "S_USER="
-set /p "S_USER=Usuário (root; no Termux, o de whoami) [%S_USER%]: "
-set /p "S_ARCH=Arquitetura (arm64|amd64) [%S_ARCH%]: "
+set /p "S_HOST=Host ou IP do celular [%S_HOST%]: "
+set /p "S_PORT=Porta SSH do Termux [%S_PORT%]: "
+set /p "S_USER=Usuário do Termux (resultado de whoami) [%S_USER%]: "
 set /p "S_KEY=Arquivo da chave SSH (vazio = ssh-agent ou padrão) [%S_KEY%]: "
-if /i "%S_ARCH%"=="amd64" set "S_RAM=padrao"
-set /p "S_RAM=Perfil de RAM (baixa|padrao) [%S_RAM%]: "
 set /p "S_TUNNEL=Nome do túnel da Cloudflare [%S_TUNNEL%]: "
 set /p "S_TUNNEL_HOST=Hostname público [%S_TUNNEL_HOST%]: "
 
 >"%SSH_FILE%" echo S_HOST=%S_HOST%
 >>"%SSH_FILE%" echo S_PORT=%S_PORT%
 >>"%SSH_FILE%" echo S_USER=%S_USER%
->>"%SSH_FILE%" echo S_OS=%S_OS%
->>"%SSH_FILE%" echo S_ARCH=%S_ARCH%
 >>"%SSH_FILE%" echo S_KEY=%S_KEY%
->>"%SSH_FILE%" echo S_RAM=%S_RAM%
 >>"%SSH_FILE%" echo S_TUNNEL=%S_TUNNEL%
 >>"%SSH_FILE%" echo S_TUNNEL_HOST=%S_TUNNEL_HOST%
 
 :ssh_validate
-if /i not "%S_ARCH%"=="arm64" if /i not "%S_ARCH%"=="amd64" (
-  echo Arquitetura inválida: %S_ARCH%. Use arm64 ou amd64.
+rem O único alvo suportado é o Termux (arm64, sem root). Perfis antigos podem ter S_OS/S_RAM: são ignorados.
+set "S_ARCH=arm64"
+if defined S_USER goto :ssh_alvo
+set /p "S_USER=Usuário do Termux (rode whoami no telefone): "
+if not defined S_USER (
+  echo Informe o usuário do Termux.
   exit /b 2
 )
-if /i not "%S_OS%"=="alpine" if /i not "%S_OS%"=="ubuntu" if /i not "%S_OS%"=="debian" if /i not "%S_OS%"=="termux" (
-  echo SO inválido: %S_OS%. Use alpine, ubuntu, debian ou termux.
-  exit /b 2
-)
-if /i not "%S_RAM%"=="baixa" if /i not "%S_RAM%"=="padrao" (
-  echo Perfil de RAM inválido: %S_RAM%. Use baixa ou padrao.
-  exit /b 2
-)
-if /i "%S_OS%"=="termux" (
-  if not defined S_USER (
-    echo Informe o usuário do Termux ^(rode whoami no telefone^).
-    exit /b 2
-  )
-  if /i not "%S_ARCH%"=="arm64" (
-    echo O Termux só é suportado em arm64.
-    exit /b 2
-  )
-  goto :ssh_alvo
-)
-if /i not "%S_USER%"=="root" (
-  echo Só o usuário root é suportado: o script remoto grava em /opt e /srv e ajusta donos.
-  exit /b 2
-)
+>>"%SSH_FILE%" echo S_USER=%S_USER%
 
 :ssh_alvo
 set "TARGET=%S_USER%@%S_HOST%"
@@ -305,15 +275,15 @@ set "SSH_OPTS=-p %S_PORT% -o StrictHostKeyChecking=accept-new -o ConnectTimeout=
 if defined S_KEY set "SSH_OPTS=%SSH_OPTS% -i "%S_KEY%" -o IdentitiesOnly=yes"
 set "TUNNEL_NAME=%S_TUNNEL%"
 set "TUNNEL_HOST=%S_TUNNEL_HOST%"
-set "TUNNEL_LOG_HINT=ssh -p %S_PORT% %TARGET% docker logs wrexercise-ssh-tunnel-1"
-set "REMOTE_DIR=/opt/wrexercise"
+set "TUNNEL_LOG_HINT=ssh -p %S_PORT% %TARGET% sh wrexercise/deploy/remote-termux.sh status"
 
 echo.
 echo ==^> Testando o SSH em %TARGET%:%S_PORT%
 "%SSH_EXE%" %SSH_OPTS% -o BatchMode=yes %TARGET% "uname -m" >"%TEMP%\wrexercise-ssh-arch.txt"
 if errorlevel 1 (
   echo.
-  echo Sem acesso por chave. O envio da imagem usa o stdin do ssh e não aceita senha. Instale a chave:
+  echo Se o erro foi "Connection refused": no celular, abra o Termux e rode sshd ^(ele não sobe no boot^). Confira também o IP e a porta ^(Termux: 8022^).
+  echo Sem acesso por chave. O envio do app usa o stdin do ssh e não aceita senha. Instale a chave:
   echo   type %%USERPROFILE%%\.ssh\id_ed25519.pub ^| ssh -p %S_PORT% %TARGET% "cat >> ~/.ssh/authorized_keys"
   goto :fail
 )
@@ -326,19 +296,6 @@ if /i not "%R_ARCH%"=="%S_ARCH%" (
   goto :fail
 )
 
-echo.
-echo ==^> Verificando Docker e Compose no alvo
-if /i "%S_OS%"=="termux" goto :ssh_sem_docker
-"%SSH_EXE%" %SSH_OPTS% %TARGET% "docker compose version" >nul 2>&1
-if errorlevel 1 (
-  echo Docker ou o plugin Compose não foi encontrado no alvo. Instale e rode de novo:
-  if /i "%S_OS%"=="alpine" echo   apk add docker docker-cli-compose ^&^& rc-update add docker boot ^&^& service docker start
-  if /i "%S_OS%"=="ubuntu" echo   apt-get install -y docker.io docker-compose-v2 ^&^& systemctl enable --now docker
-  if /i "%S_OS%"=="debian" echo   Siga https://docs.docker.com/engine/install/debian/ ^(docker-ce e docker-compose-plugin^)
-  goto :fail
-)
-:ssh_sem_docker
-
 call :prepare_tunnel
 if errorlevel 1 goto :fail
 
@@ -349,12 +306,6 @@ if not defined TUNNEL_ID (
   echo Não foi possível ler o ID do túnel em %TUNNEL_ROOT%\%TUNNEL_NAME%.json.
   goto :fail
 )
-for /f %%i in ('%COMPOSE% config --images ^| findstr /b postgres:') do set "PG_IMAGE=%%i"
-if not defined PG_IMAGE (
-  echo Não foi possível descobrir a imagem do PostgreSQL em deploy/compose.yaml.
-  goto :fail
-)
-
 set "DIRTY="
 for /f %%i in ('git status --porcelain') do set "DIRTY=-dirty"
 for /f %%i in ('git rev-parse --short HEAD') do set "SSH_IMAGE=wrexercise:%%i%DIRTY%-%S_ARCH%"
@@ -368,46 +319,8 @@ echo.
 echo ==^> Construindo %SSH_IMAGE% para linux/%S_ARCH%
 docker buildx build %DOCKER_BUILD_EXTRAS% --platform linux/%S_ARCH% -f deploy/Dockerfile -t %SSH_IMAGE% --load .
 if errorlevel 1 goto :fail
-if /i "%S_OS%"=="termux" goto :ssh_termux
 
-echo.
-echo ==^> Enviando a imagem do app
-docker save --platform linux/%S_ARCH% %SSH_IMAGE% | "%SSH_EXE%" -C %SSH_OPTS% %TARGET% "docker load"
-if errorlevel 1 goto :fail
-
-rem Imagens fixadas por versão só vão se faltarem no alvo: poupa o Wi-Fi e o disco do telefone.
-call :ssh_enviar_base %PG_IMAGE%
-if errorlevel 1 goto :fail
-call :ssh_enviar_base %TUNNEL_IMAGE%
-if errorlevel 1 goto :fail
-
-echo.
-echo ==^> Copiando a configuração e a credencial do túnel
-"%SSH_EXE%" %SSH_OPTS% %TARGET% "mkdir -p %REMOTE_DIR%/tunnel && chmod 700 %REMOTE_DIR%/tunnel"
-if errorlevel 1 goto :fail
-tar --format ustar -cf - deploy/compose.yaml deploy/compose.tunnel.yaml deploy/compose.baixa-memoria.yaml deploy/backup.sh deploy/remote-ssh.sh | "%SSH_EXE%" %SSH_OPTS% %TARGET% "tar -xf - -C %REMOTE_DIR%"
-if errorlevel 1 goto :fail
-tar --format ustar -cf - -C "%TUNNEL_ROOT%" %TUNNEL_NAME%.json | "%SSH_EXE%" %SSH_OPTS% %TARGET% "tar -xf - -C %REMOTE_DIR%/tunnel"
-if errorlevel 1 goto :fail
-
-echo.
-echo ==^> Aplicando migrações e subindo os serviços ^(perfil de RAM: %S_RAM%^)
-"%SSH_EXE%" %SSH_OPTS% %TARGET% "sh %REMOTE_DIR%/deploy/remote-ssh.sh %SSH_IMAGE% %S_RAM% %S_ARCH% %TUNNEL_NAME% %TUNNEL_IMAGE% %TUNNEL_ID%"
-if errorlevel 1 goto :fail
-
-echo.
-call :check_tunnel
-
-echo.
-echo ==^> Memória por contêiner ^(use para afinar deploy/compose.baixa-memoria.yaml^)
-"%SSH_EXE%" %SSH_OPTS% %TARGET% "sleep 5; docker stats --no-stream --format 'table {{.Name}}\t{{.MemUsage}}\t{{.MemPerc}}'; docker ps -aq | xargs -r docker inspect -f '{{.Name}} OOMKilled={{.State.OOMKilled}}'; free -m"
-
-echo.
-echo Implantação em %TARGET% concluída ^(%SSH_IMAGE%^). Perfil salvo em %SSH_FILE%
-exit /b 0
-
-rem Termux: sem Docker no alvo. O binário Native AOT sai da imagem construída acima e vai por tar em pipe.
-:ssh_termux
+rem Sem Docker no alvo. O binário Native AOT sai da imagem construída acima e vai por tar em pipe.
 set "PUBLISH_DIR=%TEMP%\wrexercise-publish"
 if exist "%PUBLISH_DIR%" rmdir /s /q "%PUBLISH_DIR%"
 for /f %%i in ('docker create --platform linux/%S_ARCH% %SSH_IMAGE%') do set "CTR=%%i"
@@ -446,20 +359,3 @@ exit /b 0
 :ssh_load
 for /f "usebackq tokens=1* delims==" %%a in ("%SSH_FILE%") do set "%%a=%%b"
 exit /b 0
-
-:ssh_enviar_base
-"%SSH_EXE%" %SSH_OPTS% %TARGET% "docker image inspect %~1 >/dev/null 2>&1"
-if not errorlevel 1 (
-  echo.
-  echo ==^> %~1 já está no alvo
-  exit /b 0
-)
-echo.
-echo ==^> Enviando %~1
-docker pull --platform linux/%S_ARCH% %~1
-if errorlevel 1 exit /b 1
-docker save --platform linux/%S_ARCH% %~1 | "%SSH_EXE%" -C %SSH_OPTS% %TARGET% "docker load"
-if errorlevel 1 exit /b 1
-rem O pull acima trocou a tag local pela imagem do alvo: restaura a da máquina, usada pela pilha local.
-docker pull -q %~1 >nul
-exit /b %errorlevel%

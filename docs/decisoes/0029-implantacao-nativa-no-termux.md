@@ -39,5 +39,5 @@ A decisão 0028 colocou a pilha no Galaxy A14 dentro do Podroid: guest Alpine, Q
 - Teste de reinicialização (12:09 a 12:16): depois do desbloqueio, o Termux:Boot iniciou o `BootJobService`, que subiu PostgreSQL, app e túnel sozinhos, e `/ready` voltou a responder 200 pelo túnel. O Android atrasou o job em cerca de 5 minutos; o tempo até a pilha voltar depende dele. O PostgreSQL se recuperou da parada abrupta sem perda. O `sshd` não sobe no boot: para implantar de novo, abra o Termux e rode `sshd`.
 - Sem o isolamento do Docker: app, banco e túnel rodam como o mesmo usuário do Android. Aceitável para um grupo pequeno em rede privada com túnel.
 - Os backups ficam no telefone; copiá-los para fora segue em aberto (0022).
-- `compose.baixa-memoria.yaml` e o fluxo de 0028 continuam válidos para máquinas com Docker (inclusive o Podroid).
+- O fluxo com Docker da 0028 foi removido pela 0030.
 - Relacionadas: 0005, 0028.

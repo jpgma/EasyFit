@@ -1,6 +1,6 @@
 # 0028 — Implantação em outra máquina por SSH e perfil de memória baixa
 
-**Status:** DECIDIDA
+**Status:** SUBSTITUÍDA pela 0030 (alvo único: Termux)
 
 ## Contexto
 
