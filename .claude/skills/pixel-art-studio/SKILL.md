@@ -161,7 +161,8 @@ These override the generic guidance above when working in this repository.
 - **No anti-aliasing at the edge against transparency.** The app scales by integer factors with
   `image-rendering: pixelated`; ship only 1x masters to the bundle.
 - **Style:** contemporary urban pixel art (streetwear, sneakers, gym wear) — see
-  `docs/gamificacao.md` §1.2. Keep one shared palette across all bundle art; once chosen, save it
+  `docs/gamificacao.md` §1.2 and the Wrexercise identity in §1.3 (urban court, brand accent colors,
+  card frame rules). Keep one shared palette across all bundle art; once chosen, save it
   with `--save-palette wrexercise` and use `Sprite(palette="wrexercise")` everywhere.
 - **License:** everything shipped in the bundle is CC0 and sits next to a `LICENSE` file. Never
   trace or copy pixels from non-CC0 art; studying a reference for technique is fine.

@@ -71,6 +71,8 @@ As folhas de `saida/` entram no bundle do frontend na G1, junto do `LICENSE` CC0
 | `tenis.cor`, `meia`, `blusa.cor`, `calca.cor` | qualquer cor `#rrggbb`; a sombra e a luz saem de uma rampa com variação de matiz |
 | `acessorios` | `bone`, `fone`, `munhequeira`, `garrafa`, cada um com uma cor |
 
+Nas folhas padrão, prefira os acentos da marca para roupa e acessórios (Coral `#FF684A`, Electric Violet `#7957E8`, Signal Yellow `#FFD34E`, Lime `#A8D978`, Asphalt `#222633`), um ou dois por personagem, como na identidade do Jogo (`gamificacao.md` §1.3). As folhas que já existem não precisam ser geradas de novo por causa disso.
+
 `tenis.sola` fica no JSON para uma sola futura; em 16 px o pé tem uma linha só.
 
 ### 2.2. Personagens padrão
