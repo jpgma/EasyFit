@@ -19,13 +19,13 @@ Organizar cada fatia por operação HTTP:
 - `Routes.cs` permanece fino: grupos de rota, políticas transversais e ligação `Map*` → `Operacao.HandleAsync`.
 - Um arquivo por operação (`Registrar.cs`, `CriarGrupo.cs`, …) concentra o fluxo completo daquela rota.
 - Arquivos compartilhados na raiz da fatia (`Respostas.cs`, `Sessoes.cs`, `ProgressoDesafio.cs`) só quando duas ou mais operações reutilizam o mesmo tipo ou helper.
-- Contratos entre fatias continuam em `Features/<Fatia>/Contracts/` com namespace `EasyFit.Features.<Fatia>.Contracts`.
+- Contratos entre fatias continuam em `Features/<Fatia>/Contracts/` com namespace `Wrexercise.Features.<Fatia>.Contracts`.
 - Fatias triviais (ex.: Health) podem ficar só com `Routes.cs`.
 
 Não usar classes agregadoras `*Commands` / `*Queries` nem arquivos `Rules.cs` / `Contracts.cs` na raiz da fatia.
 
 ## Impacto
 
-- `EasyFit/AGENTS.md`, `AGENTS.md` e `docs/arquitetura.md` §3.5 passam a descrever o layout por operação, com template comentado.
+- `Wrexercise/AGENTS.md`, `AGENTS.md` e `docs/arquitetura.md` §3.5 passam a descrever o layout por operação, com template comentado.
 - Fatias existentes (`Autenticacao`, `Grupos`, `Convites`, `Desafios`) são migradas na mesma alteração.
 - Testes unitários espelham os arquivos de regras puras compartilhadas (`ValidacaoContaTests`, `ProgressoDesafioTests`, etc.).

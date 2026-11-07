@@ -4,7 +4,7 @@
 
 ## Contexto
 
-A decisão 0007 adotou o mockup `easyfit-mockup-main` como referência de aparência e fluxos. Agora existe um mockup mais completo, `fitas-e-amigos`, mantido fora deste repositório: um protótipo navegável, só de frontend, com dados de exemplo e outra identidade visual. Ele usa TanStack Start com SSR, Radix, shadcn, sonner e Google Fonts, e parte de regras de produto diferentes das decididas aqui.
+A decisão 0007 adotou o mockup `wrexercise-mockup-main` como referência de aparência e fluxos. Agora existe um mockup mais completo, `fitas-e-amigos`, mantido fora deste repositório: um protótipo navegável, só de frontend, com dados de exemplo e outra identidade visual. Ele usa TanStack Start com SSR, Radix, shadcn, sonner e Google Fonts, e parte de regras de produto diferentes das decididas aqui.
 
 ## Alternativas consideradas
 

@@ -1,14 +1,14 @@
-# EasyFit — Open Questions
+# Wrexercise — Open Questions
 
 > Documento de pesquisa e decisões pendentes.
 >
-> Projeto: EasyFit  
+> Projeto: Wrexercise  
 > Idioma oficial: Português brasileiro (pt-BR)  
 > Arquitetura: Monólito VSA · .NET 10 Native AOT · PostgreSQL · React PWA
 
 ## 1. Objetivo deste documento
 
-Este documento reúne questões técnicas e funcionais que precisam ser investigadas ou decididas durante a implementação do EasyFit.
+Este documento reúne questões técnicas e funcionais que precisam ser investigadas ou decididas durante a implementação do Wrexercise.
 
 As decisões já estabelecidas em `arquitetura.md` não devem ser reabertas sem uma justificativa técnica concreta.
 
@@ -105,7 +105,7 @@ Não instalar SDK .NET ou Node.js no servidor de produção.
 
 **Status:** DECIDIDA — ver `decisoes/0006-autenticacao-por-sessao.md` Alteração e redefinição de senha em `decisoes/0019-conta-e-redefinicao-de-senha.md`.
 
-O EasyFit utilizará sessões persistentes com cookies HttpOnly.
+O Wrexercise utilizará sessões persistentes com cookies HttpOnly.
 
 Investigar:
 
@@ -781,7 +781,7 @@ Questões sem impacto sobre o MVP podem permanecer adiadas.
 
 ## 13. Princípio de decisão
 
-O EasyFit deve continuar sendo uma aplicação pequena, privada e eficiente.
+O Wrexercise deve continuar sendo uma aplicação pequena, privada e eficiente.
 
 A existência de uma possibilidade técnica não é motivo suficiente para introduzi-la.
 

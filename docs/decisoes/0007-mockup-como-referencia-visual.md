@@ -4,7 +4,7 @@
 
 ## Contexto
 
-`arquitetura.md` §5.2 define uma direção visual, mas não uma identidade concreta. O projeto passou a ter um mockup navegável, mantido fora deste repositório (`easyfit-mockup-main`), com todas as telas, paleta e componentes. Ele foi gerado com dados falsos e não segue as regras do repositório, então é preciso definir o que vale quando os dois divergem.
+`arquitetura.md` §5.2 define uma direção visual, mas não uma identidade concreta. O projeto passou a ter um mockup navegável, mantido fora deste repositório (`wrexercise-mockup-main`), com todas as telas, paleta e componentes. Ele foi gerado com dados falsos e não segue as regras do repositório, então é preciso definir o que vale quando os dois divergem.
 
 ## Alternativas consideradas
 

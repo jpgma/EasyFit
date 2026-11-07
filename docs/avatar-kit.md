@@ -1,4 +1,4 @@
-# Avatar base e kit de camadas — EasyFit
+# Avatar base e kit de camadas — Wrexercise
 
 > Como são feitas as folhas padrão de avatar (`gamificacao.md` §4.4) e como trocar cor de pele, cabelo, roupa e acessórios. O formato da folha final está em `avatar-formato.md`. Este documento também descreve o editor de avatar por peças, ainda sem fase (§7).
 

@@ -1,4 +1,4 @@
-# EasyFit
+# Wrexercise
 
 Aplicação web privada para pequenos grupos de amigos manterem uma rotina de exercícios, com desafios compartilhados, registro de atividades e validação comunitária.
 
@@ -20,9 +20,9 @@ Aplicação web privada para pequenos grupos de amigos manterem uma rotina de ex
 
 ```bash
 scripts/dev-db.sh                                  # PostgreSQL na porta 5433
-dotnet run --project EasyFit -- migrate            # aplica as migrações
-dotnet run --project EasyFit                       # API em http://localhost:8080
-cd EasyFit/webapp && npm ci && npm run dev         # interface em http://localhost:5173
+dotnet run --project Wrexercise -- migrate         # aplica as migrações
+dotnet run --project Wrexercise                    # API em http://localhost:8080
+cd Wrexercise/webapp && npm ci && npm run dev      # interface em http://localhost:5173
 ```
 
 ### Pilha completa no Windows
@@ -39,9 +39,9 @@ Para testar localmente o mesmo que vai para produção (Native AOT, PostgreSQL e
 .\run.bat reset   # para os serviços e apaga os dados locais
 ```
 
-Exige as portas 80 e 443 livres. Usa HTTP em `localhost`, sem aviso de certificado, em vez do HTTPS da produção. Os dados ficam em `%LOCALAPPDATA%\EasyFit\local`.
+Exige as portas 80 e 443 livres. Usa HTTP em `localhost`, sem aviso de certificado, em vez do HTTPS da produção. Os dados ficam em `%LOCALAPPDATA%\Wrexercise\local`.
 
-`--tunnel` publica esta máquina na internet por um túnel da Cloudflare, até `run.bat stop`. Na primeira vez, pede o login na Cloudflare pelo navegador e substitui o registro DNS do domínio. O cadastro sem convite fica fechado: crie a primeira conta com `.\run.bat` antes de publicar. As credenciais do túnel ficam em `%LOCALAPPDATA%\EasyFit\cloudflared`.
+`--tunnel` publica esta máquina na internet por um túnel da Cloudflare, até `run.bat stop`. Na primeira vez, pede o login na Cloudflare pelo navegador e substitui o registro DNS do domínio. O cadastro sem convite fica fechado: crie a primeira conta com `.\run.bat` antes de publicar. As credenciais do túnel ficam em `%LOCALAPPDATA%\Wrexercise\cloudflared`.
 
 ## Verificação
 
@@ -56,7 +56,7 @@ scripts/verify.sh --full   # também testes de integração e imagem arm64
 
 ```bash
 cp .env.example .env       # preencha os valores
-docker buildx build --platform linux/arm64 -f deploy/Dockerfile -t easyfit:latest --load .
+docker buildx build --platform linux/arm64 -f deploy/Dockerfile -t wrexercise:latest --load .
 docker compose --env-file .env -f deploy/compose.yaml run --rm app migrate
 docker compose --env-file .env -f deploy/compose.yaml up -d
 ```
@@ -73,15 +73,15 @@ Agende uma execução diária:
 
 ```bash
 # Linux (crontab -e), às 3h:
-0 3 * * * cd /opt/easyfit && docker compose --env-file .env -f deploy/compose.yaml run --rm backup backup >> /var/log/easyfit-backup.log 2>&1
+0 3 * * * cd /opt/wrexercise && docker compose --env-file .env -f deploy/compose.yaml run --rm backup backup >> /var/log/wrexercise-backup.log 2>&1
 ```
 
 ```powershell
 # Windows, para a pilha do run.bat, às 3h:
-schtasks /create /sc daily /st 03:00 /tn EasyFitBackup /tr "\"D:\Repos\jpgma\EasyFit\run.bat\" backup"
+schtasks /create /sc daily /st 03:00 /tn WrexerciseBackup /tr "\"D:\Repos\jpgma\Wrexercise\run.bat\" backup"
 ```
 
-Um backup que só existe na mesma máquina não protege contra a perda do disco. Aponte `BACKUP_DIR` para uma pasta sincronizada (OneDrive, Google Drive) ou copie os arquivos para fora regularmente. No `run.bat`, defina a variável de ambiente `BACKUP_DIR` antes de executá-lo; o padrão é `%LOCALAPPDATA%\EasyFit\backups`. Os backups contêm as evidências e os hashes das senhas: mantenha a pasta privada.
+Um backup que só existe na mesma máquina não protege contra a perda do disco. Aponte `BACKUP_DIR` para uma pasta sincronizada (OneDrive, Google Drive) ou copie os arquivos para fora regularmente. No `run.bat`, defina a variável de ambiente `BACKUP_DIR` antes de executá-lo; o padrão é `%LOCALAPPDATA%\Wrexercise\backups`. Os backups contêm as evidências e os hashes das senhas: mantenha a pasta privada.
 
 Para restaurar:
 

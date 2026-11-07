@@ -59,7 +59,7 @@ Permissões: qualquer membro ativo do grupo (404 se não membro ou desafio/grupo
 
 **SQL de contagens por desafio**
 
-Fonte canônica: `EasyFit/Infrastructure/Database/ContagensAtividadeDesafio.cs`.
+Fonte canônica: `Wrexercise/Infrastructure/Database/ContagensAtividadeDesafio.cs`.
 
 Atividades elegíveis:
 

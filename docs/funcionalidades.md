@@ -1,4 +1,4 @@
-# EasyFit — Feature summary
+# Wrexercise — Feature summary
 
 > **Language:** This document uses ASD-STE100 Simplified Technical English. It is the only document in English in the repository. It gives agents and people a short, complete list of the features of the application, for example to discuss changes.
 >
@@ -8,7 +8,7 @@
 
 ## 1. Purpose of the application
 
-EasyFit is a private web application for small groups of friends. It helps them to exercise regularly.
+Wrexercise is a private web application for small groups of friends. It helps them to exercise regularly.
 
 A group sets one weekly goal, for example "4 sessions of 60 minutes each week". Each member records his or her exercise sessions. The other members examine each session and give a reaction. The reactions decide if the session is valid. Only valid sessions count for the goal.
 

@@ -16,7 +16,7 @@ Q002 pedia backup diário do banco e das evidências, retenção, cópia externa
 
 - `deploy/backup.sh` roda no serviço `backup` de `deploy/compose.yaml`. Ele usa a mesma imagem do PostgreSQL e fica no perfil `backup`, por isso o `up -d` nunca o inicia.
 - `backup`:
-  - grava `easyfit-AAAAMMDD-HHMMSS.dump` (`pg_dump --format=custom`) e `evidencias-AAAAMMDD-HHMMSS.tar.gz` em `BACKUP_DIR`;
+  - grava `wrexercise-AAAAMMDD-HHMMSS.dump` (`pg_dump --format=custom`) e `evidencias-AAAAMMDD-HHMMSS.tar.gz` em `BACKUP_DIR`;
   - a data e a hora estão em UTC;
   - cada arquivo é gravado como `.tmp` e só ganha o nome final depois de passar pela verificação (`pg_restore --list` e `gzip -t`);
   - arquivos com mais de 7 dias são apagados.
@@ -24,8 +24,8 @@ Q002 pedia backup diário do banco e das evidências, retenção, cópia externa
   - restaura o banco com `pg_restore --clean --if-exists --single-transaction`;
   - substitui o conteúdo de `/dados/evidencias` pelo do arquivo, preservando os donos.
 - `BACKUP_DIR`:
-  - na VM, vale `/srv/easyfit/backups` por padrão;
-  - no `run.bat`, vale `%LOCALAPPDATA%\EasyFit\backups`, fora da pasta que `run.bat reset` apaga;
+  - na VM, vale `/srv/wrexercise/backups` por padrão;
+  - no `run.bat`, vale `%LOCALAPPDATA%\Wrexercise\backups`, fora da pasta que `run.bat reset` apaga;
   - para ter cópia externa, aponte-o para uma pasta sincronizada (OneDrive, Google Drive) ou copie os arquivos para fora da máquina regularmente.
 - O agendamento fica com o sistema: `cron` no Linux e o Agendador de Tarefas no Windows. Os comandos estão no README.
 - O teste de restauração é manual e periódico, conforme o roteiro do README.

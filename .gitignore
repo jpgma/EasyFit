@@ -9,10 +9,10 @@ node_modules/
 *.tsbuildinfo
 
 # Gerado pelo build do frontend
-EasyFit/wwwroot/
+Wrexercise/wwwroot/
 
 # Evidências em desenvolvimento local
-EasyFit/evidencias-dev/
+Wrexercise/evidencias-dev/
 
 # Segredos e configuração local
 .env

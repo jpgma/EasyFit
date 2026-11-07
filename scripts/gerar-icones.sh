@@ -3,7 +3,7 @@
 # com cantos arredondados transparentes ou fundo até a borda. Exige o ImageMagick 7 (`magick`).
 #   scripts/gerar-icones.sh caminho/novo-icone.png   troca a origem e gera tudo
 #   scripts/gerar-icones.sh                          gera de novo a partir da origem atual
-# A origem fica versionada em EasyFit/webapp/icon-source.png, fora de public/ para não entrar no pré-cache.
+# A origem fica versionada em Wrexercise/webapp/icon-source.png, fora de public/ para não entrar no pré-cache.
 set -euo pipefail
 
 # Resolve o caminho recebido antes de mudar de pasta. O cygpath aceita caminhos do Windows (D:\pasta\icone.png).
@@ -17,7 +17,7 @@ fi
 
 cd "$(dirname "$0")/.."
 
-webapp=EasyFit/webapp
+webapp=Wrexercise/webapp
 origem=$webapp/icon-source.png
 
 case $# in

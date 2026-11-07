@@ -1,4 +1,4 @@
-# Arquitetura — EasyFit
+# Arquitetura — Wrexercise
 
 > Documento inicial de arquitetura e diretrizes de implementação.
 >
@@ -8,7 +8,7 @@
 
 ### 1.1. Objetivo
 
-EasyFit é uma aplicação web privada para pequenos grupos de amigos que desejam manter uma rotina consistente de exercícios físicos por meio de desafios compartilhados, registro de atividades e validação comunitária.
+Wrexercise é uma aplicação web privada para pequenos grupos de amigos que desejam manter uma rotina consistente de exercícios físicos por meio de desafios compartilhados, registro de atividades e validação comunitária.
 
 O sistema deve permitir que um grupo estabeleça uma meta comum, como:
 
@@ -303,7 +303,7 @@ A fatia se organiza por operação HTTP (ver `docs/decisoes/0010-fatia-por-opera
 Exemplo:
 
 ```text
-EasyFit/Features/Autenticacao/
+Wrexercise/Features/Autenticacao/
 ├── Routes.cs              # MapAutenticacaoRoutes(): ligação fina
 ├── Registrar.cs           # handler, contratos, SQL e regras da operação
 ├── Entrar.cs
@@ -311,11 +311,11 @@ EasyFit/Features/Autenticacao/
 ├── Sessoes.cs             # helpers reutilizados
 └── ValidacaoConta.cs      # regras puras compartilhadas
 
-EasyFit.UnitTests/Features/Autenticacao/
+Wrexercise.UnitTests/Features/Autenticacao/
 └── ValidacaoContaTests.cs
 ```
 
-Os testes ficam em `EasyFit.UnitTests/` e `EasyFit.IntegrationTests/`, espelhando o caminho da fatia, para que código e pacotes de teste não entrem no binário Native AOT.
+Os testes ficam em `Wrexercise.UnitTests/` e `Wrexercise.IntegrationTests/`, espelhando o caminho da fatia, para que código e pacotes de teste não entrem no binário Native AOT.
 
 Não é obrigatório criar todos esses arquivos quando uma funcionalidade for pequena.
 Fatias triviais podem ficar só com `Routes.cs`.
@@ -329,14 +329,14 @@ A organização deve refletir responsabilidades reais (coesão por operação), 
 Estrutura proposta:
 
 ```text
-easyfit/
+wrexercise/
 │
 ├── AGENTS.md                  # regras do repositório
-├── EasyFit.slnx
+├── Wrexercise.slnx
 │
-├── EasyFit/                   # aplicação: API e frontend
+├── Wrexercise/                # aplicação: API e frontend
 │   ├── Program.cs
-│   ├── EasyFit.csproj
+│   ├── Wrexercise.csproj
 │   │
 │   ├── Infrastructure/
 │   │   ├── Database/
@@ -378,8 +378,8 @@ easyfit/
 │   │
 │   └── wwwroot/               # gerado a partir de webapp/, fora do git
 │
-├── EasyFit.UnitTests/
-├── EasyFit.IntegrationTests/
+├── Wrexercise.UnitTests/
+├── Wrexercise.IntegrationTests/
 │
 ├── deploy/
 │   ├── compose.yaml
@@ -561,7 +561,7 @@ Utilizar uma sessão opaca persistida em cookie:
 
 ```text
 Set-Cookie:
-  ef_session=<token>;
+  wx_session=<token>;
   HttpOnly;
   Secure;
   SameSite=Lax;
@@ -1121,8 +1121,8 @@ O frontend será servido pela mesma origem da API.
 Exemplo:
 
 ```text
-https://easyfit.example.com/
-https://easyfit.example.com/api/...
+https://wrexercise.example.com/
+https://wrexercise.example.com/api/...
 ```
 
 Isso simplifica autenticação, cookies e segurança.
@@ -1174,8 +1174,8 @@ Os dados persistentes deverão sobreviver à recriação dos contêineres.
 Volumes:
 
 ```text
-/srv/easyfit/postgres
-/srv/easyfit/evidencias
+/srv/wrexercise/postgres
+/srv/wrexercise/evidencias
 ```
 
 Implementar:
@@ -1190,7 +1190,7 @@ Um backup mantido somente na mesma VM não é suficiente contra perda do volume 
 
 A restauração deve ser documentada e testada.
 
-Implementação em `decisoes/0022-backups.md`: serviço `backup` de `deploy/compose.yaml`, com destino em `BACKUP_DIR` (padrão `/srv/easyfit/backups`).
+Implementação em `decisoes/0022-backups.md`: serviço `backup` de `deploy/compose.yaml`, com destino em `BACKUP_DIR` (padrão `/srv/wrexercise/backups`).
 
 ---
 
@@ -1203,7 +1203,7 @@ Serviços:
 ```yaml
 services:
   app:
-    image: easyfit:latest
+    image: wrexercise:latest
     restart: unless-stopped
     environment:
       ConnectionStrings__Database: ${DB_CONNECTION}
@@ -1211,7 +1211,7 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - /srv/easyfit/evidencias:/dados/evidencias
+      - /srv/wrexercise/evidencias:/dados/evidencias
     mem_limit: 384m
     cpus: 0.50
 
@@ -1219,11 +1219,11 @@ services:
     image: postgres:17-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: easyfit
-      POSTGRES_USER: easyfit
+      POSTGRES_DB: wrexercise
+      POSTGRES_USER: wrexercise
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - /srv/easyfit/postgres:/var/lib/postgresql/data
+      - /srv/wrexercise/postgres:/var/lib/postgresql/data
     command:
       - postgres
       - -c
@@ -1233,7 +1233,7 @@ services:
       - -c
       - work_mem=4MB
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U easyfit -d easyfit"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U wrexercise -d wrexercise"]
       interval: 10s
       timeout: 5s
       retries: 5
