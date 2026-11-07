@@ -17,6 +17,9 @@ rem                          Termux. Pode ser combinado com --rebuild. Ver
 rem                          docs/decisoes/0029-implantacao-nativa-no-termux.md.
 rem   run.bat logs         acompanha os logs da aplicação
 rem   run.bat backup       grava um backup do banco e das evidências em BACKUP_DIR
+rem   run.bat ssh-backup   roda o backup no celular (perfil salvo por --ssh) e copia a pasta de backups
+rem                          dele para BACKUP_DIR. Aponte BACKUP_DIR para uma pasta sincronizada.
+rem                          Não apaga cópias antigas daqui. Ver docs/decisoes/0032-a14-como-producao.md.
 rem   run.bat restore D    restaura o backup da data D (AAAAMMDD-HHMMSS), com o app parado
 rem   run.bat stop         para os serviços e mantém os dados
 rem   run.bat reset        para os serviços e APAGA os dados locais
@@ -84,10 +87,11 @@ if /i "%~1"=="--ssh" (
 )
 if /i "%~1"=="logs" goto :logs
 if /i "%~1"=="backup" goto :backup
+if /i "%~1"=="ssh-backup" goto :ssh_backup
 if /i "%~1"=="restore" goto :restore
 if /i "%~1"=="stop" goto :stop
 if /i "%~1"=="reset" goto :reset
-echo Uso: run.bat [--rebuild^|rebuild] [--tunnel^|--ssh] ^| logs ^| backup ^| restore AAAAMMDD-HHMMSS ^| stop ^| reset
+echo Uso: run.bat [--rebuild^|rebuild] [--tunnel^|--ssh] ^| logs ^| backup ^| ssh-backup ^| restore AAAAMMDD-HHMMSS ^| stop ^| reset
 exit /b 2
 
 :start
@@ -225,13 +229,14 @@ set "SSH_DIR=%LOCALAPPDATA%\Wrexercise\ssh"
 if not exist "%SSH_DIR%" mkdir "%SSH_DIR%"
 
 set "S_NOME=a14"
-set "S_HOST=192.168.18.75"
+rem 127.0.0.1 com "adb forward tcp:8022 tcp:8022" (decisão 0029); com IP do Wi-Fi, digite-o.
+set "S_HOST=127.0.0.1"
 set "S_PORT=8022"
 set "S_USER="
 set "S_ARCH=arm64"
 set "S_KEY="
-set "S_TUNNEL=wx-a14"
-set "S_TUNNEL_HOST=wx-a14.jpgmaraujo.com.br"
+set "S_TUNNEL=wx"
+set "S_TUNNEL_HOST=wx.jpgmaraujo.com.br"
 
 echo.
 set /p "S_NOME=Nome do perfil [%S_NOME%]: "
@@ -352,6 +357,33 @@ echo.
 "%SSH_EXE%" %SSH_OPTS% %TARGET% "sh wrexercise/deploy/remote-termux.sh status"
 echo.
 echo Implantação em %TARGET% concluída ^(%SSH_IMAGE%, Termux^). Perfil salvo em %SSH_FILE%
+exit /b 0
+
+:ssh_backup
+rem Usa o perfil salvo por --ssh. O backup roda no celular; depois a pasta de backups vem por tar em pipe.
+set "SSH_EXE=%SystemRoot%\System32\OpenSSH\ssh.exe"
+set "SSH_DIR=%LOCALAPPDATA%\Wrexercise\ssh"
+set "S_NOME=a14"
+set /p "S_NOME=Nome do perfil [%S_NOME%]: "
+set "SSH_FILE=%SSH_DIR%\%S_NOME%.env"
+if not exist "%SSH_FILE%" (
+  echo Perfil %S_NOME% não existe. Rode run.bat --ssh antes.
+  exit /b 2
+)
+call :ssh_load
+set "TARGET=%S_USER%@%S_HOST%"
+set "SSH_OPTS=-p %S_PORT% -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 -o BatchMode=yes"
+if defined S_KEY set "SSH_OPTS=%SSH_OPTS% -i "%S_KEY%" -o IdentitiesOnly=yes"
+if not exist "%BACKUP_DIR%" mkdir "%BACKUP_DIR%"
+echo.
+echo ==^> Gravando o backup no celular
+"%SSH_EXE%" %SSH_OPTS% %TARGET% "sh wrexercise/deploy/remote-termux.sh backup"
+if errorlevel 1 goto :fail
+echo.
+echo ==^> Copiando para %BACKUP_DIR%
+"%SSH_EXE%" %SSH_OPTS% %TARGET% "tar -cf - -C wrexercise/dados/backups ." | tar -xf - -C "%BACKUP_DIR%"
+if errorlevel 1 goto :fail
+echo Backups do celular copiados para %BACKUP_DIR%
 exit /b 0
 
 :ssh_load

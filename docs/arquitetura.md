@@ -47,7 +47,7 @@ Prioridades, em ordem:
 | Frontend | React + TypeScript |
 | Estilização | Tailwind CSS |
 | Aplicação | SPA / PWA |
-| Hospedagem | Oracle Cloud Always Free |
+| Hospedagem | Galaxy A14 com Termux, túnel da Cloudflare (0032) |
 | Arquitetura | Monólito modular com VSA |
 | Persistência | SQL explícito via Npgsql |
 | Deploy | Docker Compose |
@@ -61,7 +61,9 @@ Não implementar infraestrutura distribuída, escalabilidade horizontal ou abstr
 
 ### 2.1. Infraestrutura
 
-O ambiente de produção será composto por uma única VM Oracle Cloud Ampere A1.
+> **Atualização (0032):** a produção é um Galaxy A14 rodando nativo no Termux, em `wx.jpgmaraujo.com.br`, por túnel da Cloudflare (`docs/decisoes/0029-implantacao-nativa-no-termux.md`). Esta seção e as §2.2 a §2.4 descrevem a pilha com Docker Compose e Caddy, que hoje só roda no teste local (`run.bat`). A VM Oracle foi abandonada.
+
+O ambiente de produção seria composto por uma única VM Oracle Cloud Ampere A1.
 
 Configuração inicial recomendada:
 
@@ -1194,7 +1196,7 @@ Um backup mantido somente na mesma VM não é suficiente contra perda do volume 
 
 A restauração deve ser documentada e testada.
 
-Implementação em `decisoes/0022-backups.md`: serviço `backup` de `deploy/compose.yaml`, com destino em `BACKUP_DIR` (padrão `/srv/wrexercise/backups`).
+Implementação em `decisoes/0022-backups.md`: `deploy/backup.sh`, com destino em `BACKUP_DIR` na pilha local e em `~/wrexercise/dados/backups` no telefone. `run.bat ssh-backup` copia os backups do telefone para o Windows (`decisoes/0032-a14-como-producao.md`).
 
 ---
 
@@ -1386,9 +1388,9 @@ Desenvolver em fatias verticais funcionais.
 - Instalação mobile.
 - HTTPS.
 - Backups.
-- Deploy na Oracle Cloud.
+- Deploy em produção (Galaxy A14, 0032).
 
-Situação: PWA em `decisoes/0021-pwa-e-service-worker.md`; backups em `decisoes/0022-backups.md`; HTTPS pelo Caddy na VM e pelo túnel da Cloudflare no `run.bat --tunnel`. O deploy na Oracle Cloud está bloqueado por falta de capacidade na região e a hospedagem definitiva segue indefinida (ver `decisoes/0005-implantacao-via-ssh.md`).
+Situação: PWA em `decisoes/0021-pwa-e-service-worker.md`; backups em `decisoes/0022-backups.md`; HTTPS pelo túnel da Cloudflare: em produção, no Galaxy A14 (`wx.jpgmaraujo.com.br`, `run.bat --ssh`) e, em testes, no `run.bat --tunnel`. A VM Oracle foi abandonada (`decisoes/0032-a14-como-producao.md`).
 
 ### Fase 9 — Gamificação (opcional)
 

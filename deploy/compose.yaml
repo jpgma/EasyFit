@@ -1,4 +1,4 @@
-# Produção. Execute a partir da raiz do repositório:
+# Pilha local do run.bat (a produção roda nativa no Termux, ver decisão 0032). Execute a partir da raiz:
 #   docker compose --env-file .env -f deploy/compose.yaml up -d
 #   docker compose --env-file .env -f deploy/compose.yaml run --rm app migrate
 #   docker compose --env-file .env -f deploy/compose.yaml run --rm backup backup

@@ -2,7 +2,7 @@
 
 Aplicação web privada para pequenos grupos de amigos manterem uma rotina de exercícios, com desafios compartilhados, registro de atividades e validação comunitária.
 
-.NET 10 Native AOT · PostgreSQL · React PWA · Docker Compose
+.NET 10 Native AOT · PostgreSQL · React PWA · Termux (produção) · Docker Compose (local)
 
 - Regras do repositório: [`AGENTS.md`](AGENTS.md)
 - Arquitetura: [`docs/arquitetura.md`](docs/arquitetura.md)
@@ -41,7 +41,7 @@ Para testar localmente o mesmo que vai para produção (Native AOT, PostgreSQL e
 
 Exige as portas 80 e 443 livres. Usa HTTP em `localhost`, sem aviso de certificado, em vez do HTTPS da produção. Os dados ficam em `%LOCALAPPDATA%\Wrexercise\local`.
 
-`--tunnel` publica esta máquina na internet por um túnel da Cloudflare, até `run.bat stop`. Na primeira vez, pede o login na Cloudflare pelo navegador e substitui o registro DNS do domínio. O cadastro sem convite fica fechado: crie a primeira conta com `.\run.bat` antes de publicar. As credenciais do túnel ficam em `%LOCALAPPDATA%\Wrexercise\cloudflared`.
+`--tunnel` publica esta máquina na internet por um túnel da Cloudflare, até `run.bat stop`. Na primeira vez, pede o login na Cloudflare pelo navegador e substitui o registro DNS de `wx-dev.jpgmaraujo.com.br`. O cadastro sem convite fica fechado: crie a primeira conta com `.\run.bat` antes de publicar. As credenciais do túnel ficam em `%LOCALAPPDATA%\Wrexercise\cloudflared`.
 
 ## Verificação
 
@@ -54,51 +54,57 @@ scripts/verify.sh --full   # também testes de integração e imagem arm64
 
 ## Produção
 
-```bash
-cp .env.example .env       # preencha os valores
-docker buildx build --platform linux/arm64 -f deploy/Dockerfile -t wrexercise:latest --load .
-docker compose --env-file .env -f deploy/compose.yaml run --rm app migrate
-docker compose --env-file .env -f deploy/compose.yaml up -d
+A produção é um Galaxy A14 com Termux, em `https://wx.jpgmaraujo.com.br`, por um túnel da Cloudflare chamado `wx`. Pré-requisitos do telefone: `docs/decisoes/0029-implantacao-nativa-no-termux.md`. Decisão: `docs/decisoes/0032-a14-como-producao.md`.
+
+```powershell
+adb forward tcp:8022 tcp:8022   # opcional: fala com o telefone por USB; use 127.0.0.1 como host
+.\run.bat --ssh                 # constrói o app, envia ao Termux, migra e sobe PostgreSQL, app e túnel
 ```
+
+Antes, abra o Termux no telefone e rode `sshd` (ele não sobe no boot). Com o banco vazio, quem abrir o endereço primeiro cria a primeira conta (ver "Primeira conta").
+
+### Estatísticas
+
+```powershell
+.\stats.bat           # CPU e memória do app, do PostgreSQL e do túnel, mais aparelho, banco, disco e backups
+.\stats.bat --watch   # repete até Ctrl+C
+```
+
+Usa o perfil salvo por `run.bat --ssh`; se faltar ou o telefone não responder, pergunta host, porta, usuário e chave.
 
 ### Backups
 
-O serviço `backup` grava em `BACKUP_DIR` o dump do banco e um arquivo das evidências, mantém os últimos 7 dias e confere se os arquivos podem ser lidos. As datas nos nomes estão em UTC. Ver `docs/decisoes/0022-backups.md`.
+No telefone, `deploy/backup.sh` grava o dump do banco e um arquivo das evidências em `~/wrexercise/dados/backups`, mantém os últimos 7 dias e confere se os arquivos podem ser lidos. As datas nos nomes estão em UTC. Ver `docs/decisoes/0022-backups.md` e `docs/decisoes/0032-a14-como-producao.md`.
 
-```bash
-docker compose --env-file .env -f deploy/compose.yaml run --rm backup backup
-```
-
-Agende uma execução diária:
-
-```bash
-# Linux (crontab -e), às 3h:
-0 3 * * * cd /opt/wrexercise && docker compose --env-file .env -f deploy/compose.yaml run --rm backup backup >> /var/log/wrexercise-backup.log 2>&1
-```
+Para gravar um backup no telefone e copiá-lo para o Windows:
 
 ```powershell
-# Windows, para a pilha do run.bat, às 3h:
-schtasks /create /sc daily /st 03:00 /tn WrexerciseBackup /tr "\"D:\Repos\jpgma\Wrexercise\run.bat\" backup"
+.\run.bat ssh-backup
 ```
 
-Um backup que só existe na mesma máquina não protege contra a perda do disco. Aponte `BACKUP_DIR` para uma pasta sincronizada (OneDrive, Google Drive) ou copie os arquivos para fora regularmente. No `run.bat`, defina a variável de ambiente `BACKUP_DIR` antes de executá-lo; o padrão é `%LOCALAPPDATA%\Wrexercise\backups`. Os backups contêm as evidências e os hashes das senhas: mantenha a pasta privada.
+Agende uma execução diária (o telefone precisa estar acessível por SSH):
 
-Para restaurar:
+```powershell
+schtasks /create /sc daily /st 03:00 /tn WrexerciseBackup /tr "\"D:\Repos\jpgma\Wrexercise\run.bat\" ssh-backup"
+```
+
+Um backup que só existe no telefone não protege contra a perda do aparelho. Aponte `BACKUP_DIR` para uma pasta sincronizada (OneDrive, Google Drive); o padrão é `%LOCALAPPDATA%\Wrexercise\backups`. O `ssh-backup` não apaga cópias antigas no Windows. Os backups contêm as evidências e os hashes das senhas: mantenha a pasta privada.
+
+Para restaurar no telefone, com o par `wrexercise-*.dump` e `evidencias-*.tar.gz` já em `~/wrexercise/dados/backups`:
 
 ```bash
-docker compose --env-file .env -f deploy/compose.yaml stop app
-docker compose --env-file .env -f deploy/compose.yaml run --rm backup restore 20261105-030000
-docker compose --env-file .env -f deploy/compose.yaml start app
+sh ~/wrexercise/deploy/remote-termux.sh restore 20261105-030000
+sh ~/wrexercise/deploy/remote-termux.sh iniciar
 ```
 
 Teste a restauração de tempos em tempos, com a pilha local: `.\run.bat backup`, `.\run.bat reset`, `.\run.bat` e `.\run.bat restore <data>`. Depois, confira se as atividades e as imagens voltaram.
 
 ### Senha esquecida
 
-Não há envio de e-mail. O operador gera um link de uso único, válido por 1 hora, e o passa à pessoa. O comando encerra as sessões da conta:
+Não há envio de e-mail. O operador gera um link de uso único, válido por 1 hora, e o passa à pessoa. O comando encerra as sessões da conta. No telefone:
 
 ```bash
-docker compose --env-file .env -f deploy/compose.yaml run --rm app reset-senha pessoa@exemplo.com
+sh ~/wrexercise/deploy/remote-termux.sh reset-senha pessoa@exemplo.com
 ```
 
 ### Primeira conta

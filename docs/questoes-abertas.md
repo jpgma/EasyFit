@@ -34,7 +34,7 @@ Cada questão deve receber:
 
 ## Q001 — Qual será a configuração definitiva da VM Oracle?
 
-**Status:** PROPOSTA
+**Status:** DECIDIDA — a VM foi abandonada; a produção é o Galaxy A14 (`decisoes/0032-a14-como-producao.md`). O texto abaixo é o histórico.
 
 Investigar:
 
@@ -80,7 +80,7 @@ A perda da VM não poderá implicar perda definitiva de todos os dados do grupo.
 
 ## Q003 — Como versionar as imagens Docker?
 
-**Status:** PROPOSTA
+**Status:** DECIDIDA — sem registry: `run.bat --ssh` constrói a imagem localmente, extrai o binário e o envia ao Termux (`decisoes/0029-implantacao-nativa-no-termux.md`, `decisoes/0032-a14-como-producao.md`).
 
 Investigar:
 

@@ -1,6 +1,6 @@
 # 0005 — VM de produção e implantação via SSH
 
-**Status:** PROPOSTA · Adiada: a VM não foi criada por falta de capacidade na Oracle, e `deploy.bat` nunca foi executado
+**Status:** SUBSTITUÍDA pela 0032 · A VM nunca foi criada por falta de capacidade na Oracle, e `deploy.bat` nunca foi executado. Os arquivos citados abaixo foram removidos.
 
 ## Contexto
 
