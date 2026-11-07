@@ -19,14 +19,14 @@ services:
     cpus: 0.50
 
   db:
-    image: postgres:17.11-alpine
+    image: postgres:18.6-alpine
     restart: unless-stopped
     environment:
       POSTGRES_DB: wrexercise
       POSTGRES_USER: wrexercise
       POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env}
     volumes:
-      - ${DATA_DIR:-/srv/wrexercise}/postgres:/var/lib/postgresql/data
+      - ${DATA_DIR:-/srv/wrexercise}/postgres:/var/lib/postgresql
     command:
       - postgres
       - -c
@@ -54,7 +54,7 @@ services:
 
   # Só roda sob demanda: docker compose ... run --rm backup backup. Ver deploy/backup.sh.
   backup:
-    image: postgres:17.11-alpine
+    image: postgres:18.6-alpine
     profiles: [backup]
     entrypoint: ["sh", "/backup.sh"]
     environment:
