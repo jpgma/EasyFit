@@ -14,7 +14,12 @@ services:
       - run
       - --cred-file
       - /etc/cloudflared/credenciais.json
-      - ${TUNNEL_NAME:?use run.bat --tunnel}
+      # O ID dispensa o cert.pem, que resolveria o nome (run.bat --ssh); sem TUNNEL_ID vale o nome.
+      - ${TUNNEL_ID:-${TUNNEL_NAME:?use run.bat --tunnel}}
+    environment:
+      # Atrás do SLIRP do QEMU, QUIC/UDP e IPv6 atrasam o túnel: run.bat --ssh troca para http2 e IPv4.
+      TUNNEL_TRANSPORT_PROTOCOL: ${TUNNEL_PROTOCOL:-auto}
+      TUNNEL_EDGE_IP_VERSION: ${TUNNEL_EDGE_IP:-auto}
     volumes:
       - ${TUNNEL_DIR:?use run.bat --tunnel}/${TUNNEL_NAME}.json:/etc/cloudflared/credenciais.json:ro
     depends_on:

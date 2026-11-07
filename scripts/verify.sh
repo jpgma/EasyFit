@@ -46,6 +46,12 @@ if [ "$full" = true ]; then
   step "Backend: testes de integração"
   dotnet test --project Wrexercise.IntegrationTests -c Release --no-build
 
+  step "Compose: pilha com túnel e perfil de memória baixa"
+  DOMAIN=http://localhost DB_PASSWORD=x DB_CONNECTION=x TUNNEL_IMAGE=x TUNNEL_NAME=x TUNNEL_DIR=/tmp \
+    docker compose -f deploy/compose.yaml -f deploy/compose.tunnel.yaml -f deploy/compose.baixa-memoria.yaml config -q
+  sh -n deploy/remote-ssh.sh
+  sh -n deploy/remote-termux.sh
+
   step "Imagem linux/arm64 (publicação Native AOT real)"
   docker buildx build --platform linux/arm64 -f deploy/Dockerfile -t wrexercise:verify-arm64 --load .
 fi

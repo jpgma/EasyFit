@@ -5,8 +5,9 @@
 #   docker compose ... run --rm backup restore AAAAMMDD-HHMMSS   (com o app parado)
 set -eu
 
-destino=/backups
-evidencias=/dados/evidencias
+# Os padrões valem para o contêiner; deploy/remote-termux.sh aponta para pastas do Termux.
+destino=${BACKUP_DESTINO:-/backups}
+evidencias=${EVIDENCIAS_DIR:-/dados/evidencias}
 retencao_dias=7
 
 falhar() {

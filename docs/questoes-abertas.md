@@ -576,6 +576,10 @@ Investigar:
 
 A aplicação deverá ser testada em ARM64.
 
+Perfil de memória baixa (0028): aplicação 128 MB, PostgreSQL 160 MB, túnel 32 MB. Os valores ainda não foram medidos no Galaxy A14; `run.bat --ssh` imprime `docker stats` ao final para isso.
+
+No Termux (0029), o app usa cerca de 25 MB de RSS ao iniciar e o `initdb` leva 1,6 s. Falta medir o consumo sob uso real e a latência das consultas do feed.
+
 ## Q026 — Quais consultas precisam de otimização?
 
 **Status:** ABERTA

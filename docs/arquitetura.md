@@ -134,6 +134,10 @@ A memória restante será reservada para sistema operacional, Docker, cache de a
 
 Os limites devem ser revisados após observar o consumo real.
 
+Para máquinas de 2 GiB (ex.: o Galaxy A14 com Podroid), `deploy/compose.baixa-memoria.yaml` reduz os limites: aplicação 128 MB, PostgreSQL 160 MB (`shared_buffers=32MB`, `max_connections=10`), túnel 32 MB, backup 128 MB, e remove o limite de CPU. Ver `docs/decisoes/0028-implantacao-ssh-e-perfil-de-memoria.md`.
+
+No mesmo aparelho, a pilha também roda sem VM nem Docker, direto no Termux (PostgreSQL, app e `cloudflared` como processos nativos), pelo SO `termux` de `run.bat --ssh`. Ver `docs/decisoes/0029-implantacao-nativa-no-termux.md`.
+
 ### 2.5. Configuração inicial do PostgreSQL
 
 O banco será configurado para um ambiente pequeno, com poucas conexões simultâneas.
@@ -1216,14 +1220,14 @@ services:
     cpus: 0.50
 
   db:
-    image: postgres:17-alpine
+    image: postgres:18.6-alpine
     restart: unless-stopped
     environment:
       POSTGRES_DB: wrexercise
       POSTGRES_USER: wrexercise
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - /srv/wrexercise/postgres:/var/lib/postgresql/data
+      - /srv/wrexercise/postgres:/var/lib/postgresql
     command:
       - postgres
       - -c
