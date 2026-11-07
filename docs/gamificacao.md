@@ -1,6 +1,6 @@
 # Gamificação — Wrexercise
 
-> **Status:** proposta refinada, ainda sem código. A direção geral está em `decisoes/0023-gamificacao.md`, com as mudanças de `decisoes/0024-cartas-e-avatar-importado.md`. O formato da folha de sprites está em `avatar-formato.md`, e o avatar base e o kit de camadas estão em `avatar-kit.md`. Cada fase atualiza `funcionalidades.md` quando for entregue.
+> **Status:** proposta refinada, ainda sem código. A direção geral está em `decisoes/0023-gamificacao.md`, com as mudanças de `decisoes/0024-cartas-e-avatar-importado.md` e as regras de Energia e Jogadas de `decisoes/0033-regras-de-energia-e-jogadas.md`. O formato da folha de sprites está em `avatar-formato.md`, e o avatar base e o kit de camadas estão em `avatar-kit.md`. Cada fase atualiza `funcionalidades.md` quando for entregue.
 
 ## 1. Visão
 
@@ -182,17 +182,19 @@ Energia (EN) é a moeda do Jogo. É única por usuário, somando todos os grupos
 | Evento | EN |
 |---|---:|
 | Atividade verificada | 10 |
-| Semana com a meta cumprida | 20 |
+| Semana com a meta cumprida (uma vez por pessoa por semana) | 20 |
 | Sequência de 4 semanas | 25 |
 | Sequência de 8 semanas | 50 |
 | Sequência de 12 semanas | 100 |
-| Desafio concluído (ver §12) | 75 |
+| Desafio concluído | 75 |
 | Missão semanal concluída (§7) | 5 a 15 |
 | Rival da semana vencido (§8) | 15 |
-| Jogada concluída, para quem recebeu (§6.4) | 1,5 × o preço da carta |
+| Jogada concluída, para quem recebeu (§6.4) | 1 × o preço da carta (2 × com APOSTA) |
 | Jogada concluída, para quem enviou (§6.4) | 0,5 × o preço da carta |
 
-As sequências seguem a mesma regra das conquistas: a melhor sequência num único desafio, sem somar desafios. Cada marco conta uma vez.
+- As sequências seguem a mesma regra das conquistas: a melhor sequência num único desafio, sem somar desafios. Cada marco paga **uma vez por pessoa**, então as sequências rendem no máximo 175 EN no total.
+- **Desafio concluído:** um desafio `Encerrado` com todas as semanas que contavam para a pessoa cumpridas. Paga uma vez por desafio.
+- **Vários grupos:** a base de 10 EN vale para cada atividade verificada, em qualquer grupo. A meta semanal paga uma vez por pessoa por semana, no primeiro grupo em que for cumprida. Os bônus de §5.2 também contam por pessoa. Assim, estar em mais grupos não multiplica a Energia.
 
 **Alvo do balanceamento:** quem cumpre a meta com regularidade ganha cerca de 90 a 110 EN por semana, o suficiente para 2 ou 3 cartas. É essa escassez que faz cada gasto importar.
 
@@ -209,6 +211,8 @@ As sequências seguem a mesma regra das conquistas: a melhor sequência num úni
 
 - Máximo de **10 EN de bônus por atividade**.
 - Horários e semanas no fuso do grupo da atividade. Toda semana vai de segunda a domingo, como no desafio.
+- Os qualificadores de "primeira" (da semana, num dia novo, tipo novo) consideram as atividades da pessoa em **todos os grupos**.
+- Os bônus de horário (antes das 06:00, entre 06:00 e 08:00, fim de semana) contam no máximo uma vez por pessoa por dia.
 - Várias atividades no mesmo dia rendem o bônus de dia novo só uma vez.
 
 ### 5.3. Cálculo na leitura
@@ -225,10 +229,10 @@ Regras que garantem um saldo estável:
 - Os qualificadores ("primeira da semana", "dia novo", "tipo novo") são calculados sobre as atividades **não rejeitadas**, em ordem de `started_at`. Uma atividade pendente já ocupa sua posição. Se ela for rejeitada, a seguinte pode ganhar o bônus, mas nenhum crédito é perdido.
 - Uma Jogada só rende Energia quando fica `Concluida`, e isso depende de uma atividade `Verificada`. Esse crédito também nunca desaparece.
 - Por isso a Energia ganha **só cresce**, e o saldo nunca fica negativo se cada compra verificar `saldo >= preço`.
-- Usar uma carta não muda o saldo: o custo entrou na compra.
+- Usar uma carta não muda o saldo: o custo entrou na compra. Uma Provocação devolvida à Mão (§6.2) também não muda o saldo, porque continua comprada.
 - Atividades de grupos que a pessoa deixou continuam valendo, como as conquistas.
 
-A regra fica numa função pura (`CalculoEnergia`), com testes unitários. Um dos testes simula uma semana típica e confere o alvo de §5.1.
+A regra fica numa função pura (`CalculoEnergia`), que recebe as atividades de todos os grupos da pessoa, com testes unitários. Um dos testes simula uma semana típica e confere o alvo de §5.1. Outro confere que o mesmo treino registrado em dois grupos não dobra os bônus nem a meta.
 
 ## 6. Loja e cartas
 
@@ -240,13 +244,13 @@ O catálogo fica no código, sem tabela. Cada carta tem nome, tipo, preço e efe
 |---|---|---:|---|
 | +10 MIN | `Provocacao` | 30 | Uma atividade com pelo menos a duração mínima do desafio + 10 minutos. |
 | +20 MIN | `Provocacao` | 45 | Uma atividade com pelo menos a duração mínima do desafio + 20 minutos. |
-| VARIEDADE | `Provocacao` | 35 | Uma atividade de tipo diferente da última atividade verificada do destinatário. |
+| VARIEDADE | `Provocacao` | 35 | Uma atividade de tipo diferente da última atividade do destinatário já verificada no momento do envio. |
 | FIM DE SEMANA | `Provocacao` | 35 | Uma atividade que comece no sábado ou no domingo. |
 | ANTES DAS 8 | `Provocacao` | 40 | Uma atividade que comece antes das 08:00. |
 | DESAFIO DUPLO | `Resposta` | 40 | Aceita a Provocação e devolve o mesmo objetivo para o remetente, como uma Jogada nova. |
-| APOSTA | `Resposta` | 25 | Aceita a Provocação. Se a Jogada for concluída, a recompensa do destinatário sobe 50%. Se não for, a carta está perdida. |
+| APOSTA | `Resposta` | 25 | Aceita a Provocação. Se a Jogada for concluída, a recompensa do destinatário dobra. Se não for, a carta está perdida. |
 | PRAZO EXTRA | `Resposta` | 20 | Aceita a Provocação com 24 horas a mais de prazo. |
-| MUDANÇA DE PLANOS | `Resposta` | 25 | Aceita a Provocação trocando o objetivo por um equivalente, conforme uma tabela fixa (§12). |
+| MUDANÇA DE PLANOS | `Resposta` | 25 | Aceita a Provocação trocando o objetivo por um equivalente, conforme uma tabela fixa (§12, item 1). |
 
 - Os objetivos usam as regras e o fuso do grupo da Jogada. Sem desafio ativo, as cartas +10 MIN e +20 MIN não podem ser jogadas nesse grupo.
 - Cumprir a Provocação também conta para a meta oficial, como qualquer atividade. Não existe tipo especial de atividade.
@@ -254,15 +258,19 @@ O catálogo fica no código, sem tabela. Cada carta tem nome, tipo, preço e efe
 
 ### 6.2. Compra e Mão
 
-- A **Mão** é por pessoa, com no máximo **5 cartas**, e vale em qualquer grupo.
+- A **Mão** é por pessoa, com no máximo **5 cartas**, e vale em qualquer grupo. O limite conta as cartas não gastas, inclusive as que estão em Jogadas abertas, para que uma carta devolvida nunca passe de 5.
 - A compra roda numa transação que bloqueia a linha do usuário, recalcula o saldo e só grava se `saldo >= preço` e a Mão tiver espaço.
-- A linha de `cartas` guarda o preço pago e a data em que a carta foi usada. Mudar o catálogo depois não altera cartas já compradas.
+- A linha de `cartas` guarda o preço pago. Mudar o catálogo depois não altera cartas já compradas.
+- **Quando uma carta é gasta**, calculado a partir das Jogadas, sem coluna de data de uso:
+  - uma Provocação só é gasta quando a Jogada fica `Concluida`. Se a Jogada ficar `Recusada` ou `Expirada`, a carta volta para a Mão de quem enviou e pode ser jogada de novo;
+  - uma Resposta é gasta quando é usada, aconteça o que acontecer com a Jogada.
 - Não há pacotes aleatórios, troca de cartas nem devolução.
 
 ### 6.3. Jogar uma carta
 
 - Uma Provocação é jogada da Mão para outro membro do mesmo grupo que esteja no modo Jogo.
 - O destinatário recebe uma `Notificacao` no aplicativo (`decisoes/0020-notificacoes-no-aplicativo.md`) e vê a encenação na próxima visita à cena.
+- O remetente recebe uma `Notificacao` quando a carta é aceita, recusada ou concluída. A conclusão também avisa o destinatário. Ela é gravada por `VerificacaoAtividade`, por um contrato de `Features/Jogo/Contracts/`, na mesma transação da verificação. A expiração não gera aviso, porque é calculada na leitura.
 - Diante de uma Provocação, o destinatário pode:
   - **Aceitar**, de graça;
   - **Aceitar com uma Resposta** da própria Mão (DESAFIO DUPLO, APOSTA, PRAZO EXTRA ou MUDANÇA DE PLANOS), no máximo uma por Jogada;
@@ -279,11 +287,13 @@ O catálogo fica no código, sem tabela. Cada carta tem nome, tipo, preço e efe
 | Jogada ativa por par de pessoas | 1 |
 | Jogada nova para a mesma pessoa | 1 a cada 24 horas |
 
-Os limites ficam em constantes no código, fáceis de ajustar depois de observar o uso.
+- **Jogada ativa**, para esses limites: `Enviada` ou `Aceita`. Uma Jogada `AguardandoVerificacao` libera a vaga, mesmo com a atividade em `EmRevisao`.
+- Os limites só são conferidos ao enviar. Se uma atividade for rejeitada e a Jogada voltar a `Aceita`, a contagem pode passar do máximo por um tempo.
+- Os limites ficam em constantes no código, fáceis de ajustar depois de observar o uso.
 
 ### 6.4. Ciclo de vida de uma Jogada
 
-**Gravado:** remetente, destinatário, grupo, carta, `enviada_em`, `expira_em`, `resposta` (`Aceita` ou `Recusada`), `respondida_em`, carta de resposta usada, `origem_id` (a Jogada original, no DESAFIO DUPLO), `vista_em` e `resultado_visto_em`.
+**Gravado:** remetente, destinatário, grupo, carta, `enviada_em`, `expira_em`, `resposta` (`Aceita` ou `Recusada`), `respondida_em`, carta de resposta usada, `origem_id` (a Jogada original, no DESAFIO DUPLO), o tipo-alvo da VARIEDADE (o tipo a evitar, fixado no envio), `vista_em` e `resultado_visto_em`.
 
 **Calculado na leitura**, sem tarefa agendada:
 
@@ -301,7 +311,8 @@ Os limites ficam em constantes no código, fáceis de ajustar depois de observar
 - A verificação pode acontecer depois de `expira_em`: o que importa é o `started_at`.
 - A mesma atividade pode concluir várias Jogadas e missões.
 - **Prazo:** 48 horas a partir do envio. FIM DE SEMANA vale até o fim do próximo domingo. ANTES DAS 8 vale até as 08:00 da segunda manhã depois do envio, para que sempre haja duas manhãs. PRAZO EXTRA soma 24 horas, uma vez por Jogada. Tudo no fuso do grupo.
-- **Recompensas** (§5.1): ao ficar `Concluida`, o destinatário ganha 1,5 × o preço da carta e o remetente ganha 0,5 × o preço. Com APOSTA, a parte do destinatário sobe 50%. Na Jogada criada por DESAFIO DUPLO, as recompensas usam o preço da Provocação original.
+- **Recompensas** (§5.1): ao ficar `Concluida`, o destinatário ganha 1 × o preço da carta e o remetente ganha 0,5 × o preço. Com APOSTA, a parte do destinatário dobra (2 × o preço), o que rende de 5 a 20 EN líquidos a mais, ou custa os 25 EN da carta. Na Jogada criada por DESAFIO DUPLO, as recompensas usam o preço da Provocação original.
+- **Custo para quem enviou:** só uma Jogada `Concluida` gasta a Provocação. Com a recompensa de 0,5 ×, uma carta concluída custa na prática metade do preço. Uma carta recusada ou expirada volta para a Mão (§6.2).
 
 ## 7. Missões semanais
 
@@ -342,7 +353,7 @@ As conquistas marcadas como **nova** ainda não existem em `ConquistasUsuario` e
 | `Treinos10` | 10 atividades | Medalha de bronze |
 | `Treinos50` | 50 atividades | Medalha de prata (substitui a de bronze) |
 | `Treinos100` | 100 atividades | Medalha de ouro (substitui a de prata) |
-| `DesafioCompleto` (nova) | Um desafio `Encerrado` com todas as semanas que contavam cumpridas (a mesma regra de §12, item 3) | Troféu |
+| `DesafioCompleto` (nova) | Um desafio `Encerrado` com todas as semanas que contavam cumpridas (a mesma regra do desafio concluído, §5.1) | Troféu |
 
 **Tipo de atividade**, uma por tipo, com **20 atividades** daquele tipo. `Outro` não tem conquista.
 
@@ -369,7 +380,7 @@ As conquistas marcadas como **nova** ainda não existem em `ConquistasUsuario` e
 - São 19 conquistas e 19 desenhos de Enfeite. A planta e a medalha evoluem, então a cena mostra no máximo 15 objetos diferentes.
 - Nenhuma conquista usa distância, ritmo ou carga: só contagem de atividades, horário e semanas cumpridas. Uma pessoa que faz 20 caminhadas tem a mesma chance de um Enfeite que uma pessoa que faz 20 corridas.
 - Os nomes e os limites (20 por tipo, 10 por hábito) ficam em constantes, como os demais marcos.
-- `Madrugador` e `Noturno` cobrem as duas pontas do dia, para que treinar cedo não seja o único horário premiado (ver §12, item 5).
+- `Madrugador` e `Noturno` cobrem as duas pontas do dia, para que treinar cedo não seja o único horário premiado (ver §12, item 3).
 
 ### 9.2. Vitrine
 
@@ -417,7 +428,7 @@ Cada fase entrega algo visível e pode ser a última. Todas ficam na fatia `Jogo
 - Loja com as Provocações e a Mão: `GET /api/jogo/loja` e `POST /api/jogo/cartas`.
 - Jogar, aceitar e recusar: `POST /api/grupos/{id}/jogadas`, `PUT /api/jogadas/{id}/resposta`.
 - Situações e recompensas calculadas na leitura.
-- `Notificacao` de carta recebida.
+- `Notificacao` de carta recebida, aceita, recusada e concluída.
 - Encenações `andar`, `arremessar`, `receber`, `aceitar` e `recusar`.
 
 ### G4 — Respostas
@@ -474,14 +485,14 @@ Cada fase entrega algo visível e pode ser a última. Todas ficam na fatia `Jogo
 
 ## 12. Questões em aberto
 
-1. **Tabela da MUDANÇA DE PLANOS.** Recomendação: trocar dentro da mesma faixa de preço (+10 MIN ↔ VARIEDADE ↔ FIM DE SEMANA; +20 MIN ↔ ANTES DAS 8), e a pessoa escolhe entre os equivalentes.
-2. **Valores das recompensas.** Recomendação: começar com 1,5× e 0,5× e conferir com o teste de simulação semanal de `CalculoEnergia` antes da G3.
-3. **O que é "desafio concluído" (75 EN)?** Recomendação: desafio `Encerrado` com todas as semanas que contavam para a pessoa cumpridas.
-4. **Semana das missões para quem está em vários grupos.** Recomendação: avaliar cada atividade na semana do fuso do seu grupo e usar como referência a semana do grupo em destaque.
-5. **Madrugada.** O bônus antes das 06:00 somado à carta ANTES DAS 8 pode estimular treino de madrugada em vez de constância. Revisar depois de observar o uso.
-6. **Enfeite e cena com 10 pessoas.** Conferir num celular de 360 px se o Enfeite ao lado do avatar não polui o círculo. Se poluir, mostrar só ao tocar no avatar.
-7. **Limites das conquistas novas.** 20 por tipo pode ser muito para tipos raros, como `Natacao`. Recomendação: começar com 20 e conferir com os dados reais dos grupos antes da G6.
-8. **Atividades antigas de "Treino em casa".** A migração 014 as trocou por `Calistenia`, então elas contam para `PesoDoCorpo`. Recomendação: aceitar, porque quase sempre eram treinos com o peso do corpo.
+Fechadas em `decisoes/0033-regras-de-energia-e-jogadas.md`: valores das recompensas, desafio concluído, Energia com vários grupos, marcos de sequência, carta recusada, Jogada ativa, alvo da VARIEDADE e notificações para quem enviou.
+
+1. **Tabela da MUDANÇA DE PLANOS** (G4). Recomendação: trocar dentro da mesma faixa de preço (+10 MIN ↔ VARIEDADE ↔ FIM DE SEMANA; +20 MIN ↔ ANTES DAS 8), e a pessoa escolhe entre os equivalentes.
+2. **Semana das missões para quem está em vários grupos** (G5). Recomendação: avaliar cada atividade na semana do fuso do seu grupo. Falta definir qual grupo serve de referência para a semana, porque o aplicativo não tem um "grupo em destaque".
+3. **Madrugada.** O bônus antes das 06:00 somado à carta ANTES DAS 8 pode estimular treino de madrugada em vez de constância. Revisar depois de observar o uso.
+4. **Enfeite e cena com 10 pessoas.** Conferir num celular de 360 px se o Enfeite ao lado do avatar não polui o círculo. Se poluir, mostrar só ao tocar no avatar.
+5. **Limites das conquistas novas.** 20 por tipo pode ser muito para tipos raros, como `Natacao`. Recomendação: começar com 20 e conferir com os dados reais dos grupos antes da G6.
+6. **Atividades antigas de "Treino em casa".** A migração 014 as trocou por `Calistenia`, então elas contam para `PesoDoCorpo`. Recomendação: aceitar, porque quase sempre eram treinos com o peso do corpo.
 
 ## 13. Critérios de sucesso
 

@@ -1,6 +1,6 @@
 # 0024 — Cartas como destino da Energia e avatar importado
 
-**Status:** DECIDIDA (direção). Substitui partes de `0023-gamificacao.md`. Detalhes em `../gamificacao.md` e `../avatar-formato.md`.
+**Status:** DECIDIDA (direção). Substitui partes de `0023-gamificacao.md`. As recompensas das Jogadas e as notificações foram revistas em `0033-regras-de-energia-e-jogadas.md`. Detalhes em `../gamificacao.md` e `../avatar-formato.md`.
 
 ## Contexto
 
