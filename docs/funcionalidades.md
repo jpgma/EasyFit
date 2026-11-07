@@ -435,7 +435,7 @@ These functions are for the operator. They are not in the interface.
 - `GET /health` and `GET /ready`: show if the application and the database operate.
 - Backup: the `backup` service makes a copy of the database and of the evidence files. It keeps the copies for 7 days. The `restore` command puts a copy back. The operator must stop the application before a restore.
 - `deploy/migrar-nome.sh`: moves a server from the old name EasyFit to Wrexercise one time. It makes a backup, renames the database, the database user and the folders, and updates `.env`. `deploy/remote.sh` stops if the old folder `/opt/easyfit` is on the server.
-- `run.bat` starts the application on Windows. `run.bat --tunnel` makes the application available on the internet through a Cloudflare tunnel.
+- `run.bat` starts the application on Windows. `run.bat --tunnel` makes the application available on the internet at `wx-dev.jpgmaraujo.com.br` through the Cloudflare tunnel `wx-dev`. The production domain does not change.
 
 ## 15. Security rules that have an effect on features
 

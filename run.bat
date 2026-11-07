@@ -5,7 +5,7 @@ rem   run.bat              constrói a imagem, aplica as migrações e sobe os s
 rem   run.bat --rebuild    igual ao padrão, mas reconstrói a imagem sem cache do Docker
 rem                          (frontend wwwroot + Native AOT) e recria o contêiner app
 rem   run.bat rebuild      atalho para --rebuild
-rem   run.bat --tunnel     igual ao padrão, mas publica em https://fit.jpgmaraujo.com.br por um túnel
+rem   run.bat --tunnel     igual ao padrão, mas publica em https://wx-dev.jpgmaraujo.com.br por um túnel
 rem                          da Cloudflare, com o cadastro sem convite fechado. Pode ser combinado com
 rem                          --rebuild. Na primeira vez, pede o login na Cloudflare pelo navegador.
 rem   run.bat logs         acompanha os logs da aplicação
@@ -36,8 +36,8 @@ if not defined BACKUP_DIR set "BACKUP_DIR=%LOCALAPPDATA%\Wrexercise\backups"
 set "BACKUP_DIR=%BACKUP_DIR:\=/%"
 
 rem Fora de DATA_ROOT: run.bat reset apaga os dados, mas mantém o túnel.
-set "TUNNEL_HOST=fit.jpgmaraujo.com.br"
-set "TUNNEL_NAME=wx-local"
+set "TUNNEL_HOST=wx-dev.jpgmaraujo.com.br"
+set "TUNNEL_NAME=wx-dev"
 set "TUNNEL_ROOT=%LOCALAPPDATA%\Wrexercise\cloudflared"
 set "TUNNEL_DIR=%TUNNEL_ROOT:\=/%"
 set "TUNNEL_IMAGE=cloudflare/cloudflared:2026.10.3"

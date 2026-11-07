@@ -31,7 +31,7 @@ Para testar localmente o mesmo que vai para produção (Native AOT, PostgreSQL e
 
 ```powershell
 .\run.bat         # constrói, migra e sobe em http://localhost
-.\run.bat --tunnel  # igual, e publica em https://fit.jpgmaraujo.com.br
+.\run.bat --tunnel  # igual, e publica em https://wx-dev.jpgmaraujo.com.br
 .\run.bat logs    # acompanha os logs da aplicação
 .\run.bat backup  # grava um backup do banco e das evidências
 .\run.bat restore 20261105-030000  # restaura um backup, com o app parado
