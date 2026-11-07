@@ -31,6 +31,6 @@ A VM é migrada uma única vez por `deploy/migrar-nome.sh`, que faz um backup, r
 
 - Todo mundo precisa entrar de novo uma vez, porque o cookie de sessão mudou de nome. As sessões antigas expiram sozinhas no banco.
 - O banco de desenvolvimento (`compose.dev.yaml`, projeto `wrexercise-dev`) e a pilha local do `run.bat` (`wrexercise-local`, `%LOCALAPPDATA%\Wrexercise`) começam vazios. Os dados locais antigos ficam onde estavam, até serem apagados à mão.
-- O túnel do `run.bat --tunnel` passa a se chamar `wrexercise-local` e precisa ser criado de novo na Cloudflare.
+- O túnel do `run.bat --tunnel` passa a se chamar `wx-local` e é criado de novo na Cloudflare; o `easyfit-local` antigo deixa de ser usado.
 - Passos manuais, nesta ordem: rodar `deploy/migrar-nome.sh` na VM; renomear a chave SSH local; rodar `deploy.bat`; renomear o repositório no GitHub e atualizar o `origin`; renomear a pasta local do repositório.
 - Os documentos antigos passam a citar os caminhos novos. O nome EasyFit só continua nesta decisão, no script de migração e na limpeza de caches e backups antigos.

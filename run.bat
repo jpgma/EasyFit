@@ -37,7 +37,7 @@ set "BACKUP_DIR=%BACKUP_DIR:\=/%"
 
 rem Fora de DATA_ROOT: run.bat reset apaga os dados, mas mantém o túnel.
 set "TUNNEL_HOST=fit.jpgmaraujo.com.br"
-set "TUNNEL_NAME=wrexercise-local"
+set "TUNNEL_NAME=wx-local"
 set "TUNNEL_ROOT=%LOCALAPPDATA%\Wrexercise\cloudflared"
 set "TUNNEL_DIR=%TUNNEL_ROOT:\=/%"
 set "TUNNEL_IMAGE=cloudflare/cloudflared:2026.10.3"
